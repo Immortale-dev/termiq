@@ -19,6 +19,16 @@ void termiq::move(int c, int r) {
 	VALIDATE_EXEC(res);
 }
 
+void save_cursor_position() {
+	const int res = termiq::run_str("sc", 1);
+	VALIDATE_EXEC(res);
+}
+
+void restore_cursor_position() {
+	const int res = termiq::run_str("rs", 1);
+	VALIDATE_EXEC(res);
+}
+
 void termiq::cursor_default() {
 	const int res = termiq::run_str("cnorm", 1);
 	VALIDATE_EXEC(res);

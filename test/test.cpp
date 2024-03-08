@@ -18,11 +18,12 @@ int main() {
 
 	printf("Color is red");
 
-	termiq::set_background_color(6);
 
+
+	termiq::set_attrs(1, 0, 1, 1);
 	termiq::set_italic_on();
-
-	termiq::set_attrs(1, 1, 1, 0);
+	termiq::set_foreground_color(5);
+	termiq::set_background_color(6);
 	printf("Color is green");
 
 	termiq::set_italic_off();

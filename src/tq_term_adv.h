@@ -15,6 +15,8 @@ namespace termiq {
 	int get_rows();
 
 	void move(int c, int r);
+	void save_cursor_position();
+	void restore_cursor_position();
 
 	void cursor_default();
 	void cursor_hidden();
