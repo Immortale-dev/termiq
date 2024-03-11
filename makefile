@@ -1,7 +1,7 @@
 .PHONY: all custom lib force clear
 
 CC=g++
-OPT=-g
+OPT=-O3
 CFLAGS=-c -Wall -std=c++17
 SRCPATH:=src/
 SRCS:=$(wildcard $(SRCPATH)*.cpp)

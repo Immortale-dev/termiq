@@ -19,13 +19,13 @@ void termiq::move(int c, int r) {
 	VALIDATE_EXEC(res);
 }
 
-void save_cursor_position() {
+void termiq::save_cursor_position() {
 	const int res = termiq::run_str("sc", 1);
 	VALIDATE_EXEC(res);
 }
 
-void restore_cursor_position() {
-	const int res = termiq::run_str("rs", 1);
+void termiq::restore_cursor_position() {
+	const int res = termiq::run_str("rc", 1);
 	VALIDATE_EXEC(res);
 }
 
@@ -106,6 +106,16 @@ void termiq::reset_colors() {
 	VALIDATE_EXEC(res);
 }
 
+void termiq::alternate_chars_on() {
+	const int res = run_str("smacs", 1);
+	VALIDATE_EXEC(res);
+}
+
+void termiq::alternate_chars_off() {
+	const int res = run_str("rmacs", 1);
+	VALIDATE_EXEC(res);
+}
+
 void termiq::enter_alternate_buffer() {
 	const int res = run_str("smcup", 1);
 	VALIDATE_EXEC(res);
@@ -113,6 +123,16 @@ void termiq::enter_alternate_buffer() {
 
 void termiq::exit_alternate_buffer() {
 	const int res = run_str("rmcup", 1);
+	VALIDATE_EXEC(res);
+}
+
+void termiq::enter_automatic_margins() {
+	const int res = run_str("smam", 1);
+	VALIDATE_EXEC(res);
+}
+
+void termiq::exit_automatic_margins() {
+	const int res = run_str("rmam", 1);
 	VALIDATE_EXEC(res);
 }
 

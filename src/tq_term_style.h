@@ -7,8 +7,8 @@ namespace termiq {
 			int r,g,b;
 		};
 
-		void foreground(int r, int g, int b);
-		void background(int r, int g, int b);
+		void foreground(Color color);
+		void background(Color color);
 		void bold(bool state);
 		void italic(bool state);
 		void underline(bool state);

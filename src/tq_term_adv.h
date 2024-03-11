@@ -40,10 +40,34 @@ namespace termiq {
 	void enter_alternate_buffer();
 	void exit_alternate_buffer();
 
+	void enter_automatic_margins();
+	void exit_automatic_margins();
+
 	void clear();
 	void clear_before();
 	void clear_after();
 	void clear_rest();
+
+	void alternate_chars_on();
+	void alternate_chars_off();
+
+	namespace alt_chars {
+		inline constexpr char C_H = 'q';
+		inline constexpr char C_V = 'x';
+		inline constexpr char C_X = 'n';
+		inline constexpr char C_HT = 'v';
+		inline constexpr char C_HB = 'w';
+		inline constexpr char C_VL = 'u';
+		inline constexpr char C_VR = 't';
+		inline constexpr char C_TL = 'j';
+		inline constexpr char C_TR = 'm';
+		inline constexpr char C_BL = 'k';
+		inline constexpr char C_BR = 'l';
+	}
+
+	namespace draw_chars {
+		inline constexpr char32_t C_H = U'\u2501';
+	}
 }
 
 #endif // TQ_TERM_ADV
