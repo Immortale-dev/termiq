@@ -5,6 +5,7 @@
 #include "tq_term.h"
 #include "tq_term_adv.h"
 #include "tq_term_style.h"
+#include "tq_term_canvas.h"
 
 int main() {
 	termiq::init_term();
@@ -63,7 +64,7 @@ int main() {
 //
 //	getchar();
 //
-////	termiq::alternate_chars_off();
+//	termiq::alternate_chars_off();
 //
 ////	std::wcout << "HI:" << "; Hello, \u2501!" << std::endl;
 //	std::wstring charw = L"NICE! \u2501 ═══ HELLO?";
@@ -79,23 +80,27 @@ int main() {
 	termiq::exit_automatic_margins();
 	termiq::cursor_default();
 
-	for(int i=0;i<30;i++) {
-		termiq::cursor_hidden();
-		termiq::move(0,0);
-		for(int r=0;r<rows;r++) {
-			std::string s = "";
-			termiq::move(0,r-1);
-			for(int c=0;c<cols;c++) {
-//				s.push_back('A'+i);
-				putchar('A'+i);
-			}
-			//fprint();
-		}
-		termiq::cursor_default();
-		fflush(stdout);
-//		sleep(1);
-		getchar();
-	}
+//	for(int i=0;i<30;i++) {
+//		termiq::cursor_hidden();
+//		termiq::move(0,0);
+//		for(int r=0;r<rows;r++) {
+//			std::string s = "";
+//			termiq::move(0,r-1);
+//			for(int c=0;c<cols;c++) {
+////				s.push_back('A'+i);
+//				putchar('A'+i);
+//			}
+//			//fprint();
+//		}
+//		termiq::cursor_default();
+//		fflush(stdout);
+////		sleep(1);
+//		getchar();
+//	}
+
+	termiq::Canvas<termiq::CharCell<char>> canvas(10,10,10,10);
+	canvas.draw(canvas.text("Hello").set_bold().build());
+	canvas.paint();
 
 	getchar();
 
