@@ -21,11 +21,14 @@ namespace {
 	bool is_dim = false;
 	bool is_inverse = false;
 
+	bool is_color_set(termiq::style::Color &color) {
+		return color.r >= 0;
+	}
 	bool is_foreground_set() {
-		return current_foreground.r >= 0;
+		return is_color_set(current_foreground);
 	}
 	bool is_background_set() {
-		return current_background.r >= 0;
+		return is_color_set(current_background);
 	}
 	void reset_background() {
 		current_foreground = {-1,-1,-1};
@@ -47,10 +50,10 @@ namespace {
 	}
 	void update_colors() {
 		if (is_foreground_set()) {
-			foreground(current_foreground);
+			termiq::style::foreground(current_foreground);
 		}
 		if (is_background_set()) {
-			background(current_background);
+			termiq::style::background(current_background);
 		}
 	}
 	int color_hash(int r, int g, int b) {
@@ -82,6 +85,21 @@ namespace {
 		}
 		return color_id;
 	}
+}
+
+void termiq::style::style(Color fg, Color bg, bool bold, bool italic, bool dim, bool underline, bool inverse) {
+	is_bold = bold;
+	is_italic = italic;
+	is_dim = dim;
+	is_underline = underline;
+	is_inverse = inverse;
+	update_attrs();
+	if ((is_foreground_set() && !is_color_set(fg)) || (is_background_set() && !is_color_set(bg))) {
+		reset_colors();
+	}
+	current_foreground = fg;
+	current_background = bg;
+	update_colors();
 }
 
 void termiq::style::foreground(const Color color) {

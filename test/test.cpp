@@ -99,8 +99,10 @@ int main() {
 //	}
 
 	termiq::Canvas<termiq::CharCell<char>> canvas(10,10,10,10);
-	canvas.draw(canvas.text("Hello").set_bold().build());
+	canvas.draw(3, 3, canvas.text("hello").set_bold().build());
+	canvas.draw(4, 3, canvas.text("world").set_foreground_color({1000, 300, 0}).build());
 	canvas.paint();
+	fflush(stdout);
 
 	getchar();
 
