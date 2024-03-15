@@ -181,6 +181,9 @@ void termiq::style::inverse(bool state) {
 }
 
 void termiq::style::clear_styles() {
+	if (!is_bold && !is_italic && !is_underline && !is_dim && !is_inverse) {
+		return;
+	}
 	is_bold = false;
 	is_italic = false;
 	is_underline = false;
@@ -191,14 +194,18 @@ void termiq::style::clear_styles() {
 }
 
 void termiq::style::clear_colors() {
+	if (!is_foreground_set() && !is_background_set()) {
+		return;
+	}
 	termiq::reset_colors();
 	reset_background();
 	reset_foreground();
 }
 
 void termiq::style::clear() {
-	clear_colors();
 	clear_styles();
+	reset_background();
+	reset_foreground();
 }
 
 void termiq::style::reset() {

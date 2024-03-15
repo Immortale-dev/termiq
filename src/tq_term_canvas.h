@@ -37,24 +37,24 @@ namespace termiq {
 		template<typename T>
 		using container = std::vector<T>;
 		struct CanvasPiece {
-			const unsigned int width;
-			const unsigned int height;
+			const unsigned int rows;
+			const unsigned int cols;
 			const container<container<CC>> canvas;
 		};
 		public:
 			class TextBuilder {
 				public:
-					TextBuilder(const typename CC::char_type* txt) { for(size_t i=0;txt[i]!='\0';++i) _txt.push_back(txt[i]); }
+					TextBuilder(const typename CC::char_type* txt);
 					~TextBuilder() = default;
 
-					TextBuilder& set_foreground_color(termiq::style::Color &&color) { _foreground = color;  return *this; }
-					TextBuilder& set_background_color(termiq::style::Color &&color) { _background = color;  return *this; }
-					TextBuilder& set_bold() { _bold = true; return *this; }
-					TextBuilder& set_italic() { _italic = true; return *this; }
-					TextBuilder& set_dim() { _dim = true; return *this; }
-					TextBuilder& set_underline() { _underline = true; return *this; }
-					TextBuilder& set_inverse() { _inverse = true; return *this; }
-					TextBuilder& set_width(unsigned int w) { _width = w; }
+					TextBuilder& set_foreground_color(termiq::style::Color &&color);
+					TextBuilder& set_background_color(termiq::style::Color &&color);
+					TextBuilder& set_bold();
+					TextBuilder& set_italic();
+					TextBuilder& set_dim();
+					TextBuilder& set_underline();
+					TextBuilder& set_inverse();
+					TextBuilder& set_width(unsigned int w);
 					CanvasPiece build();
 
 				private:
@@ -70,29 +70,41 @@ namespace termiq {
 			};
 			class GridBuilder {
 				struct GridCellState {
-					termiq::style::Color _background;
-					std::vector<unsigned int> _padding;
-					TextBuilder _text;
+					termiq::style::Color background{-1,-1,-1};
+					std::vector<unsigned int> padding{0,0,0,0};
+					TextBuilder text;
+					bool has_text = false;
+					unsigned int width = 0;
+					unsigned int height = 0;
 				};
 				public:
-					GridBuilder(unsigned int rows, unsigned int cols): _rows(rows), _cols(cols), _grid(_rows, std::vector<GridCellState>(_cols)) {}
-					GridBuilder& select_cell(size_t c) { _current_cell_c = c; };
-					GridBuilder& select_cell(size_t r, size_t c) { _current_cell_r = r; _current_cell_c = c; }
-					GridBuilder& set_background_color(Color color);
-					GridBuilder& set_border_foreground_color(Color color);
-					GridBuilder& set_border_background_color(Color color);
-					GridBuilder& set_cell_background_color(Color color);
-					GridBuilder& set_cell_padding(int top, int right, int bottom, int left);
-					GridBuilder& set_padding(int top, int right, int bottom, int left);
+					GridBuilder(unsigned int rows=1, unsigned int cols=1);
+					GridBuilder& select_cell(size_t c);
+					GridBuilder& select_cell(size_t r, size_t c);
+					GridBuilder& set_background_color(termiq::style::Color color);
+					GridBuilder& set_border_foreground_color(termiq::style::Color color);
+					GridBuilder& set_border_background_color(termiq::style::Color color);
+					GridBuilder& set_cell_background_color(termiq::style::Color color);
+					GridBuilder& set_cell_padding(int top=-1, int right=-1, int bottom=-1, int left=-1);
+					GridBuilder& set_padding(int top=-1, int right=-1, int bottom=-1, int left=-1);
 					GridBuilder& set_cell_text(TextBuilder text);
+					GridBuilder& set_size(unsigned int width, unsigned int height=0);
+					GridBuilder& set_cell_size(unsigned int width, unsigned int height=0);
 					CanvasPiece build();
 
 				private:
+					void set_cell_padding_values(GridCellState &cell, int top, int right, int bottom, int left);
+					GridCellState& get_current_cell();
+
 					unsigned int _rows;
 					unsigned int _cols;
+					unsigned int _width = 0;
+					unsigned int _height = 0;
 					std::vector<std::vector<GridCellState>> _grid;
-					size_t _current_cell_r=0;
-					size_t _current_cell_c=0;
+					size_t _current_cell_r = 0;
+					size_t _current_cell_c = 0;
+					termiq::style::Color _border_foreground_color;
+					termiq::style::Color _border_background_color;
 			};
 
 		public:
