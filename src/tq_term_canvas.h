@@ -44,40 +44,63 @@ namespace termiq {
 		public:
 			class TextBuilder {
 				public:
-					TextBuilder(const typename CC::char_type* txt): _txt(txt) {}
+					TextBuilder(const typename CC::char_type* txt) { for(size_t i=0;txt[i]!='\0';++i) _txt.push_back(txt[i]); }
 					~TextBuilder() = default;
 
-					TextBuilder& set_foreground_color(termiq::style::Color &&color) { _foreground = color; _fg_set = true; return *this; }
-					TextBuilder& set_background_color(termiq::style::Color &&color) { _background = color; _bg_set = true; return *this; }
+					TextBuilder& set_foreground_color(termiq::style::Color &&color) { _foreground = color;  return *this; }
+					TextBuilder& set_background_color(termiq::style::Color &&color) { _background = color;  return *this; }
 					TextBuilder& set_bold() { _bold = true; return *this; }
 					TextBuilder& set_italic() { _italic = true; return *this; }
 					TextBuilder& set_dim() { _dim = true; return *this; }
 					TextBuilder& set_underline() { _underline = true; return *this; }
 					TextBuilder& set_inverse() { _inverse = true; return *this; }
+					TextBuilder& set_width(unsigned int w) { _width = w; }
 					CanvasPiece build();
 
 				private:
-					const typename CC::char_type* _txt;
+					std::vector<typename CC::char_type> _txt;
 					termiq::style::Color _foreground{-1,-1,-1};
 					termiq::style::Color _background{-1,-1,-1};
-					bool _fg_set = false;
-					bool _bg_set = false;
 					bool _bold = false;
 					bool _italic = false;
-					bool _dim;
-					bool _underline;
-					bool _inverse;
+					bool _dim = false;
+					bool _underline = false;
+					bool _inverse = false;
+					unsigned int _width = 0;
 			};
-			struct GridBuilder {
-				
+			class GridBuilder {
+				struct GridCellState {
+					termiq::style::Color _background;
+					std::vector<unsigned int> _padding;
+					TextBuilder _text;
+				};
+				public:
+					GridBuilder(unsigned int rows, unsigned int cols): _rows(rows), _cols(cols), _grid(_rows, std::vector<GridCellState>(_cols)) {}
+					GridBuilder& select_cell(size_t c) { _current_cell_c = c; };
+					GridBuilder& select_cell(size_t r, size_t c) { _current_cell_r = r; _current_cell_c = c; }
+					GridBuilder& set_background_color(Color color);
+					GridBuilder& set_border_foreground_color(Color color);
+					GridBuilder& set_border_background_color(Color color);
+					GridBuilder& set_cell_background_color(Color color);
+					GridBuilder& set_cell_padding(int top, int right, int bottom, int left);
+					GridBuilder& set_padding(int top, int right, int bottom, int left);
+					GridBuilder& set_cell_text(TextBuilder text);
+					CanvasPiece build();
+
+				private:
+					unsigned int _rows;
+					unsigned int _cols;
+					std::vector<std::vector<GridCellState>> _grid;
+					size_t _current_cell_r=0;
+					size_t _current_cell_c=0;
 			};
 
 		public:
 			Canvas() = default;
-			Canvas(unsigned int w, unsigned int h, unsigned int r=0, unsigned int c=0);
+			Canvas(unsigned int h, unsigned int w, unsigned int r=0, unsigned int c=0);
 			virtual ~Canvas() = default;
 
-			void resize(unsigned int width, unsigned int height);
+			void resize(unsigned int height, unsigned int width);
 			void move(unsigned int row, unsigned int col);
 			void draw(unsigned int row, unsigned int col, CanvasPiece&& piece);
 			void paint();
@@ -102,8 +125,8 @@ namespace termiq {
 		private:
 			void paint_cell(CC &cell);
 
-			unsigned int _width;
 			unsigned int _height;
+			unsigned int _width;
 			unsigned int _row;
 			unsigned int _col;
 			container<container<CC>> _canvas;

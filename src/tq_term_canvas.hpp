@@ -2,7 +2,7 @@
 #include <iostream>
 
 template<typename CC>
-termiq::Canvas<CC>::Canvas(unsigned int w, unsigned int h, unsigned int r, unsigned int c): _width(w), _height(h), _row(r), _col(c), _canvas(h, container<CC>(w)) {}
+termiq::Canvas<CC>::Canvas(unsigned int h, unsigned int w, unsigned int r, unsigned int c): _height(h), _width(w), _row(r), _col(c), _canvas(h, container<CC>(w)) {}
 
 template<typename CC>
 void termiq::Canvas<CC>::resize(unsigned int width, unsigned int height) {
@@ -104,7 +104,7 @@ typename termiq::Canvas<CC>::CanvasPiece termiq::Canvas<CC>::TextBuilder::build(
 	cs->underline = _underline;
 	cs->inverse = _inverse;
 	unsigned int w = 0;
-	for(size_t i=0;_txt[i]!='\0';++i) {
+	for(size_t i=0;i<_txt.size();++i) {
 		line.push_back({_txt[i], cs});
 		++w;
 	}

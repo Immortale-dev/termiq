@@ -88,18 +88,46 @@ namespace {
 }
 
 void termiq::style::style(Color fg, Color bg, bool bold, bool italic, bool dim, bool underline, bool inverse) {
-	is_bold = bold;
-	is_italic = italic;
-	is_dim = dim;
-	is_underline = underline;
-	is_inverse = inverse;
-	update_attrs();
-	if ((is_foreground_set() && !is_color_set(fg)) || (is_background_set() && !is_color_set(bg))) {
-		reset_colors();
+	bool attr_updated = false;
+	if (is_bold != bold) {
+		is_bold = bold;
+		attr_updated = true;
 	}
-	current_foreground = fg;
-	current_background = bg;
-	update_colors();
+	if (is_italic != italic) {
+		is_italic = italic;
+		attr_updated = true;
+	}
+	if (is_dim != dim) {
+		is_dim = dim;
+		attr_updated = true;
+	}
+	if (is_underline != underline) {
+		is_underline = underline;
+		attr_updated = true;
+	}
+	if (is_inverse != inverse) {
+		is_inverse = inverse;
+		attr_updated = true;
+	}
+	if (attr_updated) {
+		update_attrs();
+	}
+	bool clrs_updated = false;
+	if (!attr_updated && ( (is_foreground_set() && !is_color_set(fg)) || (is_background_set() && !is_color_set(bg)) )) {
+		reset_colors();
+		clrs_updated = true;
+	}
+	if (current_foreground != fg) {
+		current_foreground = fg;
+		clrs_updated = true;
+	}
+	if (current_background != bg) {
+		current_background = bg;
+		clrs_updated = true;
+	}
+	if (clrs_updated) {
+		update_colors();
+	}
 }
 
 void termiq::style::foreground(const Color color) {

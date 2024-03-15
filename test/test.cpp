@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdio>
 #include <unistd.h>
+#include <chrono>
 
 #include "tq_term.h"
 #include "tq_term_adv.h"
@@ -98,16 +99,37 @@ int main() {
 //		getchar();
 //	}
 
-	termiq::Canvas<termiq::CharCell<char>> canvas(10,10,10,10);
-	canvas.draw(3, 3, canvas.text("hello").set_bold().build());
-	canvas.draw(4, 3, canvas.text("world").set_foreground_color({1000, 300, 0}).build());
+	termiq::Canvas<termiq::CharCell<char>> canvas(rows-1,cols,0,0);
+	auto t1 = std::chrono::system_clock::now(); 
+	for(int r=0;r<rows-1;r++) {
+		for(int c=0;c<cols;c++) {
+			auto builder = canvas.text("A").set_foreground_color({(c%10 <= 5) ? 1000 : 500, 100, 100}); //.set_bold().set_inverse().build()
+			if (c%10 <= 5) {
+				builder.set_bold();
+			} else {
+				builder.set_italic();
+			}
+//			auto built = builder.build();
+			canvas.draw(r,c,builder.build());
+		}
+	}
+	auto t2 = std::chrono::system_clock::now();
+	termiq::cursor_hidden();
 	canvas.paint();
+	termiq::cursor_default();
 	fflush(stdout);
-
+	auto t3 = std::chrono::system_clock::now();
 	getchar();
+//	canvas.draw(3, 3, canvas.text("hello").set_bold().build());
+//	canvas.draw(4, 3, canvas.text("world").set_foreground_color({1000, 300, 0}).build());
+
+//	getchar();
 
 	termiq::enter_automatic_margins();
 	termiq::exit_alternate_buffer();
 
 	termiq::style::reset();
+
+	std::cout << "Time to draw: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count() << std::endl;
+	std::cout << "Time to paint: " << std::chrono::duration_cast<std::chrono::milliseconds>(t3-t2).count() << std::endl;
 }
