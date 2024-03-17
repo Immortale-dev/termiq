@@ -23,11 +23,11 @@ namespace termiq {
 
 			void resize(unsigned int height, unsigned int width);
 			void move(unsigned int row, unsigned int col);
-			void draw(unsigned int row, unsigned int col, CanvasPiece&& piece);
+			void draw(unsigned int row, unsigned int col, CanvasPiece<CC>&& piece);
 			void paint();
 
-			TextBuilder text(const char_type *txt);
-			GridBuilder grid(unsigned int rows, unsigned int cols);
+			TextBuilder<CC> text(const char_type *txt);
+			GridBuilder<CC> grid(unsigned int rows, unsigned int cols);
 
 		protected:
 			unsigned int get_width();

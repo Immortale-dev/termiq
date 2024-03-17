@@ -1,6 +1,11 @@
 #ifndef _TQ_TERM_CANVAS_UTILS
 #define _TQ_TERM_CANVAS_UTILS
 
+#include <memory>
+#include <vector>
+
+#include "tq_term_style.h"
+
 namespace termiq {
 	// Style state of the symbol.
 	struct CharState {

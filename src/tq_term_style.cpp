@@ -21,14 +21,11 @@ namespace {
 	bool is_dim = false;
 	bool is_inverse = false;
 
-	bool is_color_set(termiq::style::Color &color) {
-		return color.r >= 0;
-	}
 	bool is_foreground_set() {
-		return is_color_set(current_foreground);
+		return termiq::style::is_color_set(current_foreground);
 	}
 	bool is_background_set() {
-		return is_color_set(current_background);
+		return termiq::style::is_color_set(current_background);
 	}
 	void reset_background() {
 		current_foreground = {-1,-1,-1};
@@ -113,7 +110,7 @@ void termiq::style::style(Color fg, Color bg, bool bold, bool italic, bool dim, 
 		update_attrs();
 	}
 	bool clrs_updated = false;
-	if (!attr_updated && ( (is_foreground_set() && !is_color_set(fg)) || (is_background_set() && !is_color_set(bg)) )) {
+	if (!attr_updated && ( (is_foreground_set() && !termiq::style::is_color_set(fg)) || (is_background_set() && !termiq::style::is_color_set(bg)) )) {
 		reset_colors();
 		clrs_updated = true;
 	}
@@ -211,4 +208,8 @@ void termiq::style::clear() {
 void termiq::style::reset() {
 	termiq::undefine_colors();
 	clear();
+}
+
+bool termiq::style::is_color_set(termiq::style::Color &color) {
+	return color.r >= 0;
 }

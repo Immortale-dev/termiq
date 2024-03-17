@@ -10,7 +10,7 @@ namespace termiq {
 			using char_type = typename CC::char_type;
 			using CanvasGrid = std::vector<std::vector<char_type>>;
 
-			TextBuilder(char_type* txt);
+			TextBuilder(const char_type* txt);
 			virtual ~TextBuilder() = default;
 
 			TextBuilder& set_foreground_color(termiq::style::Color &&color);
@@ -26,7 +26,7 @@ namespace termiq {
 
 			unsigned int text_width();
 			unsigned int text_height();
-			const std::vector<const std::vector<char_type>>& get_lines();
+			const CanvasGrid& get_lines();
 
 		private:
 			void calculate_lines();
@@ -50,7 +50,7 @@ namespace termiq {
 			bool _valid_lines = true;
 
 			static inline char_type STRING_TERMINATOR = '\0';
-			static inline char_type LINE_TERNIMATOR = '\n';
+			static inline char_type LINE_TERMINATOR = '\n';
 	};
 }
 

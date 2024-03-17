@@ -21,7 +21,7 @@ void termiq::Canvas<CC>::move(unsigned int row, unsigned int col) {
 }
 
 template<typename CC>
-void termiq::Canvas<CC>::draw(unsigned int row, unsigned int col, CanvasPiece&& piece) {
+void termiq::Canvas<CC>::draw(unsigned int row, unsigned int col, CanvasPiece<CC>&& piece) {
 	for(size_t pr=0;pr<piece.rows;pr++) {
 		for(size_t pc=0;pc<piece.cols;pc++) {
 			size_t r = pr + row;
@@ -64,7 +64,7 @@ void termiq::Canvas<CC>::drawn() {}
 
 template<typename CC>
 void termiq::Canvas<CC>::paint_cell(CC &cell) {
-	const size_t char_sz = sizeof(typename CC::char_type);
+	const size_t char_sz = sizeof(char_type);
 	set_paint_state(cell.state ? cell.state.get() : nullptr);
 	printf(char_sz == 1 ? "%c" : "%lc", cell.symbol);
 }
@@ -84,13 +84,13 @@ void termiq::Canvas<CC>::set_paint_state(CharState* state) {
 }
 
 template<typename CC>
-typename termiq::Canvas<CC>::TextBuilder termiq::Canvas<CC>::text(const typename CC::char_type *txt) {
-	return TextBuilder(txt);
+typename termiq::TextBuilder<CC> termiq::Canvas<CC>::text(const char_type *txt) {
+	return TextBuilder<CC>(txt);
 }
 
 template<typename CC>
-typename termiq::Canvas<CC>::GridBuilder termiq::Canvas<CC>::grid(unsigned int rows, unsigned int cols) {
-	return GridBuilder(rows, cols);
+typename termiq::GridBuilder<CC> termiq::Canvas<CC>::grid(unsigned int rows, unsigned int cols) {
+	return GridBuilder<CC>(rows, cols);
 }
 
 // GridBuilder implementation

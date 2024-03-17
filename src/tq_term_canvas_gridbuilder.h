@@ -1,8 +1,12 @@
 #ifndef _TQ_TERM_CANVAS_GRIDBUILDER
 #define _TQ_TERM_CANVAS_GRIDBUILDER
 
+#include <functional>
+#include <vector>
+
 #include "tq_term_adv.h"
 #include "tq_term_unicode_draws.h"
+#include "tq_term_style.h"
 #include "tq_term_canvas_utils.h"
 #include "tq_term_canvas_textbuilder.h"
 
@@ -12,10 +16,8 @@ namespace termiq {
 		SINGLE = 1,
 		DOUBLE = 2,
 		BOLD = 3,
-		DASHED = 4,
-		DOTTED = 5,
-		ROUNDED = 6,
-		INVISIBLE = 7
+		ROUND = 4,
+		INVISIBLE = 5
 	};
 
 	template <typename CC>
@@ -23,7 +25,7 @@ namespace termiq {
 		using char_type = typename CC::char_type;
 		struct GridCellState {
 			termiq::style::Color background{-1,-1,-1};
-			TextBuilder text;
+			TextBuilder<CC> text;
 			bool has_text = false;
 			unsigned int width = 0;
 			unsigned int height = 0;
@@ -50,7 +52,7 @@ namespace termiq {
 			GridBuilder& set_border_foreground_color(termiq::style::Color color);
 			GridBuilder& set_border_background_color(termiq::style::Color color);
 			GridBuilder& set_cell_background_color(termiq::style::Color color);
-			GridBuilder& set_cell_text(TextBuilder text);
+			GridBuilder& set_cell_text(TextBuilder<CC> text);
 			GridBuilder& set_width(unsigned int width);
 			GridBuilder& set_height(unsigned int height);
 			GridBuilder& set_cell_width(unsigned int width);
@@ -88,6 +90,8 @@ namespace termiq {
 			termiq::style::Color _border_foreground_color;
 			termiq::style::Color _border_background_color;
 			BorderType _border_type = BorderType::SINGLE_ASCII;
+
+			static inline char_type EMPTY_SPACE = ' ';
 	};
 }
 

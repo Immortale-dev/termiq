@@ -1,5 +1,5 @@
 template<typename CC>
-termiq::TextBuilder<CC>::TextBuilder(typename TextBuilder<CC>::char_type* txt) {
+termiq::TextBuilder<CC>::TextBuilder(const char_type* txt) {
 	for(size_t i=0;txt[i]!=STRING_TERMINATOR;++i) {
 		_txt.push_back(txt[i]);
 	}
@@ -64,7 +64,7 @@ typename termiq::TextBuilder<CC>& termiq::TextBuilder<CC>::set_height(unsigned i
 
 template<typename CC>
 typename termiq::CanvasPiece<CC> termiq::TextBuilder<CC>::build() {
-	container<container<CC>> all_lines;
+	std::vector<std::vector<CC>> all_lines;
 	auto cs = std::make_shared<CharState>();
 	cs->foreground = _foreground;
 	cs->background = _background;
@@ -75,12 +75,12 @@ typename termiq::CanvasPiece<CC> termiq::TextBuilder<CC>::build() {
 	cs->inverse = _inverse;
 	unsigned int width = text_width();
 	unsigned int lines_count = text_height();
-	auto& lines = get_lines();
+	auto& built_lines = get_lines();
 
 	for (size_t l=0;l<lines_count;l++) {
-		container<CC> line;
-		for (size_t i=0;i<lines[l].size();++i) {
-			line.push_back({lines[l][i], cs});
+		std::vector<CC> line;
+		for (size_t i=0;i<built_lines[l].size();++i) {
+			line.push_back({built_lines[l][i], cs});
 		}
 		all_lines.push_back(line);
 	}
@@ -100,7 +100,7 @@ unsigned int termiq::TextBuilder<CC>::text_height() {
 }
 
 template<typename CC>
-typename termiq::TextBuilder<CC>::CanvasGrid termiq::TextBuilder<CC>::get_lines() {
+const typename termiq::TextBuilder<CC>::CanvasGrid& termiq::TextBuilder<CC>::get_lines() {
 	lazy_calculate_lines();
 	return _lines;
 }
@@ -112,10 +112,9 @@ void termiq::TextBuilder<CC>::calculate_lines() {
 	size_t max_h = 0;
 	std::vector<char_type> line;
 	for (size_t i=0;;++i) {
-		if ( i == _txt.size() || (_width && _width <= curr_w) || _txt[i] == LINE_TERMINATOR) {
+		if ( i == _txt.size() || (_width && _width <= line.size()) || _txt[i] == LINE_TERMINATOR) {
 			max_w = std::max(max_w, line.size());
 			++max_h;
-			curr_w = 0;
 			_lines.push_back(line);
 			line.resize(0);
 		}

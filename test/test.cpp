@@ -97,8 +97,8 @@ int main() {
 //	}
 
 //  TEST MULTILINE TEXT
-	canvas.draw(3, 3, canvas.text(L"hello world").set_bold().set_size(6).build());
-	canvas.draw(10, 10, canvas.text(L"kavabanga халоу ворлд how are you?").set_foreground_color({1000, 300, 0}).set_size(4, 5).build());
+	canvas.draw(3, 3, canvas.text(L"hello world").set_bold().set_width(6).build());
+	canvas.draw(10, 10, canvas.text(L"kavabanga халоу ворлд how are you?").set_foreground_color({1000, 300, 0}).set_width(4).set_height(5).build());
 
 	auto t2 = std::chrono::system_clock::now();
 	termiq::cursor_hidden();

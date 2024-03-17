@@ -21,6 +21,8 @@ namespace termiq {
 		void clear_colors();
 		void clear();
 		void reset();
+
+		bool is_color_set(Color &color);
 	}
 }
 
