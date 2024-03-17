@@ -81,13 +81,12 @@ int main() {
 	termiq::exit_automatic_margins();
 	termiq::cursor_default();
 
-	termiq::Canvas<termiq::CharCell<char>> canvas(rows-1,cols,0,0);
+	termiq::Canvas<termiq::CharCell<wchar_t>> canvas(rows-1,cols,0,0);
 
 //  TEST FULL SCREEN DRAW
-//	auto t1 = std::chrono::system_clock::now();
 //	for(int r=0;r<rows-1;r++) {
 //		for(int c=0;c<cols;c++) {
-//			auto builder = canvas.text("A").set_foreground_color({(c%10 <= 5) ? 1000 : 500, 100, 100}); //.set_bold().set_inverse().build()
+//			auto builder = canvas.text(L"A").set_foreground_color({(c%10 <= 5) ? 1000 : 500, 100, 100}); //.set_bold().set_inverse().build()
 //			if (c%10 <= 5) {
 //				builder.set_bold();
 //			} else {
@@ -98,8 +97,8 @@ int main() {
 //	}
 
 //  TEST MULTILINE TEXT
-	canvas.draw(3, 3, canvas.text("hello world").set_bold().set_width(6).build());
-	canvas.draw(10, 10, canvas.text("kavabanga hello how are you?").set_foreground_color({1000, 300, 0}).set_width(4).build());
+	canvas.draw(3, 3, canvas.text(L"hello world").set_bold().set_size(6).build());
+	canvas.draw(10, 10, canvas.text(L"kavabanga халоу ворлд how are you?").set_foreground_color({1000, 300, 0}).set_size(4, 5).build());
 
 	auto t2 = std::chrono::system_clock::now();
 	termiq::cursor_hidden();

@@ -64,10 +64,6 @@ namespace termiq {
 		inline constexpr char C_BL = 'k';
 		inline constexpr char C_BR = 'l';
 	}
-
-	namespace draw_chars {
-		inline constexpr char32_t C_H = U'\u2501';
-	}
 }
 
 #endif // TQ_TERM_ADV
