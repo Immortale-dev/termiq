@@ -26,7 +26,7 @@ void termiq::Canvas<CC>::draw(unsigned int row, unsigned int col, CanvasPiece<CC
 		for(size_t pc=0;pc<piece.cols;pc++) {
 			size_t r = pr + row;
 			size_t c = pc + col;
-			if (r >= _height || c >= _width) continue;
+			if (r >= _height || c >= _width || !piece.canvas[pr][pc].state) continue;
 			_canvas[r][c] = piece.canvas[pr][pc];
 		}
 	}
@@ -78,9 +78,11 @@ template<typename CC>
 void termiq::Canvas<CC>::set_paint_state(CharState* state) {
 	if (!state) {
 		termiq::style::clear();
+		termiq::style::special_chars(false);
 		return;
 	}
 	termiq::style::style(state->foreground, state->background, state->bold, state->italic, state->dim, state->underline, state->inverse);
+	termiq::style::special_chars(state->special);
 }
 
 template<typename CC>

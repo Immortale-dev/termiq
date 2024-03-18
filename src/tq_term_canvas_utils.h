@@ -9,14 +9,14 @@
 namespace termiq {
 	// Style state of the symbol.
 	struct CharState {
-		termiq::style::Color foreground;
-		termiq::style::Color background;
-		bool bold;
-		bool italic;
-		bool dim;
-		bool inverse;
-		bool underline;
-		bool special;
+		termiq::style::Color foreground{-1,-1,-1};
+		termiq::style::Color background{-1,-1,-1};
+		bool bold = false;
+		bool italic = false;
+		bool dim = false;
+		bool inverse = false;
+		bool underline = false;
+		bool special = false;
 
 		bool operator==(const CharState &other) const {
 			return foreground == other.foreground && background == other.background && bold == other.bold && italic == other.italic

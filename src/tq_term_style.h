@@ -14,10 +14,11 @@ namespace termiq {
 		void background(Color color);
 		void bold(bool state);
 		void italic(bool state);
+		void special_chars(bool state);
 		void underline(bool state);
 		void dim(bool state);
 		void inverse(bool state);
-		void clear_styles();
+		void clear_styles(bool also_clear_colors=false);
 		void clear_colors();
 		void clear();
 		void reset();

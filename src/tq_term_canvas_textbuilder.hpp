@@ -1,5 +1,6 @@
 template<typename CC>
 termiq::TextBuilder<CC>::TextBuilder(const char_type* txt) {
+	if (!txt) return;
 	for(size_t i=0;txt[i]!=STRING_TERMINATOR;++i) {
 		_txt.push_back(txt[i]);
 	}
@@ -78,9 +79,9 @@ typename termiq::CanvasPiece<CC> termiq::TextBuilder<CC>::build() {
 	auto& built_lines = get_lines();
 
 	for (size_t l=0;l<lines_count;l++) {
-		std::vector<CC> line;
+		std::vector<CC> line(width);
 		for (size_t i=0;i<built_lines[l].size();++i) {
-			line.push_back({built_lines[l][i], cs});
+			line[i] = {built_lines[l][i], cs};
 		}
 		all_lines.push_back(line);
 	}

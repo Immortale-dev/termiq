@@ -20,6 +20,7 @@ namespace {
 	bool is_underline = false;
 	bool is_dim = false;
 	bool is_inverse = false;
+	bool is_special = false;
 
 	bool is_foreground_set() {
 		return termiq::style::is_color_set(current_foreground);
@@ -156,6 +157,16 @@ void termiq::style::italic(bool state) {
 	}
 }
 
+void termiq::style::special_chars(bool state) {
+	if (state == is_special) return;
+	is_special = state;
+	if (is_special) {
+		termiq::alternate_chars_on();
+	} else {
+		termiq::alternate_chars_off();
+	}
+}
+
 void termiq::style::underline(bool state) {
 	if (is_underline == state) return;
 	is_underline = state;
@@ -177,8 +188,9 @@ void termiq::style::inverse(bool state) {
 	update_colors();
 }
 
-void termiq::style::clear_styles() {
+void termiq::style::clear_styles(bool also_clear_colors) {
 	if (!is_bold && !is_italic && !is_underline && !is_dim && !is_inverse) {
+		clear_colors();
 		return;
 	}
 	is_bold = false;
@@ -187,6 +199,10 @@ void termiq::style::clear_styles() {
 	is_dim = false;
 	is_inverse = false;
 	update_attrs();
+	if(also_clear_colors) {
+		reset_background();
+		reset_foreground();
+	}
 	update_colors();
 }
 
@@ -200,9 +216,7 @@ void termiq::style::clear_colors() {
 }
 
 void termiq::style::clear() {
-	clear_styles();
-	reset_background();
-	reset_foreground();
+	clear_styles(true);
 }
 
 void termiq::style::reset() {

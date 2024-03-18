@@ -77,10 +77,6 @@ int main() {
 //		perror("printf");
 //	}
 
-	termiq::enter_alternate_buffer();
-	termiq::exit_automatic_margins();
-	termiq::cursor_default();
-
 	termiq::Canvas<termiq::CharCell<wchar_t>> canvas(rows-1,cols,0,0);
 
 //  TEST FULL SCREEN DRAW
@@ -97,8 +93,25 @@ int main() {
 //	}
 
 //  TEST MULTILINE TEXT
-	canvas.draw(3, 3, canvas.text(L"hello world").set_bold().set_width(6).build());
+	canvas.draw(3, 3, canvas.text(L"hello world").set_bold().set_background_color({300,700,300}).set_width(6).build());
 	canvas.draw(10, 10, canvas.text(L"kavabanga халоу ворлд how are you?").set_foreground_color({1000, 300, 0}).set_width(4).set_height(5).build());
+	canvas.draw(20, 20,
+		canvas.grid(2,3)
+			.set_width(20)
+			.set_border_type(termiq::BorderType::SINGLE)
+			.set_border_foreground_color({400,800,100})
+//			.set_border_background_color{100,1000,100})
+			.select_cell(0,0)
+				.set_cell_background_color({500, 500, 100})
+				.set_cell_text(canvas.text(L"woohoo").set_background_color({200, 200, 900}))
+			.select_cell(1,1)
+				.set_cell_text(canvas.text(L"hello world"))
+		.build()
+	);
+
+	termiq::enter_alternate_buffer();
+	termiq::exit_automatic_margins();
+	termiq::cursor_default();
 
 	auto t2 = std::chrono::system_clock::now();
 	termiq::cursor_hidden();

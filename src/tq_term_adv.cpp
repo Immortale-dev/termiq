@@ -19,6 +19,16 @@ void termiq::move(int c, int r) {
 	VALIDATE_EXEC(res);
 }
 
+void termiq::move_left(int steps) {
+	const int res = termiq::run_str("cub", 1, steps);
+	VALIDATE_EXEC(res);
+}
+
+void termiq::move_right(int steps) {
+	const int res = termiq::run_str("cuf", 1, steps);
+	VALIDATE_EXEC(res);
+}
+
 void termiq::save_cursor_position() {
 	const int res = termiq::run_str("sc", 1);
 	VALIDATE_EXEC(res);

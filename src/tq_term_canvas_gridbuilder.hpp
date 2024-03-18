@@ -23,21 +23,25 @@ typename termiq::GridBuilder<CC>& termiq::GridBuilder<CC>::set_background_color(
 			_grid[r][c].background = color;
 		}
 	}
+	return *this;
 }
 
 template<typename CC>
 typename termiq::GridBuilder<CC>& termiq::GridBuilder<CC>::set_border_foreground_color(termiq::style::Color color) {
 	_border_foreground_color = color;
+	return *this;
 }
 
 template<typename CC>
 typename termiq::GridBuilder<CC>& termiq::GridBuilder<CC>::set_border_background_color(termiq::style::Color color) {
 	_border_background_color = color;
+	return *this;
 }
 
 template<typename CC>
 typename termiq::GridBuilder<CC>& termiq::GridBuilder<CC>::set_cell_background_color(termiq::style::Color color) {
 	get_current_cell().background = color;
+	return *this;
 }
 
 template<typename CC>
@@ -45,6 +49,7 @@ typename termiq::GridBuilder<CC>& termiq::GridBuilder<CC>::set_cell_text(TextBui
 	auto &cell = get_current_cell();
 	cell.text = text;
 	cell.has_text = true;
+	return *this;
 }
 
 template<typename CC>
@@ -90,8 +95,8 @@ typename termiq::CanvasPiece<CC> termiq::GridBuilder<CC>::build() {
 			}
 		}
 	}
-	std::vector<unsigned int> cols_widths = calculate_column_sizes();
 
+	std::vector<unsigned int> cols_widths = calculate_column_sizes();
 	// Define cells text widths.
 	for (size_t r=0;r<_rows;++r) {
 		for (size_t c=0;c<_cols;++c) {
@@ -100,6 +105,7 @@ typename termiq::CanvasPiece<CC> termiq::GridBuilder<CC>::build() {
 			}
 		}
 	}
+
 	std::vector<unsigned int> rows_heights = calculate_row_sizes();
 	// Define cells text heights.
 	for (size_t r=0;r<_rows;++r) {
@@ -111,25 +117,28 @@ typename termiq::CanvasPiece<CC> termiq::GridBuilder<CC>::build() {
 	}
 
 	GridBorders border = get_border(_border_type);
-
 	unsigned int width = summary(cols_widths) + _cols + 1;
 	unsigned int height = summary(rows_heights) + _rows + 1;
 	std::vector<std::vector<CC>> canvas(height, std::vector<CC>(width));
 
 	// Fill in borders.
 	auto cs = std::make_shared<CharState>();
+	if (_border_type == BorderType::SINGLE_ASCII) {
+		cs->special = true;
+	}
 	cs->foreground = _border_foreground_color;
 	cs->background = _border_background_color;
 
 	for (size_t r=1;r<height-1;++r) {
 		for (size_t l=0,c=0;l<=_cols;c+=cols_widths[l++]+1) {
-			if (l) c += cols_widths[l-1] + 1;
 			canvas[r][c] = {border.C_V, cs};
+			if (l == _cols) break;
 		}
 	}
 	for (size_t c=1;c<width-1;++c) {
 		for (size_t l=0,r=0;l<=_rows;r+=rows_heights[l++]+1) {
 			canvas[r][c] = {border.C_H, cs};
+			if (l == _rows) break;
 		}
 	}
 
@@ -139,18 +148,20 @@ typename termiq::CanvasPiece<CC> termiq::GridBuilder<CC>::build() {
 			if (i == 0) ct = border.C_HB;
 			if (i == _rows) ct = border.C_HT;
 			if (j == 0) ct = border.C_VR;
-			if (j == _cols) border.C_VL;
-			if (i == 0 && j == 0) ct = border.C_TL;
-			if (i == 0 && j == _cols) ct = border.C_TR;
-			if (i == _rows && j == 0) ct = border.C_BL;
-			if (i == _rows && j == _cols) ct = border.C_BR;
+			if (j == _cols) ct = border.C_VL;
+			if (i == 0 && j == 0) ct = border.C_BR;
+			if (i == 0 && j == _cols) ct = border.C_BL;
+			if (i == _rows && j == 0) ct = border.C_TR;
+			if (i == _rows && j == _cols) ct = border.C_TL;
 			canvas[r][c] = {ct, cs};
+			if (j == _cols) break;
 		}
+		if (i == _rows) break;
 	}
 
 	// Fill cell backgrounds and text.
-	for (size_t i=0,r=2;r<height;r+=rows_heights[i++]+1) {
-		for (size_t j=0,c=2;c<width;c+=cols_widths[j++]+1) {
+	for (size_t i=0,r=1;r<height;r+=rows_heights[i++]+1) {
+		for (size_t j=0,c=1;c<width;c+=cols_widths[j++]+1) {
 			GridCellState& cell = _grid[i][j];
 			auto cs = std::make_shared<CharState>();
 			cs->background = cell.background;
@@ -158,9 +169,9 @@ typename termiq::CanvasPiece<CC> termiq::GridBuilder<CC>::build() {
 			if (built_text.rows && built_text.cols && !termiq::style::is_color_set(built_text.canvas[0][0].state->background)) {
 				built_text.canvas[0][0].state->background = cs->background;
 			}
-			for (size_t ri=r,rr=0;ri<rows_heights[i];ri++,++rr) {
-				for (size_t ci=c,cc=0;ci<cols_widths[j];ci++,++cc) {
-					if (rr < built_text.rows && cc < built_text.cols) {
+			for (size_t ri=r,rr=0;rr<rows_heights[i];ri++,++rr) {
+				for (size_t ci=c,cc=0;cc<cols_widths[j];ci++,++cc) {
+					if (rr < built_text.rows && cc < built_text.cols && built_text.canvas[rr][cc].state) {
 						canvas[ri][ci] = built_text.canvas[rr][cc];
 						continue;
 					}
@@ -176,7 +187,7 @@ typename termiq::CanvasPiece<CC> termiq::GridBuilder<CC>::build() {
 template<typename CC>
 std::vector<unsigned int> termiq::GridBuilder<CC>::get_optimal_cell_sizes(std::vector<unsigned int>& defined_sizes, std::vector<unsigned int>& text_sizes, unsigned int size) {
 	size_t vals_count = defined_sizes.size();
-	std::vector<unsigned int> cols_widths;
+	std::vector<unsigned int> cols_widths(vals_count);
 	for (size_t c=0;c<vals_count;++c) {
 		cols_widths[c] = defined_sizes[c] ? defined_sizes[c] : text_sizes[c];
 	}
@@ -201,7 +212,7 @@ std::vector<unsigned int> termiq::GridBuilder<CC>::get_optimal_cell_sizes(std::v
 				fit_rates.push_back(text_sizes[c]+1);
 			}
 		}
-		distribute_rated(fit_values, fit_rates, rest);
+		distribute_rated<unsigned int>(fit_values, fit_rates, rest);
 		return cols_widths;
 	}
 
@@ -219,7 +230,7 @@ std::vector<unsigned int> termiq::GridBuilder<CC>::get_optimal_cell_sizes(std::v
 				fit_rates.push_back(text_sizes[c]+1);
 			}
 		}
-		distribute_rated(fit_values, fit_rates, rest);
+		distribute_rated<unsigned int>(fit_values, fit_rates, rest);
 		return cols_widths;
 	}
 
@@ -233,13 +244,14 @@ std::vector<unsigned int> termiq::GridBuilder<CC>::get_optimal_cell_sizes(std::v
 			fit_values.push_back(&cols_widths[c]);
 			fit_rates.push_back(defined_sizes[c] + text_sizes[c] + 1);
 		}
-		distribute_rated(fit_values, fit_rates, rest);
+		distribute_rated<unsigned int>(fit_values, fit_rates, rest);
 	}
+	return cols_widths;
 }
 
 template<typename CC>
 std::vector<unsigned int> termiq::GridBuilder<CC>::calculate_column_sizes() {
-	unsigned int max_width = _width - _cols - 1;
+	unsigned int max_width = _width ? _width - _cols - 1 : 0;
 	std::vector<unsigned int> cols_defined_widths(_cols, 0);
 	std::vector<unsigned int> cols_text_widths(_cols, 0);
 
@@ -253,7 +265,7 @@ std::vector<unsigned int> termiq::GridBuilder<CC>::calculate_column_sizes() {
 
 template<typename CC>
 std::vector<unsigned int> termiq::GridBuilder<CC>::calculate_row_sizes() {
-	unsigned int max_height = _height - _rows - 1;
+	unsigned int max_height = _height ? _height - _rows - 1 : 0;
 	std::vector<unsigned int> rows_defined_heights(_rows, 0);
 	std::vector<unsigned int> rows_text_heights(_rows, 0);
 
@@ -301,7 +313,7 @@ unsigned int termiq::GridBuilder<CC>::get_column_text_width(size_t index) {
 template<typename CC>
 unsigned int termiq::GridBuilder<CC>::get_row_text_height(size_t index) {
 	unsigned int height = 0;
-	interate_row(index, [&height](auto &cell){
+	iterate_row(index, [&height](auto &cell){
 		if (!cell.has_text) return;
 		height = std::max(height, cell.text.text_height());
 	});
@@ -340,7 +352,7 @@ void termiq::GridBuilder<CC>::distribute_rated(std::vector<IT*> &values, std::ve
 	add_size = size - values_size;
 	for (auto *it : values) {
 		if (add_size-- > 0) {
-			*it++;
+			(*it)++;
 		}
 	}
 }
@@ -386,8 +398,12 @@ typename termiq::GridBuilder<CC>::GridBorders termiq::GridBuilder<CC>::get_borde
 			case BorderType::ROUND:
 				return GridBorders{C_H, C_V, C_X, C_HT, C_HB, C_VL, C_VR, C_TL_ROUND, C_TR_ROUND, C_BL_ROUND, C_BR_ROUND};
 			case BorderType::INVISIBLE:
+			{
 				char_type invis_char = ' ';
 				return GridBorders{invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char};
+			}
+			default:
+				return GridBorders{C_H, C_V, C_X, C_HT, C_HB, C_VL, C_VR, C_TL, C_TR, C_BL, C_BR};
 		}
 	}
 }

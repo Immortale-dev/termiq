@@ -10,7 +10,7 @@ namespace termiq {
 			using char_type = typename CC::char_type;
 			using CanvasGrid = std::vector<std::vector<char_type>>;
 
-			TextBuilder(const char_type* txt);
+			TextBuilder(const char_type* txt = nullptr);
 			virtual ~TextBuilder() = default;
 
 			TextBuilder& set_foreground_color(termiq::style::Color &&color);
