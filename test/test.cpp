@@ -93,6 +93,7 @@ int main() {
 //	}
 
 //  TEST MULTILINE TEXT
+	auto t1 = std::chrono::system_clock::now();
 	canvas.draw(3, 3, canvas.text(L"hello world").set_bold().set_background_color({300,700,300}).set_width(6).build());
 	canvas.draw(10, 10, canvas.text(L"kavabanga халоу ворлд how are you?").set_foreground_color({1000, 300, 0}).set_width(4).set_height(5).build());
 	canvas.draw(20, 20,
@@ -105,7 +106,7 @@ int main() {
 				.set_cell_background_color({500, 500, 100})
 				.set_cell_text(canvas.text(L"woohoo").set_background_color({200, 200, 900}))
 			.select_cell(1,1)
-				.set_cell_text(canvas.text(L"hello world"))
+				.set_cell_text(canvas.text(L"hello\nworld"))
 		.build()
 	);
 
@@ -126,6 +127,6 @@ int main() {
 
 	termiq::style::reset();
 
-//	std::cout << "Time to draw: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count() << std::endl;
+	std::cout << "Time to draw: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count() << std::endl;
 	std::cout << "Time to paint: " << std::chrono::duration_cast<std::chrono::milliseconds>(t3-t2).count() << std::endl;
 }

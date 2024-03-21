@@ -22,7 +22,7 @@ namespace termiq {
 			TextBuilder& set_inverse();
 			TextBuilder& set_width(unsigned int w);
 			TextBuilder& set_height(unsigned int h);
-			CanvasPiece<CC> build();
+			CanvasPieces<CC> build();
 
 			unsigned int text_width();
 			unsigned int text_height();
@@ -35,8 +35,8 @@ namespace termiq {
 			bool is_valid_lines();
 
 			std::vector<char_type> _txt;
-			termiq::style::Color _foreground{-1,-1,-1};
-			termiq::style::Color _background{-1,-1,-1};
+			termiq::style::Color _foreground = style::Color::UNDEFINED;
+			termiq::style::Color _background = style::Color::UNDEFINED;
 			bool _bold = false;
 			bool _italic = false;
 			bool _dim = false;

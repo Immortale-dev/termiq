@@ -13,8 +13,8 @@ namespace {
 	int max_colors_count = 0;
 	int start_colors_offset = 16;
 
-	termiq::style::Color current_foreground{-1,-1,-1};
-	termiq::style::Color current_background{-1,-1,-1};
+	termiq::style::Color current_foreground = termiq::style::Color::UNDEFINED;
+	termiq::style::Color current_background = termiq::style::Color::UNDEFINED;
 	bool is_bold = false;
 	bool is_italic = false;
 	bool is_underline = false;
@@ -23,16 +23,16 @@ namespace {
 	bool is_special = false;
 
 	bool is_foreground_set() {
-		return termiq::style::is_color_set(current_foreground);
+		return termiq::style::is_color_defined(current_foreground);
 	}
 	bool is_background_set() {
-		return termiq::style::is_color_set(current_background);
+		return termiq::style::is_color_defined(current_background);
 	}
 	void reset_background() {
-		current_foreground = {-1,-1,-1};
+		current_foreground = termiq::style::Color::UNDEFINED;
 	}
 	void reset_foreground() {
-		current_background = {-1,-1,-1};
+		current_background = termiq::style::Color::UNDEFINED;
 	}
 	void update_attrs() {
 		if (is_bold || is_dim || is_inverse || is_underline) {
@@ -85,6 +85,8 @@ namespace {
 	}
 }
 
+const termiq::style::Color termiq::style::Color::UNDEFINED = {-1, -1, -1};
+
 void termiq::style::style(Color fg, Color bg, bool bold, bool italic, bool dim, bool underline, bool inverse) {
 	bool attr_updated = false;
 	if (is_bold != bold) {
@@ -111,7 +113,7 @@ void termiq::style::style(Color fg, Color bg, bool bold, bool italic, bool dim, 
 		update_attrs();
 	}
 	bool clrs_updated = false;
-	if (!attr_updated && ( (is_foreground_set() && !termiq::style::is_color_set(fg)) || (is_background_set() && !termiq::style::is_color_set(bg)) )) {
+	if (!attr_updated && ( (is_foreground_set() && !termiq::style::is_color_defined(fg)) || (is_background_set() && !termiq::style::is_color_defined(bg)) )) {
 		reset_colors();
 		clrs_updated = true;
 	}
@@ -224,6 +226,6 @@ void termiq::style::reset() {
 	clear();
 }
 
-bool termiq::style::is_color_set(termiq::style::Color &color) {
+bool termiq::style::is_color_defined(termiq::style::Color &color) {
 	return color.r >= 0;
 }

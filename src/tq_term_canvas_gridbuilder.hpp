@@ -166,13 +166,13 @@ typename termiq::CanvasPiece<CC> termiq::GridBuilder<CC>::build() {
 			auto cs = std::make_shared<CharState>();
 			cs->background = cell.background;
 			auto built_text = cell.text.build();
-			if (built_text.rows && built_text.cols && !termiq::style::is_color_set(built_text.canvas[0][0].state->background)) {
-				built_text.canvas[0][0].state->background = cs->background;
+			if (built_text.pieces.size() && !termiq::style::is_color_defined(built_text.pieces[0].canvas[0][0].state->background)) {
+				built_text.pieces[0].canvas[0][0].state->background = cs->background;
 			}
 			for (size_t ri=r,rr=0;rr<rows_heights[i];ri++,++rr) {
 				for (size_t ci=c,cc=0;cc<cols_widths[j];ci++,++cc) {
-					if (rr < built_text.rows && cc < built_text.cols && built_text.canvas[rr][cc].state) {
-						canvas[ri][ci] = built_text.canvas[rr][cc];
+					if (rr < built_text.pieces.size() && cc < built_text.pieces[i].cols) {
+						canvas[ri][ci] = built_text.pieces[rr].canvas[0][cc];
 						continue;
 					}
 					canvas[ri][ci] = {EMPTY_SPACE, cs};
@@ -181,7 +181,7 @@ typename termiq::CanvasPiece<CC> termiq::GridBuilder<CC>::build() {
 		}
 	}
 
-	return {height, width, canvas};
+	return {canvas, height, width};
 }
 
 template<typename CC>

@@ -64,8 +64,7 @@ typename termiq::TextBuilder<CC>& termiq::TextBuilder<CC>::set_height(unsigned i
 }
 
 template<typename CC>
-typename termiq::CanvasPiece<CC> termiq::TextBuilder<CC>::build() {
-	std::vector<std::vector<CC>> all_lines;
+typename termiq::CanvasPieces<CC> termiq::TextBuilder<CC>::build() {
 	auto cs = std::make_shared<CharState>();
 	cs->foreground = _foreground;
 	cs->background = _background;
@@ -74,18 +73,20 @@ typename termiq::CanvasPiece<CC> termiq::TextBuilder<CC>::build() {
 	cs->dim = _dim;
 	cs->underline = _underline;
 	cs->inverse = _inverse;
-	unsigned int width = text_width();
+//	unsigned int width = text_width();
 	unsigned int lines_count = text_height();
 	auto& built_lines = get_lines();
 
-	for (size_t l=0;l<lines_count;l++) {
-		std::vector<CC> line(width);
-		for (size_t i=0;i<built_lines[l].size();++i) {
-			line[i] = {built_lines[l][i], cs};
+	std::vector<CanvasPiece<CC>> pieces;
+	for (unsigned int l=0;l<lines_count;l++) {
+		std::vector<std::vector<CC>> line(1);
+		unsigned int line_width = built_lines[l].size();
+		for (size_t i=0;i<line_width;++i) {
+			line[0].push_back({built_lines[l][i], cs});
 		}
-		all_lines.push_back(line);
+		pieces.push_back({line, 1, line_width, l, 0});
 	}
-	return {lines_count, width, all_lines};
+	return {pieces};
 }
 
 template<typename CC>

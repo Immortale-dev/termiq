@@ -24,7 +24,7 @@ namespace termiq {
 	class GridBuilder {
 		using char_type = typename CC::char_type;
 		struct GridCellState {
-			termiq::style::Color background{-1,-1,-1};
+			termiq::style::Color background = style::Color::UNDEFINED;
 			TextBuilder<CC> text;
 			bool has_text = false;
 			unsigned int width = 0;
@@ -87,8 +87,8 @@ namespace termiq {
 			std::vector<std::vector<GridCellState>> _grid;
 			size_t _current_cell_r = 0;
 			size_t _current_cell_c = 0;
-			termiq::style::Color _border_foreground_color{-1,-1,-1};
-			termiq::style::Color _border_background_color{-1,-1,-1};
+			termiq::style::Color _border_foreground_color = style::Color::UNDEFINED;
+			termiq::style::Color _border_background_color = style::Color::UNDEFINED;
 			BorderType _border_type = BorderType::SINGLE_ASCII;
 
 			static inline char_type EMPTY_SPACE = ' ';

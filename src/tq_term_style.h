@@ -7,6 +7,8 @@ namespace termiq {
 			int r,g,b;
 			bool operator==(const Color &other) const { return r == other.r && g == other.g && b == other.b; }
 			bool operator!=(const Color &other) const { return !(*this == other); }
+
+			static const Color UNDEFINED;// = {-1, -1, -1};
 		};
 
 		void style(Color fg, Color bg, bool bold, bool italic, bool dim, bool underline, bool inverse);
@@ -23,7 +25,7 @@ namespace termiq {
 		void clear();
 		void reset();
 
-		bool is_color_set(Color &color);
+		bool is_color_defined(Color &color);
 	}
 }
 

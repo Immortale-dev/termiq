@@ -9,8 +9,8 @@
 namespace termiq {
 	// Style state of the symbol.
 	struct CharState {
-		termiq::style::Color foreground{-1,-1,-1};
-		termiq::style::Color background{-1,-1,-1};
+		termiq::style::Color foreground = style::Color::UNDEFINED;
+		termiq::style::Color background = style::Color::UNDEFINED;
 		bool bold = false;
 		bool italic = false;
 		bool dim = false;
@@ -34,14 +34,28 @@ namespace termiq {
 			if (state == nullptr && other.state != nullptr || state != nullptr && other.state == nullptr) return false;
 			return symbol == other.symbol && (state == other.state || *state == *(other.state));
 		}
+		bool is_transparent() { return !state; }
+
+		static const CharCell<CT> TRANSPARENT;
 	};
+
+	template<typename CT>
+	const CharCell<CT> CharCell<CT>::TRANSPARENT = CharCell<CT>();
 
 	// Piece of the canvas.
 	template<typename CC>
 	struct CanvasPiece {
+		const std::vector<std::vector<CC>> canvas;
 		const unsigned int rows;
 		const unsigned int cols;
-		const std::vector<std::vector<CC>> canvas;
+		const unsigned int offset_rows = 0;
+		const unsigned int offset_cols = 0;
+	};
+
+	// Collection of pieces.
+	template<typename CC>
+	struct CanvasPieces {
+		const std::vector<CanvasPiece<CC>> pieces;
 	};
 }
 

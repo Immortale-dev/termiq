@@ -23,7 +23,8 @@ namespace termiq {
 
 			void resize(unsigned int height, unsigned int width);
 			void move(unsigned int row, unsigned int col);
-			void draw(unsigned int row, unsigned int col, CanvasPiece<CC>&& piece);
+			void draw(unsigned int row, unsigned int col, const CanvasPiece<CC>&& piece);
+			void draw(unsigned int row, unsigned int col, const CanvasPieces<CC>&& pieces);
 			void paint();
 
 			TextBuilder<CC> text(const char_type *txt);
