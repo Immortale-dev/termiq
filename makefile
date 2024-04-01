@@ -1,8 +1,8 @@
-.PHONY: all custom lib force clear
+.PHONY: test custom lib force clear
 
 CC=g++
 OPT=-g
-CFLAGS=-c -Wall -std=c++17
+CFLAGS=-c -Wall -Wextra -Wpedantic -std=c++17
 SRCPATH:=src/
 SRCS:=$(wildcard $(SRCPATH)*.cpp)
 OBJS:=$(SRCS:%.cpp=%.o)
@@ -24,7 +24,8 @@ flagsinc=$(foreach d,$(wildcard $(1:=/inc/*)),$(call flagsinc,$d) $(d:=/makefile
 LDFLAGS:=$(LIBS_LD)
 INCL=-Isrc -Itest -Iinc $(LIBS_INC) $(MOD_INC)
 
-all: test.exe
+test: EXTRACFLAGS:=$(EXTRA_TF)
+test: test.exe
 
 custom: mtest.exe
 
@@ -48,7 +49,7 @@ mtest.exe: liboutput.a test/mtest.o
 	$(CC) -o mtest.exe test/mtest.o liboutput.a $(LDFLAGS)
 
 %.o: %.cpp
-	$(CC) $(CFLAGS) $< -o $@ $(INCL) $(OPT)
+	$(CC) $(CFLAGS) $(EXTRACFLAGS) $< -o $@ $(INCL) $(OPT)
 
 define newline
 
