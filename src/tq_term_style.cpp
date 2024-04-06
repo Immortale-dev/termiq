@@ -85,6 +85,17 @@ namespace {
 	}
 }
 
+// For testing.
+#ifdef STUBTERM
+namespace termiq {
+	void term_stub_reset_styles_() {
+		::max_colors_count = 0;
+		::saved_colors.clear();
+		::color_prior.clear();
+	}
+}
+#endif // STUBTERM
+
 const termiq::style::Color termiq::style::Color::UNDEFINED = {-1, -1, -1};
 
 void termiq::style::style(Color fg, Color bg, bool bold, bool italic, bool dim, bool underline, bool inverse) {
@@ -131,12 +142,26 @@ void termiq::style::style(Color fg, Color bg, bool bold, bool italic, bool dim, 
 }
 
 void termiq::style::foreground(const Color color) {
+	if (!is_color_defined(color)) {
+		if (!is_foreground_set()) return;
+		reset_colors();
+		reset_foreground();
+		update_colors();
+		return;
+	}
 	const int color_id = ::define_color(color);
 	set_foreground_color(color_id);
 	current_foreground = color;
 }
 
 void termiq::style::background(const Color color) {
+	if (!is_color_defined(color)) {
+		if (!is_background_set()) return;
+		reset_colors();
+		reset_background();
+		update_colors();
+		return;
+	}
 	const int color_id = ::define_color(color);
 	set_background_color(color_id);
 	current_background = color;
@@ -226,6 +251,6 @@ void termiq::style::reset() {
 	clear();
 }
 
-bool termiq::style::is_color_defined(termiq::style::Color &color) {
+bool termiq::style::is_color_defined(const termiq::style::Color &color) {
 	return color.r >= 0;
 }

@@ -10,7 +10,7 @@ namespace termiq {
 	int get_num(std::string name);
 	int run_str(std::string name, int padding);
 	template<typename... P>
-	bool run_str(std::string name, int padding, P... args);
+	int run_str(std::string name, int padding, P... args);
 }
 
 #include "tq_term.hpp"

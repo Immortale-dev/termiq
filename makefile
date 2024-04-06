@@ -4,7 +4,9 @@ CC=g++
 OPT=-g
 CFLAGS=-c -Wall -Wextra -Wpedantic -std=c++17
 SRCPATH:=src/
+TEST_SRCPATH:=test/src/
 SRCS:=$(wildcard $(SRCPATH)*.cpp)
+TEST_SRCS:=$(wildcard $(TEST_SRCPATH)*.cpp)
 OBJS:=$(SRCS:%.cpp=%.o)
 HDRS:=$(wildcard $(SRCPATH)*.h)
 HDPP:=$(wildcard $(SRCPATH)*.hpp)
@@ -47,6 +49,8 @@ test.exe: liboutput.a test/test.o
 
 mtest.exe: liboutput.a test/mtest.o
 	$(CC) -o mtest.exe test/mtest.o liboutput.a $(LDFLAGS)
+
+test/test.o: $(TEST_SRCS)
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(EXTRACFLAGS) $< -o $@ $(INCL) $(OPT)

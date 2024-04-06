@@ -25,7 +25,7 @@ namespace termiq {
 		void clear();
 		void reset();
 
-		bool is_color_defined(Color &color);
+		bool is_color_defined(const Color &color);
 	}
 }
 
