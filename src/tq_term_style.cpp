@@ -29,10 +29,10 @@ namespace {
 		return termiq::style::is_color_defined(current_background);
 	}
 	void reset_background() {
-		current_foreground = termiq::style::Color::UNDEFINED;
+		current_background = termiq::style::Color::UNDEFINED;
 	}
 	void reset_foreground() {
-		current_background = termiq::style::Color::UNDEFINED;
+		current_foreground = termiq::style::Color::UNDEFINED;
 	}
 	void update_attrs() {
 		if (is_bold || is_dim || is_inverse || is_underline) {
@@ -42,8 +42,6 @@ namespace {
 		}
 		if (is_italic) {
 			termiq::set_italic_on();
-		} else {
-			termiq::set_italic_off();
 		}
 	}
 	void update_colors() {
@@ -89,9 +87,12 @@ namespace {
 #ifdef STUBTERM
 namespace termiq {
 	void term_stub_reset_styles_() {
-		::max_colors_count = 0;
-		::saved_colors.clear();
-		::color_prior.clear();
+		max_colors_count = 0;
+		saved_colors.clear();
+		color_prior.clear();
+		reset_background();
+		reset_foreground();
+		is_bold = is_italic = is_special = is_dim = is_underline = is_inverse = false;
 	}
 }
 #endif // STUBTERM

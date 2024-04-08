@@ -25,6 +25,16 @@ int main() {
 	std::cout << "Colors: " << termiq::get_max_colors() << std::endl;
 	std::cout << "Pairs: " << termiq::get_max_pairs() << std::endl;
 
+	termiq::set_italic_on();
+	termiq::style::foreground({500, 100, 100});
+	std::cout << "ITALIC_ON" << std::endl;
+
+	termiq::set_attrs(true, false, false, false);
+	std::cout << "TURN_ON_BOLD_ATTR" << std::endl;
+
+	termiq::reset_attrs();
+	std::cout << "RESET_ATTRS" << std::endl;
+
 	#ifdef STUBTERM
 	std::cout << "TEST STUB ACTIVATED!" << std::endl;
 	#endif
