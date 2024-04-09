@@ -58,7 +58,7 @@ namespace termiq {
 			GridBuilder& set_cell_width(unsigned int width);
 			GridBuilder& set_cell_height(unsigned int height);
 			GridBuilder& set_border_type(BorderType type);
-			CanvasPiece<CC> build();
+			CanvasPieces<CC> build();
 
 		private:
 			GridCellState& get_current_cell();

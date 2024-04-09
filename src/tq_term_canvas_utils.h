@@ -57,6 +57,30 @@ namespace termiq {
 	struct CanvasPieces {
 		const std::vector<CanvasPiece<CC>> pieces;
 	};
+
+	// Buildable content interface
+	template<typename CC>
+	class ContentBuilder {
+		public:
+			ContentBuilder() = default;
+			virtual ~ContentBuilder() = default;
+
+			virtual CanvasPieces<CC> build() = 0;
+			virtual unsigned int get_width();
+			virtual unsigned int get_height();
+			virtual unsigned int min_width();
+			virtual unsigned int min_height();
+	};
+
+	template<typename CC>
+	class NothingBuilder : public ContentBuilder<CC> {
+		public:
+			CanvasPieces<CC> build() { return {{}}; }
+			unsigned int get_width() { return 0; }
+			unsigned int get_height() {  return 0; }
+			unsigned int min_width() { return 0; }
+			unsigned int min_height() { return 0; }
+	};
 }
 
 #endif // _TQ_TERM_CANVAS_UTILS

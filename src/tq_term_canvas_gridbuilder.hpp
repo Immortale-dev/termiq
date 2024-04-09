@@ -85,7 +85,7 @@ typename termiq::GridBuilder<CC>& termiq::GridBuilder<CC>::set_border_type(Borde
 }
 
 template<typename CC>
-typename termiq::CanvasPiece<CC> termiq::GridBuilder<CC>::build() {
+typename termiq::CanvasPieces<CC> termiq::GridBuilder<CC>::build() {
 	// Reset cells text sizes.
 	for (size_t r=0;r<_rows;++r) {
 		for (size_t c=0;c<_cols;++c) {
@@ -181,7 +181,7 @@ typename termiq::CanvasPiece<CC> termiq::GridBuilder<CC>::build() {
 		}
 	}
 
-	return {canvas, height, width};
+	return {{{canvas, height, width}}};
 }
 
 template<typename CC>
