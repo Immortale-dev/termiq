@@ -21,12 +21,11 @@ namespace termiq {
 	};
 
 	template <typename CC>
-	class GridBuilder {
+	class GridBuilder : public ResizableContentBuilder<CC> {
 		using char_type = typename CC::char_type;
 		struct GridCellState {
 			termiq::style::Color background = style::Color::UNDEFINED;
-			TextBuilder<CC> text;
-			bool has_text = false;
+			ResizableContentBuilder<CC>* content = nullptr;
 			unsigned int width = 0;
 			unsigned int height = 0;
 		};
@@ -52,13 +51,18 @@ namespace termiq {
 			GridBuilder& set_border_foreground_color(termiq::style::Color color);
 			GridBuilder& set_border_background_color(termiq::style::Color color);
 			GridBuilder& set_cell_background_color(termiq::style::Color color);
-			GridBuilder& set_cell_text(TextBuilder<CC> text);
+			GridBuilder& set_cell_content(ResizableContentBuilder<CC>* content);
 			GridBuilder& set_width(unsigned int width);
 			GridBuilder& set_height(unsigned int height);
 			GridBuilder& set_cell_width(unsigned int width);
 			GridBuilder& set_cell_height(unsigned int height);
 			GridBuilder& set_border_type(BorderType type);
 			CanvasPieces<CC> build();
+
+			unsigned int get_width();
+			unsigned int get_height();
+			unsigned int min_width();
+			unsigned int min_height();
 
 		private:
 			GridCellState& get_current_cell();

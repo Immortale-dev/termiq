@@ -66,18 +66,25 @@ namespace termiq {
 			virtual ~ContentBuilder() = default;
 
 			virtual CanvasPieces<CC> build() = 0;
-			virtual unsigned int get_width();
-			virtual unsigned int get_height();
-			virtual unsigned int min_width();
-			virtual unsigned int min_height();
+			virtual unsigned int get_width() = 0;
+			virtual unsigned int get_height() = 0;
+			virtual unsigned int min_width() = 0;
+			virtual unsigned int min_height() = 0;
 	};
 
 	template<typename CC>
-	class NothingBuilder : public ContentBuilder<CC> {
+	class ResizableContentBuilder : public ContentBuilder<CC> {
+		public:
+			virtual ResizableContentBuilder& set_width(unsigned int width) = 0;
+			virtual ResizableContentBuilder& set_height(unsigned int height) = 0;
+	};
+
+	template<typename CC>
+	class Nothing : public ContentBuilder<CC> {
 		public:
 			CanvasPieces<CC> build() { return {{}}; }
 			unsigned int get_width() { return 0; }
-			unsigned int get_height() {  return 0; }
+			unsigned int get_height() { return 0; }
 			unsigned int min_width() { return 0; }
 			unsigned int min_height() { return 0; }
 	};

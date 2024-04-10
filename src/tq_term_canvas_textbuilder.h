@@ -5,10 +5,10 @@
 
 namespace termiq {
 	template<typename CC>
-	class TextBuilder {
+	class TextBuilder : public ResizableContentBuilder<CC> {
 		public:
 			using char_type = typename CC::char_type;
-			using CanvasGrid = std::vector<std::vector<char_type>>;
+			using CanvasMatrix = std::vector<std::vector<char_type>>;
 
 			TextBuilder(const char_type* txt = nullptr);
 			virtual ~TextBuilder() = default;
@@ -24,9 +24,11 @@ namespace termiq {
 			TextBuilder& set_height(unsigned int h);
 			CanvasPieces<CC> build();
 
-			unsigned int text_width();
-			unsigned int text_height();
-			const CanvasGrid& get_lines();
+			unsigned int get_width();
+			unsigned int get_height();
+			unsigned int min_width();
+			unsigned int min_height();
+			const CanvasMatrix& get_lines();
 
 		private:
 			void calculate_lines();
@@ -46,7 +48,7 @@ namespace termiq {
 			unsigned int _height = 0;
 			unsigned int _text_width = 0;
 			unsigned int _text_height = 0;
-			std::vector<std::vector<char_type>> _lines;
+			CanvasMatrix _lines;
 			bool _valid_lines = true;
 
 			static inline char_type STRING_TERMINATOR = '\0';

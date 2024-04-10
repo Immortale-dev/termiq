@@ -1,5 +1,5 @@
 template<typename CC>
-termiq::TextBuilder<CC>::TextBuilder(const char_type* txt) {
+termiq::TextBuilder<CC>::TextBuilder(const char_type* txt) : ResizableContentBuilder<CC>() {
 	if (!txt) return;
 	for(size_t i=0;txt[i]!=STRING_TERMINATOR;++i) {
 		_txt.push_back(txt[i]);
@@ -73,8 +73,7 @@ typename termiq::CanvasPieces<CC> termiq::TextBuilder<CC>::build() {
 	cs->dim = _dim;
 	cs->underline = _underline;
 	cs->inverse = _inverse;
-//	unsigned int width = text_width();
-	unsigned int lines_count = text_height();
+	unsigned int lines_count = get_height();
 	auto& built_lines = get_lines();
 
 	std::vector<CanvasPiece<CC>> pieces;
@@ -90,19 +89,32 @@ typename termiq::CanvasPieces<CC> termiq::TextBuilder<CC>::build() {
 }
 
 template<typename CC>
-unsigned int termiq::TextBuilder<CC>::text_width() {
+unsigned int termiq::TextBuilder<CC>::get_width() {
 	lazy_calculate_lines();
 	return _text_width;
 }
 
 template<typename CC>
-unsigned int termiq::TextBuilder<CC>::text_height() {
+unsigned int termiq::TextBuilder<CC>::get_height() {
 	lazy_calculate_lines();
 	return _text_height;
 }
 
 template<typename CC>
-const typename termiq::TextBuilder<CC>::CanvasGrid& termiq::TextBuilder<CC>::get_lines() {
+unsigned int termiq::TextBuilder<CC>::min_width() {
+	if (_width) {
+		return _width;
+	}
+	return 1;
+}
+
+template<typename CC>
+unsigned int termiq::TextBuilder<CC>::min_height() {
+	return get_height();
+}
+
+template<typename CC>
+const typename termiq::TextBuilder<CC>::CanvasMatrix& termiq::TextBuilder<CC>::get_lines() {
 	lazy_calculate_lines();
 	return _lines;
 }
