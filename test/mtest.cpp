@@ -111,20 +111,23 @@ int main() {
 
 	auto textBuilder1 = canvas.text(L"woohoo").set_background_color({200, 200, 900});
 	auto textBuilder2 = canvas.text(L"hello\nworld");
+	auto gridBuilder1 = canvas.grid(1,2).set_width(10).set_border_type(termiq::BorderType::SINGLE);
 
 	canvas.draw(3, 3, canvas.text(L"hello world").set_bold().set_background_color({300,700,300}).set_width(6).build());
 	canvas.draw(10, 10, canvas.text(L"kavabanga халоу ворлд how are you?").set_foreground_color({1000, 300, 0}).set_width(4).set_height(5).build());
 	canvas.draw(20, 20,
 		canvas.grid(2,3)
-			.set_width(20)
+			.set_width(30)
 			.set_border_type(termiq::BorderType::SINGLE)
 			.set_border_foreground_color({400,800,100})
-//			.set_border_background_color{100,1000,100})
+//			.set_border_background_color({100,1000,100})
 			.select_cell(0,0)
 				.set_cell_background_color({500, 500, 100})
 				.set_cell_content(&textBuilder1)
 			.select_cell(1,1)
 				.set_cell_content(&textBuilder2)
+			.select_cell(0,2)
+				.set_cell_content(&gridBuilder1)
 		.build()
 	);
 

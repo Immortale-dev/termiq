@@ -151,17 +151,22 @@ typename termiq::CanvasPieces<CC> termiq::GridBuilder<CC>::build() {
 			cs->background = cell.background;
 			bool has_content = cell.content != nullptr;
 			auto built_text = has_content ? cell.content->build() : CanvasPieces<CC>();
-			if (has_content && built_text.pieces.size() && !termiq::style::is_color_defined(built_text.pieces[0].canvas[0][0].state->background)) {
-				built_text.pieces[0].canvas[0][0].state->background = cs->background;
-			}
-			// TODO: fix so any content is possible to put into cell.
 			for (size_t ri=r,rr=0;rr<rows_heights[i];ri++,++rr) {
 				for (size_t ci=c,cc=0;cc<cols_widths[j];ci++,++cc) {
-					if (has_content && rr < built_text.pieces.size() && cc < built_text.pieces[i].cols) {
-						canvas[ri][ci] = built_text.pieces[rr].canvas[0][cc];
-						continue;
-					}
 					canvas[ri][ci] = {EMPTY_SPACE, cs};
+				}
+			}
+			for (auto &piece : built_text.pieces) {
+				for (size_t ri=0,rr=piece.offset_rows;ri<piece.rows;ri++,++rr) {
+					if (rr >= rows_heights[i]) break;
+					for (size_t ci=0,cc=piece.offset_cols;ci<piece.cols;ci++,++cc) {
+						if (cc >= cols_widths[j]) break;
+						auto &cell = canvas[r+rr][c+cc];
+						cell = piece.canvas[ri][ci];
+						if (!termiq::style::is_color_defined(cell.state->background)) {
+							cell.state->background = cs->background;
+						}
+					}
 				}
 			}
 		}
@@ -411,9 +416,10 @@ void termiq::GridBuilder<CC>::distribute_rated(std::vector<IT*> &values, std::ve
 	// Fixes error from integer division.
 	add_size = size - values_size;
 	for (auto *it : values) {
-		if (add_size-- > 0) {
-			(*it)++;
+		if (add_size-- <= 0) {
+			break;
 		}
+		(*it)++;
 	}
 }
 
