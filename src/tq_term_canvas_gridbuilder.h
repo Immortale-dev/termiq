@@ -75,6 +75,8 @@ namespace termiq {
 			unsigned int get_row_defined_height(size_t index);
 			unsigned int get_column_content_min_width(size_t index);
 			unsigned int get_row_content_min_height(size_t index);
+			unsigned int get_column_content_width(size_t index);
+			unsigned int get_row_content_height(size_t index);
 			void iterate_column(size_t index, std::function<void(GridCellState&)> callback);
 			void iterate_row(size_t index, std::function<void(GridCellState&)> callback);
 			std::vector<unsigned int> get_optimal_cell_sizes(std::vector<unsigned int>& defined_sizes, std::vector<unsigned int>& text_sizes, unsigned int size);

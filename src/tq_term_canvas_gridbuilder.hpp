@@ -305,7 +305,7 @@ std::vector<unsigned int> termiq::GridBuilder<CC>::get_optimal_cell_sizes(std::v
 template<typename CC>
 std::vector<unsigned int> termiq::GridBuilder<CC>::calculate_column_sizes() {
 	unsigned int max_width = _suggested_width;
-	if (!max_width) {
+	if (!max_width || (_width && _width < max_width)) {
 		max_width = _width;
 	}
 	if (max_width > 0 && _border_type != BorderType::NONE) {
@@ -316,7 +316,7 @@ std::vector<unsigned int> termiq::GridBuilder<CC>::calculate_column_sizes() {
 
 	for (size_t c=0;c<_cols;++c) {
 		cols_defined_widths[c] = get_column_defined_width(c);
-		cols_text_widths[c] = get_column_content_min_width(c);
+		cols_text_widths[c] = get_column_content_width(c);
 	}
 
 	return get_optimal_cell_sizes(cols_defined_widths, cols_text_widths, max_width);
@@ -336,7 +336,7 @@ std::vector<unsigned int> termiq::GridBuilder<CC>::calculate_row_sizes() {
 
 	for (size_t r=0;r<_rows;++r) {
 		rows_defined_heights[r] = get_row_defined_height(r);
-		rows_text_heights[r] = get_row_content_min_height(r);
+		rows_text_heights[r] = get_row_content_height(r);
 	}
 
 	return get_optimal_cell_sizes(rows_defined_heights, rows_text_heights, max_height);
@@ -381,6 +381,26 @@ unsigned int termiq::GridBuilder<CC>::get_row_content_min_height(size_t index) {
 	iterate_row(index, [&height](auto &cell){
 		if (!cell.content) return;
 		height = std::max(height, cell.content->min_height());
+	});
+	return height;
+}
+
+template<typename CC>
+unsigned int termiq::GridBuilder<CC>::get_column_content_width(size_t index) {
+	unsigned int width = 0;
+	iterate_column(index, [&width](auto &cell){
+		if (!cell.content) return;
+		width = std::max(width, cell.content->get_width());
+	});
+	return width;
+}
+
+template<typename CC>
+unsigned int termiq::GridBuilder<CC>::get_row_content_height(size_t index) {
+	unsigned int height = 0;
+	iterate_row(index, [&height](auto &cell){
+		if (!cell.content) return;
+		height = std::max(height, cell.content->get_height());
 	});
 	return height;
 }
