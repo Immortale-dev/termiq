@@ -1,5 +1,5 @@
 template<typename CC>
-termiq::TextBuilder<CC>::TextBuilder(const char_type* txt) : ResizableContentBuilder<CC>() {
+termiq::TextBuilder<CC>::TextBuilder(const char_type* txt) : FlexibleContentBuilder<CC>() {
 	if (!txt) return;
 	for(size_t i=0;txt[i]!=STRING_TERMINATOR;++i) {
 		_txt.push_back(txt[i]);
@@ -114,6 +114,18 @@ unsigned int termiq::TextBuilder<CC>::min_height() {
 }
 
 template<typename CC>
+void termiq::TextBuilder<CC>::suggest_width(unsigned int w) {
+	_suggested_width = w;
+	invalidate_lines();
+}
+
+template<typename CC>
+void termiq::TextBuilder<CC>::suggest_height(unsigned int h) {
+	_suggested_height = h;
+	invalidate_lines();
+}
+
+template<typename CC>
 const typename termiq::TextBuilder<CC>::CanvasMatrix& termiq::TextBuilder<CC>::get_lines() {
 	lazy_calculate_lines();
 	return _lines;
@@ -125,14 +137,22 @@ void termiq::TextBuilder<CC>::calculate_lines() {
 	size_t max_w = 0;
 	size_t max_h = 0;
 	std::vector<char_type> line;
+	size_t calc_w = _suggested_width;
+	size_t calc_h = _suggested_height;
+	if (!calc_w) {
+		calc_w = _width;
+	}
+	if (!calc_h) {
+		calc_h = _height;
+	}
 	for (size_t i=0;;++i) {
-		if ( i == _txt.size() || (_width && _width <= line.size()) || _txt[i] == LINE_TERMINATOR) {
+		if ( i == _txt.size() || (calc_w && calc_w <= line.size()) || _txt[i] == LINE_TERMINATOR) {
 			max_w = std::max(max_w, line.size());
 			++max_h;
 			_lines.push_back(line);
 			line.resize(0);
 		}
-		if (_height && _lines.size() >= _height) break;
+		if (calc_h && _lines.size() >= calc_h) break;
 		if (i >= _txt.size()) break;
 		if (_txt[i] == LINE_TERMINATOR) continue;
 		line.push_back(_txt[i]);

@@ -5,7 +5,7 @@
 
 namespace termiq {
 	template<typename CC>
-	class TextBuilder : public ResizableContentBuilder<CC> {
+	class TextBuilder : public FlexibleContentBuilder<CC> {
 		public:
 			using char_type = typename CC::char_type;
 			using CanvasMatrix = std::vector<std::vector<char_type>>;
@@ -30,6 +30,10 @@ namespace termiq {
 			unsigned int min_height();
 			const CanvasMatrix& get_lines();
 
+		protected:
+			void suggest_width(unsigned int w) override;
+			void suggest_height(unsigned int h) override;
+
 		private:
 			void calculate_lines();
 			void invalidate_lines();
@@ -48,6 +52,8 @@ namespace termiq {
 			unsigned int _height = 0;
 			unsigned int _text_width = 0;
 			unsigned int _text_height = 0;
+			unsigned int _suggested_width = 0;
+			unsigned int _suggested_height = 0;
 			CanvasMatrix _lines;
 			bool _valid_lines = true;
 

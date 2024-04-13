@@ -12,20 +12,21 @@
 
 namespace termiq {
 	enum class BorderType {
-		SINGLE_ASCII = 0,
-		SINGLE = 1,
-		DOUBLE = 2,
-		BOLD = 3,
-		ROUND = 4,
-		INVISIBLE = 5
+		NONE = 0,
+		SINGLE_ASCII = 1,
+		SINGLE = 2,
+		DOUBLE = 3,
+		BOLD = 4,
+		ROUND = 5,
+		INVISIBLE = 6
 	};
 
 	template <typename CC>
-	class GridBuilder : public ResizableContentBuilder<CC> {
+	class GridBuilder : public FlexibleContentBuilder<CC> {
 		using char_type = typename CC::char_type;
 		struct GridCellState {
 			termiq::style::Color background = style::Color::UNDEFINED;
-			ResizableContentBuilder<CC>* content = nullptr;
+			FlexibleContentBuilder<CC>* content = nullptr;
 			unsigned int width = 0;
 			unsigned int height = 0;
 		};
@@ -51,7 +52,7 @@ namespace termiq {
 			GridBuilder& set_border_foreground_color(termiq::style::Color color);
 			GridBuilder& set_border_background_color(termiq::style::Color color);
 			GridBuilder& set_cell_background_color(termiq::style::Color color);
-			GridBuilder& set_cell_content(ResizableContentBuilder<CC>* content);
+			GridBuilder& set_cell_content(FlexibleContentBuilder<CC>* content);
 			GridBuilder& set_width(unsigned int width);
 			GridBuilder& set_height(unsigned int height);
 			GridBuilder& set_cell_width(unsigned int width);
@@ -64,12 +65,16 @@ namespace termiq {
 			unsigned int min_width();
 			unsigned int min_height();
 
+		protected:
+			void suggest_width(unsigned int w) override;
+			void suggest_height(unsigned int h) override;
+
 		private:
 			GridCellState& get_current_cell();
 			unsigned int get_column_defined_width(size_t index);
 			unsigned int get_row_defined_height(size_t index);
-			unsigned int get_column_text_width(size_t index);
-			unsigned int get_row_text_height(size_t index);
+			unsigned int get_column_content_min_width(size_t index);
+			unsigned int get_row_content_min_height(size_t index);
 			void iterate_column(size_t index, std::function<void(GridCellState&)> callback);
 			void iterate_row(size_t index, std::function<void(GridCellState&)> callback);
 			std::vector<unsigned int> get_optimal_cell_sizes(std::vector<unsigned int>& defined_sizes, std::vector<unsigned int>& text_sizes, unsigned int size);
@@ -84,16 +89,27 @@ namespace termiq {
 			template<typename IT>
 			IT summary(std::vector<IT> &values);
 
+			void calc();
+			void lazy_calc();
+			void invalidate_calc();
+			bool is_valid_calc();
+
 			unsigned int _rows;
 			unsigned int _cols;
 			unsigned int _width = 0;
 			unsigned int _height = 0;
+			unsigned int _suggested_width = 0;
+			unsigned int _suggested_height = 0;
 			std::vector<std::vector<GridCellState>> _grid;
 			size_t _current_cell_r = 0;
 			size_t _current_cell_c = 0;
+			std::vector<unsigned int> _cols_widths;
+			std::vector<unsigned int> _rows_heights;
 			termiq::style::Color _border_foreground_color = style::Color::UNDEFINED;
 			termiq::style::Color _border_background_color = style::Color::UNDEFINED;
 			BorderType _border_type = BorderType::SINGLE_ASCII;
+
+			bool _valid_calc = false;
 
 			static inline char_type EMPTY_SPACE = ' ';
 	};

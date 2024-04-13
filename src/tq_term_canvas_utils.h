@@ -73,10 +73,12 @@ namespace termiq {
 	};
 
 	template<typename CC>
-	class ResizableContentBuilder : public ContentBuilder<CC> {
-		public:
-			virtual ResizableContentBuilder& set_width(unsigned int width) = 0;
-			virtual ResizableContentBuilder& set_height(unsigned int height) = 0;
+	class FlexibleContentBuilder : public ContentBuilder<CC> {
+		protected:
+			virtual void suggest_width(unsigned int width) = 0;
+			virtual void suggest_height(unsigned int height) = 0;
+			virtual void apply_suggest_width(FlexibleContentBuilder<CC>& c, unsigned int width) { c.suggest_width(width); }
+			virtual void apply_suggest_height(FlexibleContentBuilder<CC>& c, unsigned int height) { c.suggest_height(height); }
 	};
 
 	template<typename CC>
