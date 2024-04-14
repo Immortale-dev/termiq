@@ -111,7 +111,15 @@ int main() {
 
 	auto textBuilder1 = canvas.text(L"woohoo").set_background_color({200, 200, 900});
 	auto textBuilder2 = canvas.text(L"hello\nworld");
-	auto gridBuilder1 = canvas.grid(1,2).set_width(10).set_border_type(termiq::BorderType::SINGLE);
+	auto textBuilder3 = canvas.text(L"Awesome").set_width(10);
+	auto textBuilder4 = canvas.text(L"Nice");
+	auto gridBuilder1 = canvas.grid(1,2)
+		.set_width(10)
+		.set_border_type(termiq::BorderType::SINGLE)
+		.select_cell(0,1)
+			.set_cell_content(&textBuilder3)
+		.select_cell(0,0)
+			.set_cell_content(&textBuilder4);
 
 	canvas.draw(3, 3, canvas.text(L"hello world").set_bold().set_background_color({300,700,300}).set_width(6).build());
 	canvas.draw(10, 10, canvas.text(L"kavabanga халоу ворлд how are you?").set_foreground_color({1000, 300, 0}).set_width(4).set_height(5).build());

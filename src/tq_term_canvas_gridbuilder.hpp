@@ -239,6 +239,7 @@ void termiq::GridBuilder<CC>::suggest_height(unsigned int h) {
 
 template<typename CC>
 std::vector<unsigned int> termiq::GridBuilder<CC>::get_optimal_cell_sizes(std::vector<unsigned int>& defined_sizes, std::vector<unsigned int>& text_sizes, unsigned int size) {
+	// TODO: take into account content min_widths
 	size_t vals_count = defined_sizes.size();
 	std::vector<unsigned int> cols_widths(vals_count);
 	for (size_t c=0;c<vals_count;++c) {
@@ -250,6 +251,7 @@ std::vector<unsigned int> termiq::GridBuilder<CC>::get_optimal_cell_sizes(std::v
 	std::vector<unsigned int> fit_rates;
 
 	int rest = size - summary(cols_widths);
+
 	if (rest >= 0) {
 		// The rest of table width is distributed proportionally to the amount of text between the columns which
 		// width was not. If non of such columns exist, the width is equaly distributed between all of the columns.
@@ -325,7 +327,7 @@ std::vector<unsigned int> termiq::GridBuilder<CC>::calculate_column_sizes() {
 template<typename CC>
 std::vector<unsigned int> termiq::GridBuilder<CC>::calculate_row_sizes() {
 	unsigned int max_height = _suggested_height;
-	if (!max_height) {
+	if (!max_height || (_height && _height < max_height)) {
 		max_height = _height;
 	}
 	if (max_height > 0 && _border_type != BorderType::NONE) {
@@ -418,23 +420,24 @@ void termiq::GridBuilder<CC>::distribute(std::vector<IT*> &values, IT size) {
 template<typename CC>
 template<typename IT>
 void termiq::GridBuilder<CC>::distribute_rated(std::vector<IT*> &values, std::vector<IT> &rates, IT size) {
-	IT values_size = 0;
+	if (!size) return;
+
 	IT rates_size = 0;
 	for (size_t i=0;i<values.size();++i) {
-		values_size += *(values[i]);
 		rates_size += rates[i];
 	}
 
 	// Add values proportionally to rates.
 	IT add_size = size;
+	IT plus_values_size = 0;
 	for (size_t i=0;i<values.size();++i) {
 		IT plus = add_size * rates[i] / rates_size;
 		*(values[i]) += plus;
-		values_size += plus;
+		plus_values_size += plus;
 	}
 
 	// Fixes error from integer division.
-	add_size = size - values_size;
+	add_size = size - plus_values_size;
 	for (auto *it : values) {
 		if (add_size-- <= 0) {
 			break;

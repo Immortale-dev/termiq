@@ -22,24 +22,23 @@ namespace termiq {
 			TextBuilder& set_inverse();
 			TextBuilder& set_width(unsigned int w);
 			TextBuilder& set_height(unsigned int h);
-			CanvasPieces<CC> build();
+			CanvasPieces<CC> build() override;
 
-			unsigned int get_width();
-			unsigned int get_height();
-			unsigned int min_width();
-			unsigned int min_height();
+			unsigned int get_width() override;
+			unsigned int get_height() override;
+			unsigned int min_width() override;
+			unsigned int min_height() override;
 			const CanvasMatrix& get_lines();
 
 		protected:
 			void suggest_width(unsigned int w) override;
 			void suggest_height(unsigned int h) override;
-
-		private:
-			void calculate_lines();
+			virtual void calculate_lines();
 			void invalidate_lines();
 			void lazy_calculate_lines();
 			bool is_valid_lines();
 
+		private:
 			std::vector<char_type> _txt;
 			termiq::style::Color _foreground = style::Color::UNDEFINED;
 			termiq::style::Color _background = style::Color::UNDEFINED;

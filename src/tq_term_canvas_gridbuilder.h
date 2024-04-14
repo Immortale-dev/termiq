@@ -58,16 +58,20 @@ namespace termiq {
 			GridBuilder& set_cell_width(unsigned int width);
 			GridBuilder& set_cell_height(unsigned int height);
 			GridBuilder& set_border_type(BorderType type);
-			CanvasPieces<CC> build();
+			CanvasPieces<CC> build() override;
 
-			unsigned int get_width();
-			unsigned int get_height();
-			unsigned int min_width();
-			unsigned int min_height();
+			unsigned int get_width() override;
+			unsigned int get_height() override;
+			unsigned int min_width() override;
+			unsigned int min_height() override;
 
 		protected:
 			void suggest_width(unsigned int w) override;
 			void suggest_height(unsigned int h) override;
+			virtual void calc();
+			void lazy_calc();
+			void invalidate_calc();
+			bool is_valid_calc();
 
 		private:
 			GridCellState& get_current_cell();
@@ -90,11 +94,6 @@ namespace termiq {
 			void distribute_rated(std::vector<IT*> &values, std::vector<IT> &rates, IT size);
 			template<typename IT>
 			IT summary(std::vector<IT> &values);
-
-			void calc();
-			void lazy_calc();
-			void invalidate_calc();
-			bool is_valid_calc();
 
 			unsigned int _rows;
 			unsigned int _cols;
