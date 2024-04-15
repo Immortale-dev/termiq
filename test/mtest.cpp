@@ -7,6 +7,8 @@
 #include "tq_term_adv.h"
 #include "tq_term_style.h"
 #include "tq_term_canvas.h"
+#include "tq_term_canvas_flextext.h"
+#include "tq_term_canvas_flexgrid.h"
 
 int main() {
 	termiq::init_term();
@@ -91,7 +93,10 @@ int main() {
 //		perror("printf");
 //	}
 
-	termiq::Canvas<termiq::CharCell<wchar_t>> canvas(rows-1,cols,0,0);
+	using CC = termiq::canvas::CharCell<wchar_t>;
+	using BText = termiq::canvas::FlexText<CC>;
+	using BGrid = termiq::canvas::FlexGrid<CC>;
+	termiq::canvas::Canvas<CC> canvas(rows-1,cols,0,0);
 
 //  TEST FULL SCREEN DRAW
 //	for(int r=0;r<rows-1;r++) {
@@ -109,54 +114,64 @@ int main() {
 //  TEST MULTILINE TEXT
 	auto t1 = std::chrono::system_clock::now();
 
-	auto textBuilder1 = canvas.text(L"woohoo").set_background_color({200, 200, 900});
-	auto textBuilder2 = canvas.text(L"hello\nworld");
-	auto textBuilder3 = canvas.text(L"Awesome"); //.set_width(4);
-	auto textBuilder4 = canvas.text(L"Nice");
-	auto gridBuilder1 = canvas.grid(1,2)
-		.set_width(10)
-		.set_border_type(termiq::BorderType::SINGLE)
-		.select_cell(0,1)
-			.set_cell_content(&textBuilder3)
-		.select_cell(0,0)
-			.set_cell_content(&textBuilder4);
+	auto tb1 = BText(L"woohoo");
+	tb1.set_background_color({200, 200, 900});
+	auto tb2 = BText(L"hello\nworld");
+	auto tb3 = BText(L"Awesome"); //.set_width(4);
+	auto tb4 = BText(L"Nice");
+	auto gb1 = BGrid(1,2);
+	gb1.set_width(10);
+	gb1.set_border_type(termiq::canvas::BorderType::SINGLE);
+	gb1.select_cell(0,1);
+	gb1.set_cell_content(&tb3);
+	gb1.select_cell(0,0);
+	gb1.set_cell_content(&tb4);
 
-	auto gt1 = canvas.text(L"a");
-	auto gt2 = canvas.text(L"aa");
-	auto gt3 = canvas.text(L"aa aa aa");
-	auto gt4 = canvas.text(L"aaaaaaaaaaaaaaaa aaaaaaaaaaaaa");
-	auto gridBuilder2 = canvas.grid(2,4)
-		.set_width(40)
-		.set_border_type(termiq::BorderType::SINGLE)
-		.select_cell(0,0)
-			.set_cell_content(&gt1)
-			.set_cell_width(5)
-		.select_cell(0,1)
-			.set_cell_content(&gt2)
-			.set_cell_width(10)
-		.select_cell(0,2)
-			.set_cell_content(&gt3)
-		.select_cell(0,3)
-			.set_cell_content(&gt4);
+	auto gt1 = BText(L"a");
+	auto gt2 = BText(L"aa");
+	auto gt3 = BText(L"aa aa aa");
+	auto gt4 = BText(L"aaaaaaaaaaaaaaaa aaaaaaaaaaaaa");
+	BGrid gb2 = BGrid(2,4);
+	gb2.set_width(40);
+	gb2.set_border_type(termiq::canvas::BorderType::SINGLE);
+	gb2.select_cell(0,0);
+	gb2.set_cell_content(&gt1);
+	gb2.set_cell_width(5);
+	gb2.select_cell(0,1);
+	gb2.set_cell_content(&gt2);
+	gb2.set_cell_width(10);
+	gb2.select_cell(0,2);
+	gb2.set_cell_content(&gt3);
+	gb2.select_cell(0,3);
+	gb2.set_cell_content(&gt4);
 
-	canvas.draw(3, 3, canvas.text(L"hello world").set_bold().set_background_color({300,700,300}).set_width(6).build());
-	canvas.draw(10, 10, canvas.text(L"kavabanga халоу ворлд how are you?").set_foreground_color({1000, 300, 0}).set_width(4).set_height(5).build());
-	canvas.draw(20, 20,
-		canvas.grid(2,3)
-			.set_width(30)
-			.set_border_type(termiq::BorderType::SINGLE)
-			.set_border_foreground_color({400,800,100})
-//			.set_border_background_color({100,1000,100})
-			.select_cell(0,0)
-				.set_cell_background_color({500, 500, 100})
-				.set_cell_content(&textBuilder1)
-			.select_cell(1,1)
-				.set_cell_content(&textBuilder2)
-			.select_cell(0,2)
-				.set_cell_content(&gridBuilder1)
-		.build()
-	);
-	canvas.draw(3, 15, gridBuilder2.build());
+	BGrid gb3 = BGrid(2,3);
+	gb3.set_width(30);
+	gb3.set_border_type(termiq::canvas::BorderType::SINGLE);
+	gb3.set_border_foreground_color({400,800,100});
+//	gb3.set_border_background_color({100,1000,100});
+	gb3.select_cell(0,0);
+	gb3.set_cell_background_color({500, 500, 100});
+	gb3.set_cell_content(&tb1);
+	gb3.select_cell(1,1);
+	gb3.set_cell_content(&tb2);
+	gb3.select_cell(0,2);
+	gb3.set_cell_content(&gb1);
+
+	auto tbf1 = BText(L"hello world");
+	tbf1.set_bold();
+	tbf1.set_background_color({300,700,300});
+	tbf1.set_width(6);
+
+	auto tbf2 = BText(L"kavabanga халоу ворлд how are you?");
+	tbf2.set_foreground_color({1000, 300, 0});
+	tbf2.set_width(4);
+	tbf2.set_height(5);
+
+	canvas.draw(3, 3, tbf1.build());
+	canvas.draw(10, 10, tbf2.build());
+	canvas.draw(20, 20, gb3.build());
+	canvas.draw(3, 15, gb2.build());
 
 	termiq::enter_alternate_buffer();
 	termiq::exit_automatic_margins();

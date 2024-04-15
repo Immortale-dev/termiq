@@ -1,0 +1,66 @@
+#ifndef _TQ_TERM_CANVAS_TEXT
+#define _TQ_TERM_CANVAS_TEXT
+
+#include "tq_term_canvas_utils.h"
+
+namespace termiq {
+	namespace canvas {
+		template<typename CC>
+		class Text : public Content<CC> {
+			public:
+				using char_type = typename CC::char_type;
+				using CanvasMatrix = std::vector<std::vector<char_type>>;
+
+				Text(const char_type* txt = nullptr);
+
+				void set_foreground_color(termiq::style::Color &&color);
+				void set_background_color(termiq::style::Color &&color);
+				void set_bold();
+				void set_italic();
+				void set_dim();
+				void set_underline();
+				void set_inverse();
+				void set_width(unsigned int w);
+				void set_height(unsigned int h);
+				CanvasPieces<CC> build() override;
+
+				unsigned int get_width() override;
+				unsigned int get_height() override;
+				unsigned int min_width() override;
+				unsigned int min_height() override;
+				const CanvasMatrix& get_lines();
+
+			protected:
+				virtual void calculate_lines();
+				void invalidate_lines();
+				void lazy_calculate_lines();
+				bool is_valid_lines();
+				virtual unsigned int get_calc_width();
+				virtual unsigned int get_calc_height();
+
+				std::vector<char_type> _txt;
+				termiq::style::Color _foreground = style::Color::UNDEFINED;
+				termiq::style::Color _background = style::Color::UNDEFINED;
+				bool _bold = false;
+				bool _italic = false;
+				bool _dim = false;
+				bool _underline = false;
+				bool _inverse = false;
+				unsigned int _width = 0;
+				unsigned int _height = 0;
+				unsigned int _text_width = 0;
+				unsigned int _text_height = 0;
+				CanvasMatrix _lines;
+
+			private:
+				bool _valid_lines = true;
+
+				static inline char_type STRING_TERMINATOR = '\0';
+				static inline char_type LINE_TERMINATOR = '\n';
+		};
+	}
+}
+
+#include "tq_term_canvas_text.hpp"
+
+#endif // _TQ_TERM_CANVAS_TEXT

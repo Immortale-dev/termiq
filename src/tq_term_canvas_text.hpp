@@ -1,5 +1,5 @@
 template<typename CC>
-termiq::TextBuilder<CC>::TextBuilder(const char_type* txt) : FlexibleContentBuilder<CC>() {
+termiq::canvas::Text<CC>::Text(const char_type* txt) : Content<CC>() {
 	if (!txt) return;
 	for(size_t i=0;txt[i]!=STRING_TERMINATOR;++i) {
 		_txt.push_back(txt[i]);
@@ -8,63 +8,54 @@ termiq::TextBuilder<CC>::TextBuilder(const char_type* txt) : FlexibleContentBuil
 }
 
 template<typename CC>
-typename termiq::TextBuilder<CC>& termiq::TextBuilder<CC>::set_foreground_color(termiq::style::Color &&color) {
+void termiq::canvas::Text<CC>::set_foreground_color(termiq::style::Color &&color) {
 	_foreground = color;
-	return *this;
 }
 
 template<typename CC>
-typename termiq::TextBuilder<CC>& termiq::TextBuilder<CC>::set_background_color(termiq::style::Color &&color) {
+void termiq::canvas::Text<CC>::set_background_color(termiq::style::Color &&color) {
 	_background = color;
-	return *this;
 }
 
 template<typename CC>
-typename termiq::TextBuilder<CC>& termiq::TextBuilder<CC>::set_bold() {
+void termiq::canvas::Text<CC>::set_bold() {
 	_bold = true;
-	return *this;
 }
 
 template<typename CC>
-typename termiq::TextBuilder<CC>& termiq::TextBuilder<CC>::set_italic() {
+void termiq::canvas::Text<CC>::set_italic() {
 	_italic = true;
-	return *this;
 }
 
 template<typename CC>
-typename termiq::TextBuilder<CC>& termiq::TextBuilder<CC>::set_dim() {
+void termiq::canvas::Text<CC>::set_dim() {
 	_dim = true;
-	return *this;
 }
 
 template<typename CC>
-typename termiq::TextBuilder<CC>& termiq::TextBuilder<CC>::set_underline() {
+void termiq::canvas::Text<CC>::set_underline() {
 	_underline = true;
-	return *this;
 }
 
 template<typename CC>
-typename termiq::TextBuilder<CC>& termiq::TextBuilder<CC>::set_inverse() {
+void termiq::canvas::Text<CC>::set_inverse() {
 	_inverse = true;
-	return *this;
 }
 
 template<typename CC>
-typename termiq::TextBuilder<CC>& termiq::TextBuilder<CC>::set_width(unsigned int w) {
+void termiq::canvas::Text<CC>::set_width(unsigned int w) {
 	_width = w;
 	invalidate_lines();
-	return *this;
 }
 
 template<typename CC>
-typename termiq::TextBuilder<CC>& termiq::TextBuilder<CC>::set_height(unsigned int h) {
+void termiq::canvas::Text<CC>::set_height(unsigned int h) {
 	_height = h;
 	invalidate_lines();
-	return *this;
 }
 
 template<typename CC>
-typename termiq::CanvasPieces<CC> termiq::TextBuilder<CC>::build() {
+typename termiq::canvas::CanvasPieces<CC> termiq::canvas::Text<CC>::build() {
 	auto cs = std::make_shared<CharState>();
 	cs->foreground = _foreground;
 	cs->background = _background;
@@ -85,23 +76,27 @@ typename termiq::CanvasPieces<CC> termiq::TextBuilder<CC>::build() {
 		}
 		pieces.push_back({line, 1, line_width, l, 0});
 	}
-	return {pieces};
+
+	CanvasPieces<CC> result{pieces};
+	this->built(result);
+
+	return result;
 }
 
 template<typename CC>
-unsigned int termiq::TextBuilder<CC>::get_width() {
+unsigned int termiq::canvas::Text<CC>::get_width() {
 	lazy_calculate_lines();
 	return _text_width;
 }
 
 template<typename CC>
-unsigned int termiq::TextBuilder<CC>::get_height() {
+unsigned int termiq::canvas::Text<CC>::get_height() {
 	lazy_calculate_lines();
 	return _text_height;
 }
 
 template<typename CC>
-unsigned int termiq::TextBuilder<CC>::min_width() {
+unsigned int termiq::canvas::Text<CC>::min_width() {
 	if (_width) {
 		return _width;
 	}
@@ -109,42 +104,24 @@ unsigned int termiq::TextBuilder<CC>::min_width() {
 }
 
 template<typename CC>
-unsigned int termiq::TextBuilder<CC>::min_height() {
+unsigned int termiq::canvas::Text<CC>::min_height() {
 	return get_height();
 }
 
 template<typename CC>
-void termiq::TextBuilder<CC>::suggest_width(unsigned int w) {
-	_suggested_width = w;
-	invalidate_lines();
-}
-
-template<typename CC>
-void termiq::TextBuilder<CC>::suggest_height(unsigned int h) {
-	_suggested_height = h;
-	invalidate_lines();
-}
-
-template<typename CC>
-const typename termiq::TextBuilder<CC>::CanvasMatrix& termiq::TextBuilder<CC>::get_lines() {
+const typename termiq::canvas::Text<CC>::CanvasMatrix& termiq::canvas::Text<CC>::get_lines() {
 	lazy_calculate_lines();
 	return _lines;
 }
 
 template<typename CC>
-void termiq::TextBuilder<CC>::calculate_lines() {
+void termiq::canvas::Text<CC>::calculate_lines() {
 	_lines.resize(0);
 	size_t max_w = 0;
 	size_t max_h = 0;
 	std::vector<char_type> line;
-	size_t calc_w = _suggested_width;
-	size_t calc_h = _suggested_height;
-	if (!calc_w) {
-		calc_w = _width;
-	}
-	if (!calc_h) {
-		calc_h = _height;
-	}
+	size_t calc_w = get_calc_width();
+	size_t calc_h = get_calc_height();
 	for (size_t i=0;;++i) {
 		if ( i == _txt.size() || (calc_w && calc_w <= line.size()) || _txt[i] == LINE_TERMINATOR) {
 			max_w = std::max(max_w, line.size());
@@ -162,18 +139,28 @@ void termiq::TextBuilder<CC>::calculate_lines() {
 }
 
 template<typename CC>
-void termiq::TextBuilder<CC>::invalidate_lines() {
+void termiq::canvas::Text<CC>::invalidate_lines() {
 	_valid_lines = false;
 }
 
 template<typename CC>
-void termiq::TextBuilder<CC>::lazy_calculate_lines() {
+void termiq::canvas::Text<CC>::lazy_calculate_lines() {
 	if (_valid_lines) return;
 	calculate_lines();
 	_valid_lines = true;
 }
 
 template<typename CC>
-bool termiq::TextBuilder<CC>::is_valid_lines() {
+bool termiq::canvas::Text<CC>::is_valid_lines() {
 	return _valid_lines;
+}
+
+template<typename CC>
+unsigned int termiq::canvas::Text<CC>::get_calc_width() {
+	return _width;
+}
+
+template<typename CC>
+unsigned int termiq::canvas::Text<CC>::get_calc_height() {
+	return _height;
 }
