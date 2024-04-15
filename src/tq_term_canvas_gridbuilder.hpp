@@ -238,8 +238,12 @@ void termiq::GridBuilder<CC>::suggest_height(unsigned int h) {
 }
 
 template<typename CC>
-std::vector<unsigned int> termiq::GridBuilder<CC>::get_optimal_cell_sizes(std::vector<unsigned int>& defined_sizes, std::vector<unsigned int>& text_sizes, unsigned int size) {
-	// TODO: take into account content min_widths
+std::vector<unsigned int> termiq::GridBuilder<CC>::get_optimal_cell_sizes(
+	std::vector<unsigned int> &defined_sizes,
+	std::vector<unsigned int> &text_sizes,
+	std::vector<unsigned int> &min_content_sizes,
+	unsigned int size
+) {
 	size_t vals_count = defined_sizes.size();
 	std::vector<unsigned int> cols_widths(vals_count);
 	for (size_t c=0;c<vals_count;++c) {
@@ -272,15 +276,15 @@ std::vector<unsigned int> termiq::GridBuilder<CC>::get_optimal_cell_sizes(std::v
 	}
 
 	for (size_t c=0;c<_cols;c++) {
-		if (defined_sizes[c]) {
-			cols_widths[c] = std::min(defined_sizes[c], text_sizes[c]);
+		if (!defined_sizes[c]) {
+			cols_widths[c] = min_content_sizes[c];
 		}
 	}
 	rest = size - summary(cols_widths);
-	if (rest > 0) {
-		// Distribute between the columns which default width is defined proportionally to this defined width.
+	if (rest >= 0) {
+		// Distribute proportionally between columns which width was not set.
 		for (size_t c=0;c<vals_count;++c) {
-			if (defined_sizes[c]) {
+			if (!defined_sizes[c]) {
 				fit_values.push_back(&cols_widths[c]);
 				fit_rates.push_back(text_sizes[c]+1);
 			}
@@ -290,7 +294,7 @@ std::vector<unsigned int> termiq::GridBuilder<CC>::get_optimal_cell_sizes(std::v
 	}
 
 	for (size_t c=0;c<_cols;c++) {
-		cols_widths[c] = text_sizes[c] ? 1 : 0;
+		cols_widths[c] = min_content_sizes[c];
 	}
 	rest = size - summary(cols_widths);
 	if (rest > 0) {
@@ -315,13 +319,15 @@ std::vector<unsigned int> termiq::GridBuilder<CC>::calculate_column_sizes() {
 	}
 	std::vector<unsigned int> cols_defined_widths(_cols, 0);
 	std::vector<unsigned int> cols_text_widths(_cols, 0);
+	std::vector<unsigned int> cols_content_min_widths(_cols, 0);
 
 	for (size_t c=0;c<_cols;++c) {
 		cols_defined_widths[c] = get_column_defined_width(c);
 		cols_text_widths[c] = get_column_content_width(c);
+		cols_content_min_widths[c] = get_column_content_min_width(c);
 	}
 
-	return get_optimal_cell_sizes(cols_defined_widths, cols_text_widths, max_width);
+	return get_optimal_cell_sizes(cols_defined_widths, cols_text_widths, cols_content_min_widths, max_width);
 }
 
 template<typename CC>
@@ -335,13 +341,15 @@ std::vector<unsigned int> termiq::GridBuilder<CC>::calculate_row_sizes() {
 	}
 	std::vector<unsigned int> rows_defined_heights(_rows, 0);
 	std::vector<unsigned int> rows_text_heights(_rows, 0);
+	std::vector<unsigned int> rows_content_min_heights(_rows, 0);
 
 	for (size_t r=0;r<_rows;++r) {
 		rows_defined_heights[r] = get_row_defined_height(r);
 		rows_text_heights[r] = get_row_content_height(r);
+		rows_content_min_heights[r] = get_row_content_min_height(r);
 	}
 
-	return get_optimal_cell_sizes(rows_defined_heights, rows_text_heights, max_height);
+	return get_optimal_cell_sizes(rows_defined_heights, rows_text_heights, rows_content_min_heights, max_height);
 }
 
 template<typename CC>

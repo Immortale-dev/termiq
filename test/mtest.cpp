@@ -111,7 +111,7 @@ int main() {
 
 	auto textBuilder1 = canvas.text(L"woohoo").set_background_color({200, 200, 900});
 	auto textBuilder2 = canvas.text(L"hello\nworld");
-	auto textBuilder3 = canvas.text(L"Awesome").set_width(10);
+	auto textBuilder3 = canvas.text(L"Awesome"); //.set_width(4);
 	auto textBuilder4 = canvas.text(L"Nice");
 	auto gridBuilder1 = canvas.grid(1,2)
 		.set_width(10)
@@ -120,6 +120,24 @@ int main() {
 			.set_cell_content(&textBuilder3)
 		.select_cell(0,0)
 			.set_cell_content(&textBuilder4);
+
+	auto gt1 = canvas.text(L"a");
+	auto gt2 = canvas.text(L"aa");
+	auto gt3 = canvas.text(L"aa aa aa");
+	auto gt4 = canvas.text(L"aaaaaaaaaaaaaaaa aaaaaaaaaaaaa");
+	auto gridBuilder2 = canvas.grid(2,4)
+		.set_width(40)
+		.set_border_type(termiq::BorderType::SINGLE)
+		.select_cell(0,0)
+			.set_cell_content(&gt1)
+			.set_cell_width(5)
+		.select_cell(0,1)
+			.set_cell_content(&gt2)
+			.set_cell_width(10)
+		.select_cell(0,2)
+			.set_cell_content(&gt3)
+		.select_cell(0,3)
+			.set_cell_content(&gt4);
 
 	canvas.draw(3, 3, canvas.text(L"hello world").set_bold().set_background_color({300,700,300}).set_width(6).build());
 	canvas.draw(10, 10, canvas.text(L"kavabanga халоу ворлд how are you?").set_foreground_color({1000, 300, 0}).set_width(4).set_height(5).build());
@@ -138,6 +156,7 @@ int main() {
 				.set_cell_content(&gridBuilder1)
 		.build()
 	);
+	canvas.draw(3, 15, gridBuilder2.build());
 
 	termiq::enter_alternate_buffer();
 	termiq::exit_automatic_margins();
