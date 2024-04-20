@@ -74,7 +74,7 @@ typename termiq::canvas::CanvasPieces<CC> termiq::canvas::Text<CC>::build() {
 		for (size_t i=0;i<line_width;++i) {
 			line[0].push_back({built_lines[l][i], cs});
 		}
-		pieces.push_back({line, 1, line_width, l, 0});
+		pieces.push_back({line, 1, line_width, (int)l, 0});
 	}
 
 	CanvasPieces<CC> result{pieces};

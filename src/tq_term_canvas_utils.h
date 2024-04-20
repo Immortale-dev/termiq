@@ -49,8 +49,8 @@ namespace termiq {
 			const std::vector<std::vector<CC>> canvas;
 			const unsigned int rows;
 			const unsigned int cols;
-			const unsigned int offset_rows = 0;
-			const unsigned int offset_cols = 0;
+			const int offset_rows = 0;
+			const int offset_cols = 0;
 		};
 
 		// Collection of pieces.
