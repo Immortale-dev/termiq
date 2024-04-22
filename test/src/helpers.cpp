@@ -16,8 +16,8 @@ std::vector<std::vector<CC>> pieces_to_grid(termiq::canvas::CanvasPieces<CC> p) 
 
 	for(auto &piece : p.pieces) {
 		int r = piece.offset_rows;
-		int c = piece.offset_cols;
 		for(auto &row : piece.canvas) {
+			int c = piece.offset_cols;
 			for (auto &cell : row) {
 				result[r][c] = cell;
 				++c;

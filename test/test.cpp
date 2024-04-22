@@ -6,5 +6,6 @@
 
 #include "src/tq_term_style.test.cpp"
 #include "src/tq_term_canvas_text.test.cpp"
+#include "src/tq_term_canvas_grid.test.cpp"
 
 int main() { return 0; }

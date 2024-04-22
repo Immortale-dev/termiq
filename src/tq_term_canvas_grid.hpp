@@ -225,6 +225,7 @@ template<typename CC>
 std::vector<unsigned int> termiq::canvas::Grid<CC>::calculate_column_sizes() {
 	std::vector<unsigned int> widths(_cols, 0);
 	unsigned int sum = 0;
+	unsigned int added = 0;
 	size_t zeros = 0;
 	for (size_t c=0;c<_cols;c++) {
 		widths[c] = get_column_defined_width(c);
@@ -233,12 +234,21 @@ std::vector<unsigned int> termiq::canvas::Grid<CC>::calculate_column_sizes() {
 			++zeros;
 		}
 	}
+	if (_border_type != BorderType::NONE) {
+		sum += _cols + 1;
+	}
 	if (_width && _width > sum) {
 		unsigned int divs = zeros ? zeros : _cols;
 		unsigned int rest = _width - sum;
 		for (auto &w : widths) {
 			if (zeros > 0 && w > 0) continue;
-			w += (rest-1)/divs+1;
+			w += rest/divs;
+			added += rest/divs;
+		}
+		rest -= added;
+		for (auto &w : widths) {
+			if (rest-- == 0) break;
+			++w;
 		}
 	}
 	return widths;
@@ -248,6 +258,7 @@ template<typename CC>
 std::vector<unsigned int> termiq::canvas::Grid<CC>::calculate_row_sizes() {
 	std::vector<unsigned int> heights(_rows, 0);
 	unsigned int sum = 0;
+	unsigned int added = 0;
 	size_t zeros = 0;
 	for (size_t c=0;c<_rows;c++) {
 		heights[c] = get_row_defined_height(c);
@@ -256,12 +267,21 @@ std::vector<unsigned int> termiq::canvas::Grid<CC>::calculate_row_sizes() {
 			++zeros;
 		}
 	}
+	if (_border_type != BorderType::NONE) {
+		sum += _rows + 1;
+	}
 	if (_height && _height > sum) {
-		unsigned int divs = zeros ? zeros : _cols;
+		unsigned int divs = zeros ? zeros : _rows;
 		unsigned int rest = _height - sum;
 		for (auto &h : heights) {
 			if (zeros > 0 && h > 0) continue;
-			h += (rest-1)/divs+1;
+			h += rest/divs;
+			added += rest/divs;
+		}
+		rest -= added;
+		for (auto &h : heights) {
+			if (rest-- == 0) break;
+			++h;
 		}
 	}
 	return heights;
@@ -336,20 +356,20 @@ typename termiq::canvas::Grid<CC>::GridBorders termiq::canvas::Grid<CC>::get_bor
 		using namespace draw_chars;
 		switch(type) {
 			case BorderType::SINGLE:
-				return GridBorders{C_H, C_V, C_X, C_HT, C_HB, C_VL, C_VR, C_TL, C_TR, C_BL, C_BR};
+				return GridBorders{char_type(C_H), char_type(C_V), char_type(C_X), char_type(C_HT), char_type(C_HB), char_type(C_VL), char_type(C_VR), char_type(C_TL), char_type(C_TR), char_type(C_BL), char_type(C_BR)};
 			case BorderType::DOUBLE:
-				return GridBorders{C_H_DOUBLE, C_V_DOUBLE, C_X_DOUBLE, C_HT_DOUBLE, C_HB_DOUBLE, C_VL_DOUBLE, C_VR_DOUBLE, C_TL_DOUBLE, C_TR_DOUBLE, C_BL_DOUBLE, C_BR_DOUBLE};
+				return GridBorders{char_type(C_H_DOUBLE), char_type(C_V_DOUBLE), char_type(C_X_DOUBLE), char_type(C_HT_DOUBLE), char_type(C_HB_DOUBLE), char_type(C_VL_DOUBLE), char_type(C_VR_DOUBLE), char_type(C_TL_DOUBLE), char_type(C_TR_DOUBLE), char_type(C_BL_DOUBLE), char_type(C_BR_DOUBLE)};
 			case BorderType::BOLD:
-				return GridBorders{C_H_BOLD, C_V_BOLD, C_X_BOLD, C_HT_BOLD, C_HB_BOLD, C_VL_BOLD, C_VR_BOLD, C_TL_BOLD, C_TR_BOLD, C_BL_BOLD, C_BR_BOLD};
+				return GridBorders{char_type(C_H_BOLD), char_type(C_V_BOLD), char_type(C_X_BOLD), char_type(C_HT_BOLD), char_type(C_HB_BOLD), char_type(C_VL_BOLD), char_type(C_VR_BOLD), char_type(C_TL_BOLD), char_type(C_TR_BOLD), char_type(C_BL_BOLD), char_type(C_BR_BOLD)};
 			case BorderType::ROUND:
-				return GridBorders{C_H, C_V, C_X, C_HT, C_HB, C_VL, C_VR, C_TL_ROUND, C_TR_ROUND, C_BL_ROUND, C_BR_ROUND};
+				return GridBorders{char_type(C_H), char_type(C_V), char_type(C_X), char_type(C_HT), char_type(C_HB), char_type(C_VL), char_type(C_VR), char_type(C_TL_ROUND), char_type(C_TR_ROUND), char_type(C_BL_ROUND), char_type(C_BR_ROUND)};
 			case BorderType::INVISIBLE:
 			{
 				char_type invis_char = ' ';
 				return GridBorders{invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char};
 			}
 			default:
-				return GridBorders{C_H, C_V, C_X, C_HT, C_HB, C_VL, C_VR, C_TL, C_TR, C_BL, C_BR};
+				return GridBorders{char_type(C_H), char_type(C_V), char_type(C_X), char_type(C_HT), char_type(C_HB), char_type(C_VL), char_type(C_VR), char_type(C_TL), char_type(C_TR), char_type(C_BL), char_type(C_BR)};
 		}
 	}
 }
