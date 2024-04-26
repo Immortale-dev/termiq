@@ -1,10 +1,13 @@
 #include <string>
+#include <vector>
+#include <memory>
 
 #include "tq_term_canvas_grid.h"
+#include "tq_term_style.h"
 
 SCENARIO_START
 
-DESCRIBE_ONLY("Canvas", {
+DESCRIBE("Canvas", {
 	DESCRIBE("Grid", {
 		using CC_CHAR = termiq::canvas::CharCell<char>;
 		using CC = termiq::canvas::CharCell<wchar_t>;
@@ -94,61 +97,194 @@ DESCRIBE_ONLY("Canvas", {
 		});
 
 		DESCRIBE("an 2x2 instance of wchar_t with text has been created", {
+			termiq::canvas::Text<CC>* txt;
 			BEFORE_EACH({
 				grid = new termiq::canvas::Grid<CC>(2,2);
-				// TODO: add text
+				txt = new termiq::canvas::Text<CC>(L"Hello W!");
+				grid->select_cell(0,0);
+				grid->set_cell_content(txt);
+				grid->set_cell_width(10);
+				grid->set_cell_height(1);
+				grid->set_width(15);
 			});
 			AFTER_EACH({
 				delete grid;
+				delete txt;
 			});
 
 			IT("should display invisible border", {
-				// TODO
+				grid->set_border_type(termiq::canvas::BorderType::INVISIBLE);
+
+				auto result = pieces_to_text(grid->build());
+
+				EXPECT(result).toBe({{
+					 L"               ",
+					 L" Hello W!      ",
+					 L"               ",
+					 L"               ",
+				 }});
 			});
 
 			IT("should not display border", {
-				// TODO
+				grid->set_border_type(termiq::canvas::BorderType::NONE);
+
+				auto result = pieces_to_text(grid->build());
+
+				EXPECT(result).toBe({{
+					 L"Hello W!       ",
+				 }});
 			});
 
 			IT("should display double border", {
-				// TODO
+				grid->set_border_type(termiq::canvas::BorderType::DOUBLE);
+
+				auto result = pieces_to_text(grid->build());
+
+				EXPECT(result).toBe({{
+					 L"╔══════════╦══╗",
+					 L"║Hello W!  ║  ║",
+					 L"╠══════════╬══╣",
+					 L"╚══════════╩══╝",
+				 }});
 			});
 
 			IT("should display bold border", {
-				// TODO
+				grid->set_border_type(termiq::canvas::BorderType::BOLD);
+
+				auto result = pieces_to_text(grid->build());
+
+				EXPECT(result).toBe({{
+					 L"┏━━━━━━━━━━┳━━┓",
+					 L"┃Hello W!  ┃  ┃",
+					 L"┣━━━━━━━━━━╋━━┫",
+					 L"┗━━━━━━━━━━┻━━┛",
+				 }});
 			});
 
 			IT("should display rounded border", {
-				// TODO
+				grid->set_border_type(termiq::canvas::BorderType::ROUND);
+
+				auto result = pieces_to_text(grid->build());
+
+				EXPECT(result).toBe({{
+					 L"╭──────────┬──╮",
+					 L"│Hello W!  │  │",
+					 L"├──────────┼──┤",
+					 L"╰──────────┴──╯",
+				 }});
 			});
 		});
 
 		DESCRIBE("an 1x1 instance of wchar_t with text has been created", {
+			termiq::canvas::Text<CC>* txt;
 			BEFORE_EACH({
-				// TODO
+				grid = new termiq::canvas::Grid<CC>(1,1);
+				txt = new termiq::canvas::Text<CC>(L"¯\\_(ツ)_/¯");
+				grid->select_cell(0,0);
+				grid->set_border_type(termiq::canvas::BorderType::SINGLE);
+				grid->set_cell_content(txt);
+				grid->set_cell_width(9);
+				grid->set_cell_height(1);
 			});
 			AFTER_EACH({
-				// TODO
+				delete grid;
+				delete txt;
+			});
+
+			IT("should share style state among the text and borders", {
+				auto state = pieces_to_grid(grid->build());
+				std::vector<std::shared_ptr<termiq::canvas::CharState>> borders;
+				std::vector<std::shared_ptr<termiq::canvas::CharState>> text;
+
+				for (size_t i=0;i<state[0].size();i++) {
+					borders.push_back(state[0][i].state);
+					borders.push_back(state[2][i].state);
+				}
+				borders.push_back(state[1][0].state);
+				borders.push_back(state[1][state[0].size()-1].state);
+				for (size_t i=1;i<state[0].size()-1;i++) {
+					text.push_back(state[1][i].state);
+				}
+
+				auto b_state = borders[0];
+				auto t_state = text[0];
+
+				for (auto &b : borders) {
+					EXPECT(b).toBe(b_state);
+				}
+				for (auto &t : text) {
+					EXPECT(t).toBe(t_state);
+				}
+				EXPECT(b_state).NOT().toBe(t_state);
 			});
 
 			IT("should not be stylized", {
-				// TODO
+				auto state = pieces_to_grid(grid->build());
+
+				auto b_state = state[0][0].state;
+				auto t_state = state[1][1].state;
+
+				auto expected = termiq::canvas::CharState{
+					termiq::style::Color::UNDEFINED,
+					termiq::style::Color::UNDEFINED,
+					false, false, false, false, false, false
+				};
+
+				EXPECT(*b_state).toBe(expected);
+				EXPECT(*t_state).toBe(expected);
 			});
 
 			IT("should style border color", {
-				// TODO
+				grid->set_border_foreground_color({100, 100, 100});
+
+				auto state = pieces_to_grid(grid->build());
+
+				auto b_state = state[0][0].state;
+				auto t_state = state[1][1].state;
+
+				auto e_text = termiq::canvas::CharState{};
+				auto e_border = termiq::canvas::CharState{
+					{100, 100, 100},
+				};
+
+				EXPECT(*t_state).toBe(e_text);
+				EXPECT(*b_state).toBe(e_border);
 			});
 
 			IT("should style border background color", {
-				// TODO
+				grid->set_border_background_color({100, 100, 100});
+
+				auto state = pieces_to_grid(grid->build());
+
+				auto b_state = state[0][0].state;
+				auto t_state = state[1][1].state;
+
+				auto e_text = termiq::canvas::CharState{};
+				auto e_border = termiq::canvas::CharState{
+					termiq::style::Color::UNDEFINED,
+					{100, 100, 100},
+				};
+
+				EXPECT(*t_state).toBe(e_text);
+				EXPECT(*b_state).toBe(e_border);
 			});
 
 			IT("should style cell background color", {
-				// TODO
-			});
+				grid->set_background_color({100, 100, 100});
 
-			IT("should style background color", {
-				// TODO
+				auto state = pieces_to_grid(grid->build());
+
+				auto b_state = state[0][0].state;
+				auto t_state = state[1][1].state;
+
+				auto e_text = termiq::canvas::CharState{
+					termiq::style::Color::UNDEFINED,
+					{100, 100, 100}
+				};
+				auto e_border = termiq::canvas::CharState{};
+
+				EXPECT(*t_state).toBe(e_text);
+				EXPECT(*b_state).toBe(e_border);
 			});
 		});
 	});
