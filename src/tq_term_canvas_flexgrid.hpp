@@ -54,11 +54,12 @@ std::vector<unsigned int> termiq::canvas::FlexGrid<CC>::get_optimal_cell_sizes(
 			cols_widths[c] = min_content_sizes[c];
 		}
 	}
+
 	rest = size - summary(cols_widths);
 	if (rest >= 0) {
-		// Distribute proportionally between columns which width was not set.
+		// Distribute proportionally between columns which has content, and which width was not set.
 		for (size_t c=0;c<vals_count;++c) {
-			if (!defined_sizes[c]) {
+			if (!defined_sizes[c] && text_sizes[c]) {
 				fit_values.push_back(&cols_widths[c]);
 				fit_rates.push_back(text_sizes[c]+1);
 			}
@@ -72,10 +73,20 @@ std::vector<unsigned int> termiq::canvas::FlexGrid<CC>::get_optimal_cell_sizes(
 	}
 	rest = size - summary(cols_widths);
 	if (rest > 0) {
-		// Distribute between all columns proportionally to defined width + text width.
+		// Distribute between columns with defined widths
 		for (size_t c=0;c<vals_count;++c) {
-			fit_values.push_back(&cols_widths[c]);
-			fit_rates.push_back(defined_sizes[c] + text_sizes[c] + 1);
+			if (defined_sizes[c]) {
+				fit_values.push_back(&cols_widths[c]);
+				fit_rates.push_back(defined_sizes[c]);
+			}
+		}
+		if (!fit_values.size()) {
+			// If not columns with defined sizes found, distribute between all columns proportionally
+			// to defined width + text width.
+			for (size_t c=0;c<vals_count;++c) {
+				fit_values.push_back(&cols_widths[c]);
+				fit_rates.push_back(defined_sizes[c] + text_sizes[c] + 1);
+			}
 		}
 		distribute_rated<unsigned int>(fit_values, fit_rates, rest);
 	}

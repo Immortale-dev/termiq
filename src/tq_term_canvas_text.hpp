@@ -105,7 +105,14 @@ unsigned int termiq::canvas::Text<CC>::min_width() {
 
 template<typename CC>
 unsigned int termiq::canvas::Text<CC>::min_height() {
-	return get_height();
+	if (_height) {
+		const unsigned int calc_height = get_height();
+		if (_height < calc_height) {
+			return _height;
+		}
+		return calc_height;
+	}
+	return 1;
 }
 
 template<typename CC>
