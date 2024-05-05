@@ -32,7 +32,6 @@ void termiq::canvas::Canvas<CC>::draw(unsigned int row, unsigned int col, const 
 			_canvas[r][c] = piece.canvas[pr][pc];
 		}
 	}
-	drawn();
 }
 
 
@@ -42,12 +41,6 @@ void termiq::canvas::Canvas<CC>::draw(unsigned int row, unsigned int col, const 
 		draw(row, col, piece);
 	}
 	drawn();
-}
-
-
-template<typename CC>
-void termiq::canvas::Canvas<CC>::draw(unsigned int row, unsigned int col, const CanvasPiece<CC> &&piece) {
-	draw(row, col, piece);
 }
 
 template<typename CC>
@@ -60,6 +53,31 @@ void termiq::canvas::Canvas<CC>::paint() {
 	for(size_t cr=0;cr<_height;cr++) {
 		paint_row(cr);
 	}
+}
+
+template<typename CC>
+unsigned int termiq::canvas::Canvas<CC>::get_width() {
+	return _width;
+}
+
+template<typename CC>
+unsigned int termiq::canvas::Canvas<CC>::get_height() {
+	return _height;
+}
+
+template<typename CC>
+unsigned int termiq::canvas::Canvas<CC>::get_col() {
+	return _col;
+}
+
+template<typename CC>
+unsigned int termiq::canvas::Canvas<CC>::get_row() {
+	return _row;
+}
+
+template<typename CC>
+const typename termiq::canvas::Canvas<CC>::container<const typename termiq::canvas::Canvas<CC>::container<CC>>& termiq::canvas::Canvas<CC>::get_canvas() {
+	return _canvas;
 }
 
 template<typename CC>

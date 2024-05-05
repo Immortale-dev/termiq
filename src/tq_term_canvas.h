@@ -22,19 +22,17 @@ namespace termiq {
 
 				void resize(unsigned int height, unsigned int width);
 				void move(unsigned int row, unsigned int col);
-				void draw(unsigned int row, unsigned int col, const CanvasPiece<CC>&& piece);
 				void draw(unsigned int row, unsigned int col, const CanvasPieces<CC>&& pieces);
-				void draw(unsigned int row, unsigned int col, const CanvasPiece<CC>& piece);
 				void draw(unsigned int row, unsigned int col, const CanvasPieces<CC>& pieces);
 				void paint();
 
-			protected:
 				unsigned int get_width();
 				unsigned int get_height();
 				unsigned int get_col();
 				unsigned int get_row();
 				const container<const container<CC>>& get_canvas();
 
+			protected:
 				virtual void moved();
 				virtual void resized();
 				virtual void drawn();
@@ -43,6 +41,7 @@ namespace termiq {
 				virtual void paint_row(size_t index);
 
 			private:
+				void draw(unsigned int row, unsigned int col, const CanvasPiece<CC>& piece);
 				void paint_cell(CC &cell);
 
 				unsigned int _height;
