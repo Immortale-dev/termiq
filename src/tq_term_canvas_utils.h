@@ -35,7 +35,7 @@ namespace termiq {
 				if (state == nullptr && other.state != nullptr || state != nullptr && other.state == nullptr) return false;
 				return symbol == other.symbol && (state == other.state || *state == *(other.state));
 			}
-			bool is_transparent() { return !state; }
+			bool is_transparent() const { return !state; }
 
 			static const CharCell<CT> TRANSPARENT;
 		};

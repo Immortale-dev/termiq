@@ -29,6 +29,7 @@ namespace canvas_test {
 				position_on_moved.push_back({get_row(), get_col()});
 			}
 			void resized() override {
+				termiq::canvas::Canvas<CC>::resized();
 				size_on_resized.push_back({get_height(), get_width()});
 			}
 			void drawn() override {
@@ -98,11 +99,53 @@ DESCRIBE("canvas", {
 		});
 
 		IT("should correctly draw pieces", {
-			// TODO
+			auto pieces = termiq::canvas::Text<canvas_test::CC>(L"Hello\nWorld!");
+			canvas.draw(3, 4, pieces.build());
+
+			int filled_cells = 0;
+			auto matrix = canvas.get_canvas();
+			for (auto &l : matrix) {
+				for (auto &c : l) {
+					if (!c.is_transparent()) {
+						++filled_cells;
+					}
+				}
+			}
+			auto text_lines = grid_to_text<canvas_test::CC>(matrix);
+			int text_cells = 0;
+			for (auto &l : text_lines) {
+				for (auto c : l) {
+					if (c != ' ') {
+						++text_cells;
+					}
+				}
+			}
+			std::vector<std::basic_string<wchar_t>> part;
+			for (int i=0;i<2;i++) {
+				std::basic_string<wchar_t> str;
+				for(int j=0;j<6;j++) {
+					str.push_back(text_lines[3+i][4+j]);
+				}
+				part.push_back(str);
+			}
+
+			EXPECT(part).toBe({
+				L"Hello ",
+				L"World!",
+			});
+
+			EXPECT(filled_cells).toBe(11);
+			EXPECT(text_cells).toBe(11);
 		});
 
 		IT("should call paint_row for every row in the canvas", {
-			// TODO
+			canvas.paint();
+
+			int i=0;
+			for (auto index : canvas_test::paint_row_called) {
+				EXPECT(index).toBe(i++);
+			}
+			EXPECT(i).toBe(20);
 		});
 
 		DESCRIBE("canvas has been moved and resized", {
@@ -112,11 +155,91 @@ DESCRIBE("canvas", {
 			});
 
 			IT("should correctly draw pieces with complex offsets", {
-				// TODO
+				auto piece_state = std::make_shared<termiq::canvas::CharState>();
+				const termiq::canvas::CanvasPieces<canvas_test::CC> built_pieces{
+					{
+						termiq::canvas::CanvasPiece<canvas_test::CC>{
+							{
+								{
+									{'T', piece_state},
+									{'T', piece_state},
+									{'T', piece_state}
+								},
+							},
+							1, 3, -2, 0
+						},
+						termiq::canvas::CanvasPiece<canvas_test::CC>{
+							{
+								{
+									{'B', piece_state},
+									{'B', piece_state},
+									{'B', piece_state}
+								},
+							},
+							1, 3, 0, 0
+						},
+						termiq::canvas::CanvasPiece<canvas_test::CC>{
+							{
+								{{'L', piece_state}},
+							},
+							1, 1, -1, 0
+						},
+						termiq::canvas::CanvasPiece<canvas_test::CC>{
+							{
+								{{'R', piece_state}},
+							},
+							1, 1, -1, 2
+						},
+					}
+				};
+
+				canvas.draw(5, 6, built_pieces);
+
+				int filled_cells = 0;
+				auto matrix = canvas.get_canvas();
+				for (auto &l : matrix) {
+					for (auto &c : l) {
+						if (!c.is_transparent()) {
+							++filled_cells;
+						}
+					}
+				}
+				auto text_lines = grid_to_text<canvas_test::CC>(matrix);
+				int text_cells = 0;
+				for (auto &l : text_lines) {
+					for (auto c : l) {
+						if (c != ' ') {
+							++text_cells;
+						}
+					}
+				}
+				std::vector<std::basic_string<wchar_t>> part;
+				for (int i=0;i<3;i++) {
+					std::basic_string<wchar_t> str;
+					for(int j=0;j<3;j++) {
+						str.push_back(text_lines[3+i][6+j]);
+					}
+					part.push_back(str);
+				}
+
+				EXPECT(part).toBe({
+					L"TTT",
+					L"L R",
+					L"BBB",
+				});
+
+				EXPECT(filled_cells).toBe(8);
+				EXPECT(text_cells).toBe(8);
 			});
 
 			IT("should call paint_row for every row in the canvas", {
-				// TODO
+				canvas.paint();
+
+				int i=0;
+				for (auto index : canvas_test::paint_row_called) {
+					EXPECT(index).toBe(i++);
+				}
+				EXPECT(i).toBe(30);
 			});
 		});
 	});

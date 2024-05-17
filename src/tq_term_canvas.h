@@ -30,7 +30,7 @@ namespace termiq {
 				unsigned int get_height();
 				unsigned int get_col();
 				unsigned int get_row();
-				const container<const container<CC>>& get_canvas();
+				const container<container<CC>>& get_canvas();
 
 			protected:
 				virtual void moved();

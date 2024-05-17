@@ -29,10 +29,10 @@ std::vector<std::vector<CC>> pieces_to_grid(termiq::canvas::CanvasPieces<CC> p) 
 	return result;
 }
 
+
 template<typename CC>
-std::vector<std::basic_string<typename CC::char_type>> pieces_to_text(termiq::canvas::CanvasPieces<CC> p) {
+std::vector<std::basic_string<typename CC::char_type>> grid_to_text(std::vector<std::vector<CC>> grid) {
 	using CT = typename CC::char_type;
-	auto grid = pieces_to_grid(p);
 	int max_h = grid.size();
 	int max_w = grid.size()>0 ? grid[0].size() : 0;
 	std::vector<std::basic_string<CT>> result(max_h, std::basic_string<CT>(max_w, ' '));
@@ -44,4 +44,10 @@ std::vector<std::basic_string<typename CC::char_type>> pieces_to_text(termiq::ca
 	}
 
 	return result;
+}
+
+template<typename CC>
+std::vector<std::basic_string<typename CC::char_type>> pieces_to_text(termiq::canvas::CanvasPieces<CC> p) {
+	auto grid = pieces_to_grid(p);
+	return grid_to_text(grid);
 }

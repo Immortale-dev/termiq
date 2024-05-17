@@ -9,7 +9,7 @@ template<typename CC>
 termiq::canvas::Canvas<CC>::Canvas(unsigned int h, unsigned int w, unsigned int r, unsigned int c): _height(h), _width(w), _row(r), _col(c), _canvas(h, container<CC>(w)) {}
 
 template<typename CC>
-void termiq::canvas::Canvas<CC>::resize(unsigned int width, unsigned int height) {
+void termiq::canvas::Canvas<CC>::resize(unsigned int height, unsigned int width) {
 	_width = width;
 	_height = height;
 	resized();
@@ -76,7 +76,7 @@ unsigned int termiq::canvas::Canvas<CC>::get_row() {
 }
 
 template<typename CC>
-const typename termiq::canvas::Canvas<CC>::container<const typename termiq::canvas::Canvas<CC>::container<CC>>& termiq::canvas::Canvas<CC>::get_canvas() {
+const typename termiq::canvas::Canvas<CC>::container<typename termiq::canvas::Canvas<CC>::container<CC>>& termiq::canvas::Canvas<CC>::get_canvas() {
 	return _canvas;
 }
 
