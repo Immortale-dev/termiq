@@ -23,6 +23,9 @@ namespace termiq {
 				return foreground == other.foreground && background == other.background && bold == other.bold && italic == other.italic
 					&& dim == other.dim && inverse == other.inverse && underline == other.underline && special == other.special;
 			}
+			bool operator!=(const CharState &other) const {
+				return !(*this == other);
+			}
 		};
 
 		// CT - char type, e.g. char, wchar_t, etc.
@@ -34,6 +37,9 @@ namespace termiq {
 			bool operator==(const CharCell &other) const {
 				if (state == nullptr && other.state != nullptr || state != nullptr && other.state == nullptr) return false;
 				return symbol == other.symbol && (state == other.state || *state == *(other.state));
+			}
+			bool operator!=(const CharCell &other) const {
+				return !(*this == other);
 			}
 			bool is_transparent() const { return !state; }
 

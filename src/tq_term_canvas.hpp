@@ -111,7 +111,7 @@ void termiq::canvas::Canvas<CC>::paint_cell(CC &cell) {
 
 template<typename CC>
 void termiq::canvas::Canvas<CC>::move_cursor(unsigned int row, unsigned int col) {
-	termiq::move(col, row);
+	termiq::move(row, col);
 }
 
 template<typename CC>

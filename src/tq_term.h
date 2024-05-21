@@ -5,10 +5,10 @@
 #include <term.h>
 
 namespace termiq {
-	void init_term();
+	void init_term(std::string term="");
 	bool get_flag(std::string name);
 	int get_num(std::string name);
-	int run_str(std::string name, int padding);
+	int run_str(std::string name, int padding=1);
 	template<typename... P>
 	int run_str(std::string name, int padding, P... args);
 }

@@ -4,9 +4,10 @@
 
 #include "tq_term.h"
 
-void termiq::init_term() {
+void termiq::init_term(std::string term) {
+	char* term_str = term.size() ? term.data() : 0;
 	int err;
-	if (setupterm(0, 1, &err)) {
+	if (setupterm(term_str, 1, &err)) {
 		if (err == 1) {
 			throw std::logic_error("The terminal is hardcopy.");
 		} else if (err == 0) {

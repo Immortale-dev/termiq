@@ -52,8 +52,8 @@ int termiq::get_rows() {
 	return res;
 }
 
-void termiq::move(int c, int r) {
-	MAYBE_STUB_ARGS(move, c, r);
+void termiq::move(int r, int c) {
+	MAYBE_STUB_ARGS(move, r, c);
 	const int res = termiq::run_str("cup", 1, r, c);
 	VALIDATE_EXEC(res);
 }

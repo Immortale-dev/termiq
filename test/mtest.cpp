@@ -10,108 +10,54 @@
 #include "tq_term_canvas_flextext.h"
 #include "tq_term_canvas_flexgrid.h"
 
-int main() {
-	termiq::init_term();
-	setlocale(LC_ALL, "C.UTF-8");
+using CC = termiq::canvas::CharCell<wchar_t>;
+using BText = termiq::canvas::FlexText<CC>;
+using BGrid = termiq::canvas::FlexGrid<CC>;
 
-	const int SZ = 1000000;
-	char* buf = new char[SZ];
+int rows, cols;
 
-	std::setvbuf(stdout, buf, _IOFBF, SZ);
+void paint_texts() {
+	termiq::style::background({0, 500, 500});
+	termiq::style::bold(true);
+	termiq::style::underline(true);
 
-	const int rows = termiq::get_rows();
-	const int cols = termiq::get_cols();
+	std::cout << "Some text";
+	termiq::style::clear_colors();
+	std::cout << std::endl;
 
-	std::cout << "Lines: " << rows << std::endl;
-	std::cout << "Columns: " << cols << std::endl;
-	std::cout << "Colors: " << termiq::get_max_colors() << std::endl;
-	std::cout << "Pairs: " << termiq::get_max_pairs() << std::endl;
+	termiq::style::foreground({0, 500, 100});
+	termiq::style::underline(false);
 
-	termiq::set_italic_on();
-	termiq::style::foreground({500, 100, 100});
-	std::cout << "ITALIC_ON" << std::endl;
+	std::cout << "Other text" << std::endl;
+	for(int i=1;i<=10;i++) {
+		termiq::style::foreground({((i%2) == 0) ? 1000 : 500, 0, 0});
+		std::cout << "This is red color" << std::endl;
+	}
+	getchar();
 
-	termiq::set_attrs(true, false, false, false);
-	std::cout << "TURN_ON_BOLD_ATTR" << std::endl;
+	termiq::style::clear_colors();
 
-	termiq::reset_attrs();
-	std::cout << "RESET_ATTRS" << std::endl;
+	termiq::alternate_chars_on();
 
-	#ifdef STUBTERM
-	std::cout << "TEST STUB ACTIVATED!" << std::endl;
-	#endif
+	std::wcout << termiq::alt_chars::C_BR << termiq::alt_chars::C_H << termiq::alt_chars::C_HB << termiq::alt_chars::C_H << termiq::alt_chars::C_BL << std::endl;
+	std::wcout << termiq::alt_chars::C_VR << termiq::alt_chars::C_H << termiq::alt_chars::C_X << termiq::alt_chars::C_H << termiq::alt_chars::C_VL << std::endl;
+	std::wcout << termiq::alt_chars::C_TR << termiq::alt_chars::C_H << termiq::alt_chars::C_HT << termiq::alt_chars::C_H << termiq::alt_chars::C_TL << std::endl;
 
 	getchar();
 
-//	termiq::style::background({0, 500, 500});
-//	termiq::style::bold(true);
-//	termiq::style::underline(true);
-////	termiq::style::italic(true);
-////	termiq::style::inverse(true);
-//
-//	std::cout << "SOme text";
-//	termiq::style::clear_colors();
-//	std::cout << std::endl;
-//
-//	termiq::style::foreground({0, 500, 100});
-//	termiq::style::underline(false);
-//
-//	std::cout << "Other text" << std::endl;
-//	for(int i=1;i<=10;i++) {
-//		termiq::style::foreground({((i%2) == 0) ? 1000 : 500, 0, 0});
-//		std::cout << "This is red color" << std::endl;
-//	}
-//	getchar();
-//
-//	termiq::style::clear_colors();
-//
-////	termiq::alternate_chars_on();
-////	termiq::style::inverse(true);
-//
-////	std::cout << "qwertyuiop[]" << std::endl;
-//	std::cout << "asdfghjkl;'" << std::endl;
-////	std::cout << "zxcvbnm,./" << std::endl;
-//
-////	std::cout << "jklmnq╰┓┇┊🬀" << std::endl;
-////	std::cout << "opqrs" << std::endl;
-//
-//	std::wcout << termiq::alt_chars::C_BR << termiq::alt_chars::C_H << termiq::alt_chars::C_HB << termiq::alt_chars::C_H << termiq::alt_chars::C_BL << std::endl;
-//	std::wcout << termiq::alt_chars::C_VR << termiq::alt_chars::C_H << termiq::alt_chars::C_X << termiq::alt_chars::C_H << termiq::alt_chars::C_VL << std::endl;
-//	std::wcout << termiq::alt_chars::C_TR << termiq::alt_chars::C_H << termiq::alt_chars::C_HT << termiq::alt_chars::C_H << termiq::alt_chars::C_TL << std::endl;
-//
-//	getchar();
-//
-//	termiq::alternate_chars_off();
-//
-////	std::wcout << "HI:" << "; Hello, \u2501!" << std::endl;
-//	std::wstring charw = L"NICE! \u2501 ═══ HELLO?";
-//	wchar_t cc = L'\u2500';
-////	std::wcout << charw.size() << "STR: " << charw << '\n';
-////	std::wcout << termiq::draw_chars::C_H;
-//
-//	if (printf("%ls\n%ls\n", charw.data(), &cc) < 0) {
-//		perror("printf");
-//	}
+	termiq::alternate_chars_off();
 
-	using CC = termiq::canvas::CharCell<wchar_t>;
-	using BText = termiq::canvas::FlexText<CC>;
-	using BGrid = termiq::canvas::FlexGrid<CC>;
+	std::wstring charw = L"NICE! \u2501 ═══ HELLO?";
+	wchar_t cc = L'\u2500';
+	if (printf("%ls\n%ls\n", charw.data(), &cc) < 0) {
+		perror("printf");
+	}
+
+}
+
+void paint_canvas() {
 	termiq::canvas::Canvas<CC> canvas(rows-1,cols,0,0);
 
-//  TEST FULL SCREEN DRAW
-//	for(int r=0;r<rows-1;r++) {
-//		for(int c=0;c<cols;c++) {
-//			auto builder = canvas.text(L"A").set_foreground_color({(c%10 <= 5) ? 1000 : 500, 100, 100}); //.set_bold().set_inverse().build()
-//			if (c%10 <= 5) {
-//				builder.set_bold();
-//			} else {
-//				builder.set_italic();
-//			}
-//			canvas.draw(r,c,builder.build());
-//		}
-//	}
-
-//  TEST MULTILINE TEXT
 	auto t1 = std::chrono::system_clock::now();
 
 	auto tb1 = BText(L"woohoo");
@@ -149,7 +95,6 @@ int main() {
 	gb3.set_width(30);
 	gb3.set_border_type(termiq::canvas::BorderType::SINGLE);
 	gb3.set_border_foreground_color({400,800,100});
-//	gb3.set_border_background_color({100,1000,100});
 	gb3.select_cell(0,0);
 	gb3.set_cell_background_color({500, 500, 100});
 	gb3.set_cell_content(&tb1);
@@ -192,4 +137,82 @@ int main() {
 
 	std::cout << "Time to draw: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count() << std::endl;
 	std::cout << "Time to paint: " << std::chrono::duration_cast<std::chrono::milliseconds>(t3-t2).count() << std::endl;
+}
+
+void paint_full_screen() {
+	// TEST FULL SCREEN DRAW
+	termiq::canvas::Canvas<CC> canvas(rows-1,cols,0,0);
+	auto t1 = std::chrono::system_clock::now();
+	for(int r=0;r<rows-1;r++) {
+		for(int c=0;c<cols;c++) {
+			auto builder = BText(L"A");
+			builder.set_foreground_color({(c%10 <= 5) ? 1000 : 500, 100, 100}); //.set_bold().set_inverse().build()
+			if (c%10 <= 5) {
+				builder.set_bold();
+			} else {
+				builder.set_italic();
+			}
+			canvas.draw(r,c,builder.build());
+		}
+	}
+
+	termiq::enter_alternate_buffer();
+	termiq::exit_automatic_margins();
+	termiq::cursor_default();
+
+	auto t2 = std::chrono::system_clock::now();
+	termiq::cursor_hidden();
+	canvas.paint();
+	termiq::cursor_default();
+	fflush(stdout);
+	auto t3 = std::chrono::system_clock::now();
+	getchar();
+
+	termiq::enter_automatic_margins();
+	termiq::exit_alternate_buffer();
+
+	termiq::style::reset();
+
+	std::cout << "Time to draw: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count() << std::endl;
+	std::cout << "Time to paint: " << std::chrono::duration_cast<std::chrono::milliseconds>(t3-t2).count() << std::endl;
+}
+
+int main() {
+	termiq::init_term();
+	setlocale(LC_ALL, "C.UTF-8");
+
+	const int SZ = 1000000;
+	char* buf = new char[SZ];
+
+	std::setvbuf(stdout, buf, _IOFBF, SZ);
+
+	rows = termiq::get_rows();
+	cols = termiq::get_cols();
+
+	std::cout << "Lines: " << rows << std::endl;
+	std::cout << "Columns: " << cols << std::endl;
+	std::cout << "Colors: " << termiq::get_max_colors() << std::endl;
+	std::cout << "Pairs: " << termiq::get_max_pairs() << std::endl;
+
+	termiq::set_italic_on();
+	termiq::style::foreground({500, 100, 100});
+	std::cout << "ITALIC_ON" << std::endl;
+
+	termiq::set_attrs(true, false, false, false);
+	std::cout << "TURN_ON_BOLD_ATTR" << std::endl;
+
+	termiq::reset_attrs();
+	std::cout << "RESET_ATTRS" << std::endl;
+
+	#ifdef STUBTERM
+	std::cout << "TEST STUB ACTIVATED!" << std::endl;
+	#endif
+
+	std::cout << "Press enter..." << std::endl;
+
+	getchar();
+
+//	paint_texts();
+//	paint_full_screen();
+	paint_canvas();
 }
