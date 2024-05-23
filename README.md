@@ -1166,6 +1166,7 @@ termiq::style::reset();
 ```
 
 Possible output:
+
 ![usage_example_output](https://github.com/Immortale-dev/termiq/blob/master/res/imgs/usage_example_1.png?raw=true)
 
 ## Tests
