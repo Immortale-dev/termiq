@@ -1,4 +1,5 @@
-# TermiQ
+![logo](https://github.com/Immortale-dev/termiq/blob/master/res/imgs/logo.svg?raw=true#gh-light-mode-only)
+![logo](https://github.com/Immortale-dev/termiq/blob/master/res/imgs/logo_dark.svg?raw=true#gh-dark-mode-only)
 
 C++ library that provides a **high** *(or higher)* level of abstraction on standard **terminal** API, that allows you to stylize terminal output or manipulate terminal behavior entirely.
 
