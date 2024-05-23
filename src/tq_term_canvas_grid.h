@@ -18,7 +18,7 @@ namespace termiq {
 			DOUBLE = 3,
 			BOLD = 4,
 			ROUND = 5,
-			INVISIBLE = 6
+			EMPTY = 6
 		};
 
 		template <typename CC>

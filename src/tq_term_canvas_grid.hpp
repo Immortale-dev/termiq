@@ -363,7 +363,7 @@ typename termiq::canvas::Grid<CC>::GridBorders termiq::canvas::Grid<CC>::get_bor
 				return GridBorders{char_type(C_H_BOLD), char_type(C_V_BOLD), char_type(C_X_BOLD), char_type(C_HT_BOLD), char_type(C_HB_BOLD), char_type(C_VL_BOLD), char_type(C_VR_BOLD), char_type(C_TL_BOLD), char_type(C_TR_BOLD), char_type(C_BL_BOLD), char_type(C_BR_BOLD)};
 			case BorderType::ROUND:
 				return GridBorders{char_type(C_H), char_type(C_V), char_type(C_X), char_type(C_HT), char_type(C_HB), char_type(C_VL), char_type(C_VR), char_type(C_TL_ROUND), char_type(C_TR_ROUND), char_type(C_BL_ROUND), char_type(C_BR_ROUND)};
-			case BorderType::INVISIBLE:
+			case BorderType::EMPTY:
 			{
 				char_type invis_char = ' ';
 				return GridBorders{invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char};

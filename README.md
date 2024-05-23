@@ -938,7 +938,7 @@ Sets the border of the grid. There are multiple options available for border typ
 * **DOUBLE** - Double lined grid, built from *wchar_t* characters.
 * **BOLD** - Single lined bold border type. Built from *wchar_t* characters.
 * **ROUND** - Single lined border with rounded corners. Built from *wchar_t* characters.
-* **INVISIBLE** - the border is not visible, but still occupies the space.
+* **EMPTY** - user empty (` `) character for every border cell.
 
 >[!NOTE]
 >Use of this border types built from **wchar_t** characters are not compatible with regular *char* type.

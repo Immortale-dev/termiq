@@ -112,8 +112,8 @@ DESCRIBE("Canvas", {
 				delete txt;
 			});
 
-			IT("should display invisible border", {
-				grid->set_border_type(termiq::canvas::BorderType::INVISIBLE);
+			IT("should display empty border", {
+				grid->set_border_type(termiq::canvas::BorderType::EMPTY);
 
 				auto result = pieces_to_text(grid->build());
 
