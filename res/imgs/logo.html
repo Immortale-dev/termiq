@@ -1,0 +1,76 @@
+<svg id="s" xmlns="http://www.w3.org/2000/svg" width="530" height="140" viewbox="5 30 520 130">
+    <defs>
+        <clipPath id="c1">
+            <text class="q" x="0" y="115">O</text>
+            <path class="qt" d="M 0 0 L 50 50 L 65 35 L 15 -15 Z"></path>
+        </clipPath>
+    </defs>
+    <style>
+        #s {
+            color: #454a60;
+        }
+        .q {
+            font-size: 160px;
+            font-family: sans-serif;
+            font-weight: 800;
+            fill: currentColor;
+        }
+        .qt {
+            transform: translate(55px, 70px);
+        }
+        .txt {
+            font-weight: 800;
+            font-family: serif;
+            font-size: 150px;
+            fill: currentColor;
+        }
+        #container {
+            transform: translate(395px, 35px);
+            clip-path: url(#c1);
+        }
+        .t {
+            font-weight: 400;
+            font-family: monospace;
+            fill: currentColor;
+            font-size: 13px;
+        }
+    </style>
+    <text x="10" y="145" class="txt">Termi</text>
+    
+    <g id="container">
+        <g id="small-text">
+            <animateTransform
+                type="translate"
+                values="0 0;-20 0;-40 0;-60 0;-80 0;-100 0;-120 0;-140 0;-160 0;-180 0"
+                dur="3s"
+                calcMode="discrete"
+                attributeName="transform"
+                attributeType="XML"
+                repeatCount="indefinite">
+            </animateTransform>
+        </g>
+    </g>
+</svg>
+
+<script>
+    const svg = document.querySelector('#s');
+    const smallText = document.querySelector('#small-text');
+
+    const charW = 8;
+    const charH = 10;
+    for(let i=0;i<15;i++) {
+        for(let j=0;j<50;j++) {
+            const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            txt.innerHTML = randomChar();
+            txt.setAttributeNS(null, 'class', 't');
+            txt.setAttributeNS(null, 'x', j * charW);
+            txt.setAttributeNS(null, 'y', i * charH);
+            smallText.appendChild(txt);
+        }
+    }
+
+    function randomChar() {
+        const str = 'abcdefghijklmnopqrstuvwxyz';
+        return str[Math.floor(Math.random()*str.length)];
+    }
+</script>
