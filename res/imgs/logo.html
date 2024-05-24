@@ -1,8 +1,18 @@
 <svg id="s" xmlns="http://www.w3.org/2000/svg" width="530" height="140" viewbox="5 30 520 130">
     <defs>
         <clipPath id="c1">
-            <text class="q" x="0" y="115">O</text>
             <path class="qt" d="M 0 0 L 50 50 L 65 35 L 15 -15 Z"></path>
+            <path
+                d="
+                M 65 0
+                A 60 60 0 1 0 65 120
+                A 60 60 0 1 0 65 0
+                Z
+                M 65 25
+                A 35 35 0 1 1 65 95
+                A 35 35 0 1 1 65 25
+                Z">
+            </path>
         </clipPath>
     </defs>
     <style>
@@ -85,7 +95,7 @@ q-32 0 -54.5 22.5t-22.5 54.5z"></path>
                 id="an"
                 type="translate"
                 values=""
-                dur="3s"
+                dur="5s"
                 calcMode="discrete"
                 attributeName="transform"
                 attributeType="XML"
@@ -99,6 +109,8 @@ q-32 0 -54.5 22.5t-22.5 54.5z"></path>
     const svg = document.querySelector('#s');
     const smallText = document.querySelector('#small-text');
     const anim = document.querySelector('#an');
+
+    const getRand = jsf32(2305473968, 3496678619, 883516096, 1710244600);
 
     const charW = 8;
     const charH = 10;
@@ -121,6 +133,18 @@ q-32 0 -54.5 22.5t-22.5 54.5z"></path>
 
     function randomChar() {
         const str = 'abcdefghijklmnopqrstuvwxyz';
-        return str[Math.floor(Math.random()*str.length)];
+        return str[Math.floor(getRand()*str.length)];
+    }
+
+    function jsf32(a, b, c, d) {
+      return function() {
+        a |= 0; b |= 0; c |= 0; d |= 0;
+        let t = a - (b << 27 | b >>> 5) | 0;
+        a = b ^ (c << 17 | c >>> 15);
+        b = c + d | 0;
+        c = d + t | 0;
+        d = a + t | 0;
+        return (d >>> 0) / 4294967296;
+      }
     }
 </script>
