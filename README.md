@@ -3,6 +3,8 @@
 
 C++ library that provides a **high** *(or higher)* level of abstraction on standard **terminal** API, that allows you to stylize terminal output or manipulate terminal behavior entirely.
 
+[![CodeFactor](https://www.codefactor.io/repository/github/immortale-dev/termiq/badge)](https://www.codefactor.io/repository/github/immortale-dev/termiq)
+
 ## Table of Contest
 
 * [Table of Contest](#table-of-contest)
