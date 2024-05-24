@@ -12,9 +12,9 @@ C++ library that provides a **high** *(or higher)* level of abstraction on stand
 	* [qt_term.h](#qt_term.h)
 		* [void termiq::init_term([std::string terminal term])](#void-termiqinit_termstdstring-terminal-term)
 		* [bool termiq::get_flag(std::string name)](#bool-termiqget_flagstdstring-name)
-		* [int get_num(std::string name)](#int-get_numstdstring-name)
-		* [int run_str(std::string name[, int padding])](#int-run_strstdstring-name-int-padding)
-		* [int run_str<P…>(std::string name, int padding, P… args)](#int-run_strp...stdstring-name-int-padding-p...-args)
+		* [int termiq::get_num(std::string name)](#int-termiqget_numstdstring-name)
+		* [int termiq::run_str(std::string name[, int padding])](#int-termiqrun_strstdstring-name-int-padding)
+		* [int termiq::run_str<P…>(std::string name, int padding, P… args)](#int-termiqrun_strp...stdstring-name-int-padding-p...-args)
 	* [qt_term_adv.h](#qt_term_adv.h)
 		* [class termiq::exception](#class-termiqexception)
 		* [int termiq::get_cols()](#int-termiqget_cols)
@@ -33,23 +33,23 @@ C++ library that provides a **high** *(or higher)* level of abstraction on stand
 		* [void termiq::undefine_colors()](#void-termiqundefine_colors)
 		* [void termiq::set_foreground_color(int id)](#void-termiqset_foreground_colorint-id)
 		* [void termiq::set_background_color(int id)](#void-termiqset_background_colorint-id)
-		* [void set_pair_color(int id)](#void-set_pair_colorint-id)
+		* [void termiq::set_pair_color(int id)](#void-termiqset_pair_colorint-id)
 		* [void termiq::set_attrs(bool bold, bool dim, bool reverse, bool underline)](#void-termiqset_attrsbool-bold-bool-dim-bool-reverse-bool-underline)
-		* [void reset_attrs()](#void-reset_attrs)
+		* [void termiq::reset_attrs()](#void-termiqreset_attrs)
 		* [void termiq::set_italic_on()](#void-termiqset_italic_on)
 		* [void termiq::set_italic_off()](#void-termiqset_italic_off)
-		* [void reset_colors()](#void-reset_colors)
+		* [void termiq::reset_colors()](#void-termiqreset_colors)
 		* [void termiq::alternate_chars_on()](#void-termiqalternate_chars_on)
 		* [void termiq::alternate_chars_off()](#void-termiqalternate_chars_off)
 		* [void termiq::enter_automatic_margins()](#void-termiqenter_automatic_margins)
 		* [void termiq::exit_automatic_margins()](#void-termiqexit_automatic_margins)
-		* [void enter_alternate_buffer()](#void-enter_alternate_buffer)
-		* [void termiq::exit_automatic_margins()](#void-termiqexit_automatic_margins-1)
+		* [void termiq::enter_alternate_buffer()](#void-termiqenter_alternate_buffer)
+		* [void termiq::exit_alternate_buffer()](#void-termiqexit_alternate_buffer)
 		* [void termiq::clear()](#void-termiqclear)
 		* [void termiq::clear_before()](#void-termiqclear_before)
 		* [void termiq::clear_after()](#void-termiqclear_after)
-		* [void clear_rest()](#void-clear_rest)
-		* [namespace alt_chars](#namespace-alt_chars)
+		* [void termiq::clear_rest()](#void-termiqclear_rest)
+		* [namespace termiq::alt_chars](#namespace-termiqalt_chars)
 	* [tq_term_style.h](#tq_term_style.h)
 		* [struct termiq::style::Color](#struct-termiqstylecolor)
 		* [void termiq::style::foreground(Color color)](#void-termiqstyleforegroundcolor-color)
@@ -64,7 +64,7 @@ C++ library that provides a **high** *(or higher)* level of abstraction on stand
 		* [void termiq::style::clear_styles([bool also_clear_colors])](#void-termiqstyleclear_stylesbool-also_clear_colors)
 		* [void termiq::style::clear()](#void-termiqstyleclear)
 		* [void termiq::style::reset()](#void-termiqstylereset)
-		* [bool is_color_defined(const Color &color)](#bool-is_color_definedconst-color-color)
+		* [bool termiq::style::is_color_defined(const Color &color)](#bool-termiqstyleis_color_definedconst-color-color)
 		* [void termiq::style::style(Color fg, Color bg, bool bold, bool italic, bool dim, bool underline, bool inverse)](#void-termiqstylestylecolor-fg-color-bg-bool-bold-bool-italic-bool-dim-bool-underline-bool-inverse)
 	* [termiq::canvas::Canvas<CC>](#termiqcanvascanvascc)
 		* [termiq::canvas::Canvas<CC>::Canvas(unsigned int h, unsigned int w[, unsigned int r, unsigned int])](#termiqcanvascanvascccanvasunsigned-int-h-unsigned-int-w-unsigned-int-r-unsigned-int)
@@ -90,12 +90,12 @@ C++ library that provides a **high** *(or higher)* level of abstraction on stand
 	* [struct termiq::canvas::CanvasPiece<CC>](#struct-termiqcanvascanvaspiececc)
 	* [struct termiq::canvas::CanvasPieces<CC>](#struct-termiqcanvascanvaspiecescc)
 	* [class termiq::canvas::Content<CC>](#class-termiqcanvascontentcc)
-		* [virtual CanvasPieces<CC> termiq::canvas::Content<CC> build() = 0](#virtual-canvaspiecescc-termiqcanvascontentcc-build--0)
-		* [virtual unsigned int termiq::canvas::Content<CC>get_width() = 0](#virtual-unsigned-int-termiqcanvascontentccget_width--0)
-		* [virtual unsigned int termiq::canvas::Content<CC>get_height() = 0](#virtual-unsigned-int-termiqcanvascontentccget_height--0)
-		* [virtual unsigned int termiq::canvas::Content<CC>min_width() = 0](#virtual-unsigned-int-termiqcanvascontentccmin_width--0)
-		* [virtual unsigned int termiq::canvas::Content<CC>min_height() = 0](#virtual-unsigned-int-termiqcanvascontentccmin_height--0)
-		* [virtual void built(CanvasPieces<CC> &pieces)](#virtual-void-builtcanvaspiecescc-pieces)
+		* [virtual CanvasPieces<CC> termiq::canvas::Content<CC>::build() = 0](#virtual-canvaspiecescc-termiqcanvascontentccbuild--0)
+		* [virtual unsigned int termiq::canvas::Content<CC>::get_width() = 0](#virtual-unsigned-int-termiqcanvascontentccget_width--0)
+		* [virtual unsigned int termiq::canvas::Content<CC>::get_height() = 0](#virtual-unsigned-int-termiqcanvascontentccget_height--0)
+		* [virtual unsigned int termiq::canvas::Content<CC>::min_width() = 0](#virtual-unsigned-int-termiqcanvascontentccmin_width--0)
+		* [virtual unsigned int termiq::canvas::Content<CC>::min_height() = 0](#virtual-unsigned-int-termiqcanvascontentccmin_height--0)
+		* [virtual void termiq::canvas::Content<CC>::built(CanvasPieces<CC> &pieces)](#virtual-void-termiqcanvascontentccbuiltcanvaspiecescc-pieces)
 	* [class Nothing : public Content<CC>](#class-nothing--public-contentcc)
 	* [class termiq::canvas::Text : public Content<CC>](#class-termiqcanvastext--public-contentcc)
 		* [termiq::canvas::Text<CC>::Text([char_type* txt])](#termiqcanvastextcctextchar_type-txt)
@@ -118,8 +118,8 @@ C++ library that provides a **high** *(or higher)* level of abstraction on stand
 	* [class termiq::canvas::Grid<CC> : public Content<CC>](#class-termiqcanvasgridcc--public-contentcc)
 		* [termiq::canvas::Grid<CC>::Grid([unsigned int rows, unsigned int cols])](#termiqcanvasgridccgridunsigned-int-rows-unsigned-int-cols)
 		* [void termiq::canvas::Grid<CC>::set_background_color(termiq::style::Color color)](#void-termiqcanvasgridccset_background_colortermiqstylecolor-color)
-		* [void termiq::canvas::Grid<CC>set_border_foreground_color(termiq::style::Color color)](#void-termiqcanvasgridccset_border_foreground_colortermiqstylecolor-color)
-		* [void termiq::canvas::Grid<CC>set_border_background_color(termiq::style::Color color)](#void-termiqcanvasgridccset_border_background_colortermiqstylecolor-color)
+		* [void termiq::canvas::Grid<CC>::set_border_foreground_color(termiq::style::Color color)](#void-termiqcanvasgridccset_border_foreground_colortermiqstylecolor-color)
+		* [void termiq::canvas::Grid<CC>::set_border_background_color(termiq::style::Color color)](#void-termiqcanvasgridccset_border_background_colortermiqstylecolor-color)
 		* [void termiq::canvas::Grid<CC>::set_width(unsigned int width)](#void-termiqcanvasgridccset_widthunsigned-int-width)
 		* [void termiq::canvas::Grid<CC>::set_height(unsigned int height)](#void-termiqcanvasgridccset_heightunsigned-int-height)
 		* [void termiq::canvas::Grid<CC>::set_border_type(termiq::canvas::BorderType type)](#void-termiqcanvasgridccset_border_typetermiqcanvasbordertype-type)
@@ -137,7 +137,7 @@ C++ library that provides a **high** *(or higher)* level of abstraction on stand
 		* [bool termiq::canvas::Text<CC>::is_valid_calc()](#bool-termiqcanvastextccis_valid_calc)
 	* [class termiq::canvas::Flexible](#class-termiqcanvasflexible)
 		* [virtual protected void termiq::canvas::Flexible::suggest_width(unsigned int width) = 0](#virtual-protected-void-termiqcanvasflexiblesuggest_widthunsigned-int-width--0)
-		* [virtual void suggest_height(unsigned int height) = 0](#virtual-void-suggest_heightunsigned-int-height--0)
+		* [virtual void termiq::canvas::Flexible::suggest_height(unsigned int height) = 0](#virtual-void-termiqcanvasflexiblesuggest_heightunsigned-int-height--0)
 	* [class class termiq::canvas::FlexText<CC> : public Text<CC>, public Flexible](#class-class-termiqcanvasflextextcc--public-textcc-public-flexible)
 	* [class termiq::canvas::FlexGrid<CC> : public Grid<CC>, public Flexible](#class-termiqcanvasflexgridcc--public-gridcc-public-flexible)
 * [Usage Examples](#usage-examples)
@@ -198,7 +198,7 @@ std::count << margins_on << std::endl; // 1
 >[!NOTE]
 >*All **standard** available boolean capabilities can be found [here](https://man7.org/linux/man-pages/man5/terminfo.5.html) under the **"boolean capabilities"** section.*
 
-#### int get_num(std::string name)
+#### int termiq::get_num(std::string name)
 
 It requires one *string* parameter - the name of the capability, and returns the value of the *numeric* terminal capability e.g.: the number of rows or columns of the current terminal window.
 
@@ -214,7 +214,7 @@ std::cout << num_rows << std::endl; // 42
 >[!NOTE]
 >*All **standard** available numeric capabilities can be found [here](https://man7.org/linux/man-pages/man5/terminfo.5.html) under the **"numeric capabilities"** section.*
 
-#### int run_str(std::string name[, int padding])
+#### int termiq::run_str(std::string name[, int padding])
 
 It accepts one required *string* parameter - the name of the capability that needs to be run, and one optional *int* parameter - padding, and runs a string terminal capability, e.g.: to clear the terminal screen.
 
@@ -231,7 +231,7 @@ termiq::run_str("clear"); // Clears the terminal screen.
 >[!NOTE]
 >*All **standard** available string capabilities can be found [here](https://man7.org/linux/man-pages/man5/terminfo.5.html) under the **"string capabilities"** section.*
 
-#### int run_str\<P...\>(std::string name, int padding, P... args)
+#### int termiq::run_str\<P...\>(std::string name, int padding, P... args)
 
 Accepts the same parameters as above one but *padding* is required here, plus receives additional parameters that are required to be passed with a **parametric** string capability. It runs the chosen parametric string capability, e.g.: erase some amount of characters from the current cursor position.
 
@@ -331,7 +331,7 @@ Requires one *int* parameter - **id** and sets the chosen color **ID** as the fo
 
 Requires one *int* parameter - **id** and sets the chosen color **ID** as the background color for the next text that is going to be written into the terminal.
 
-#### void set_pair_color(int id)
+#### void termiq::set_pair_color(int id)
 
 Requires one *int* parameter - **id** and sets the chosen color pairs **ID** as the foreground and background color for the next text that is going to be written into the terminal.
 
@@ -343,7 +343,7 @@ Requires **4** *bool* parameters to be passed, representing the attribute states
 * **reverse** - reverses text foreground and background colors.
 * **underline** - Adds a straight line under the text.
 
-#### void reset_attrs()
+#### void termiq::reset_attrs()
 
 Resets text attribute.
 
@@ -358,7 +358,7 @@ Turns on **italic** text mode.
 
 Turns off **italic** text mode.
 
-#### void reset_colors()
+#### void termiq::reset_colors()
 
 Resets **background** and **foreground** colors to default.
 
@@ -386,7 +386,7 @@ Sets terminal into the mode, where after cursor reaches the edge of the screen, 
 
 Sets terminal into the mode, where after cursor reaches the edge of the screen, the cursor is being stopped at the last column of the current row, and the next character that is printed into the screen will overwrite the current one.
 
-#### void enter_alternate_buffer()
+#### void termiq::enter_alternate_buffer()
 
 Makes terminals use an alternate buffer which allows to modify the terminal content in any way, without losing the original content of the terminal.
 
@@ -394,7 +394,7 @@ This alternate buffer usually doesn't have an ability to scroll, so if this func
 
 Every time the alternate buffer is used, its content is cleared.
 
-#### void termiq::exit_automatic_margins()
+#### void termiq::exit_alternate_buffer()
 
 Exits the alternate buffer, returning to the original one.
 
@@ -410,11 +410,11 @@ Clears the current row of the terminal *before* the cursor position.
 
 Clears the current row of the terminal *after* the cursor position.
 
-#### void clear_rest()
+#### void termiq::clear_rest()
 
 Clears the terminal screen *after* the current position of the cursor.
 
-#### namespace alt_chars
+#### namespace termiq::alt_chars
 
 This namespace contains graphic characters that can be used to draw lines and table borders in a [alternate character](#) mode.
 
@@ -578,7 +578,7 @@ Basically equivalent to `termiq::style::clear_styles(true)`.
 
 Returns all define color IDs to their default values.
 
-#### bool is_color_defined(const Color &color)
+#### bool termiq::style::is_color_defined(const Color &color)
 
 Accepts the *reference* to a *const Color*, and returns true if the passed **color** parameter equals to `termiq::style::Color::UNDEFINED`.
 
@@ -753,27 +753,27 @@ Basically a collection of *CanvasPiece* instances. Declares just one property:
 
 The class is *pure virtual*, *DefaultConstructable* and *virtually dewstructable* and is meant to be used as a **interface**, to be extended by other specific canvas content classes.
 
-#### virtual CanvasPieces\<CC\> termiq::canvas::Content\<CC\> build() = 0
+#### virtual CanvasPieces\<CC\> termiq::canvas::Content\<CC\>::build() = 0
 
 *Pure virtual* method is supposed to return *termiq::canvas::CanvasPieces\<CC\>* instnace - the canvas representation of the **content** when called.
 
-#### virtual unsigned int termiq::canvas::Content\<CC\>get_width() = 0
+#### virtual unsigned int termiq::canvas::Content\<CC\>::get_width() = 0
 
 *Pure virtual* method that is supposed to return the **width** of the content.
 
-#### virtual unsigned int termiq::canvas::Content\<CC\>get_height() = 0
+#### virtual unsigned int termiq::canvas::Content\<CC\>::get_height() = 0
 
 *Pure virtual* method that is supposed to return the **height** of the content.
 
-#### virtual unsigned int termiq::canvas::Content\<CC\>min_width() = 0
+#### virtual unsigned int termiq::canvas::Content\<CC\>::min_width() = 0
 
 *Pure virtual* method that is supposed to return the **minimal content width** of the content.
 
-#### virtual unsigned int termiq::canvas::Content\<CC\>min_height() = 0
+#### virtual unsigned int termiq::canvas::Content\<CC\>::min_height() = 0
 
 *Pure virtual* method that is supposed to return the **minimal content height** of the content.
 
-#### virtual void built(CanvasPieces\<CC\> &pieces)
+#### virtual void termiq::canvas::Content\<CC\>::built(CanvasPieces\<CC\> &pieces)
 
 The function that is called after the **pieces** instance was built, but before returning it from the `build()` method call.
 
@@ -911,11 +911,11 @@ Constructor that accepts the number of **rows** and **columns** in a grid. Both 
 
 Defines grid background color.
 
-#### void termiq::canvas::Grid\<CC\>set_border_foreground_color(termiq::style::Color color)
+#### void termiq::canvas::Grid\<CC\>::set_border_foreground_color(termiq::style::Color color)
 
 Defines grid border foreground color.
 
-#### void termiq::canvas::Grid\<CC\>set_border_background_color(termiq::style::Color color)
+#### void termiq::canvas::Grid\<CC\>::set_border_background_color(termiq::style::Color color)
 
 Defines grid border background color.
 
@@ -939,7 +939,7 @@ Sets the border of the grid. There are multiple options available for border typ
 * **DOUBLE** - Double lined grid, built from *wchar_t* characters.
 * **BOLD** - Single lined bold border type. Built from *wchar_t* characters.
 * **ROUND** - Single lined border with rounded corners. Built from *wchar_t* characters.
-* **EMPTY** - user empty (` `) character for every border cell.
+* **INVISIBLE** - the border is not visible, but still occupies the space.
 
 >[!NOTE]
 >Use of this border types built from **wchar_t** characters are not compatible with regular *char* type.
@@ -1052,7 +1052,7 @@ See useful examples in **FlexGrid** section of the documentation.
 
 It is for users to decide if they want to respect the suggested width, in order to make the content **flexible**.
 
-#### virtual void suggest_height(unsigned int height) = 0
+#### virtual void termiq::canvas::Flexible::suggest_height(unsigned int height) = 0
 
 *(pure virtual)* protected function that is called from other canvas content instances, and *suggests* the height that needs to be applied to the content instance before the calculation process.
 
