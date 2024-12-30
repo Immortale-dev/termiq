@@ -1,6 +1,10 @@
 #include "tq_term_adv.h"
 
-#define VALIDATE_EXEC(code) if (code < 0) throw termiq::exception("Command executon error.");
+#ifdef TERMIQ_THROW_ON_FAILED_COMMAND
+#define VALIDATE_EXEC(code) if (code < 0) throw termiq::exception("Command executon error.")
+#else
+#define VALIDATE_EXEC(code) (void)code
+#endif
 
 // For testing.
 #ifdef STUBTERM

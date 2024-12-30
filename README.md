@@ -173,6 +173,9 @@ The library provides a couple of levels of abstraction depending on users needs.
 
 This header provides a `termiq` namespace with some low (well, slightly higher) level API over **GNU terminfo** library to interact with the terminal.
 
+>[!NOTE]
+>By default if the command fails, the error is just silently ignored, if you want the error to be thrown, the `TERMIQ_THROW_ON_FAILED_COMMAND` macro must be defined.
+
 #### void termiq::init_term([std::string terminal term])
 
 Initially **init_term** should be called. This defines the set of terminal-dependent variables. It reads in the *terminfo* database, initializing the *terminfo* structures.
