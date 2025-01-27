@@ -17,6 +17,8 @@ namespace termiq {
 	void move(int r, int c);
 	void move_left(int steps=1);
 	void move_right(int steps=1);
+	void move_up(int steps=1);
+	void move_down(int steps=1);
 	void save_cursor_position();
 	void restore_cursor_position();
 

@@ -29,6 +29,8 @@ namespace termiq {
 	stub_term_t<int, int> move_stub_;
 	stub_term_t<int> move_left_stub_;
 	stub_term_t<int> move_right_stub_;
+	stub_term_t<int> move_up_stub_;
+	stub_term_t<int> move_down_stub_;
 	stub_term_t<int, int, int ,int> define_color_stub_;
 	stub_term_t<int, int, int, int, int, int, int> define_pair_stub_;
 	stub_term_t<int> set_foreground_color_stub_;
@@ -71,6 +73,18 @@ void termiq::move_left(int steps) {
 void termiq::move_right(int steps) {
 	MAYBE_STUB_ARGS(move_right, steps);
 	const int res = termiq::run_str("cuf", 1, steps);
+	VALIDATE_EXEC(res);
+}
+
+void termiq::move_up(int steps) {
+	MAYBE_STUB_ARGS(move_up, steps);
+	const int res = termiq::run_str("cuu", 1, steps);
+	VALIDATE_EXEC(res);
+}
+
+void termiq::move_down(int steps) {
+	MAYBE_STUB_ARGS(move_down, steps);
+	const int res = termiq::run_str("cud", 1, steps);
 	VALIDATE_EXEC(res);
 }
 

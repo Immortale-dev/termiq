@@ -52,7 +52,6 @@ void paint_texts() {
 	if (printf("%ls\n%ls\n", charw.data(), &cc) < 0) {
 		perror("printf");
 	}
-
 }
 
 void paint_canvas() {
@@ -208,11 +207,25 @@ int main() {
 	std::cout << "TEST STUB ACTIVATED!" << std::endl;
 	#endif
 
+	// unicode char
+	std::vector<unsigned char> em = {0xf0, 0x9f, 0xa7, 0x99};
+	for (size_t i=0;i<em.size();i++) {
+		std::cout << em[i];
+	}
+	std::cout << std::endl;
+
 	std::cout << "Press enter..." << std::endl;
+
+	std::wstring charw = L"\u4ef6\u4ef6\u4ef6\u4ef6\u4ef6\u4ef6\u4ef6\u4ef6\u4ef6\u4ef6";
+	printf("%ls", charw.data());
+	fflush(stdout);
+
+	termiq::move_left(10);
+	fflush(stdout);
 
 	getchar();
 
 //	paint_texts();
 //	paint_full_screen();
-	paint_canvas();
+//	paint_canvas();
 }
