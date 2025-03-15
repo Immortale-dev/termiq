@@ -1,4 +1,2 @@
 LIBS_LD+=-ltinfo
 # LIBS_INC+=
-
-EXTRA_TF+=-DSTUBTERM
