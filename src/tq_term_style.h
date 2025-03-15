@@ -7,6 +7,7 @@ namespace termiq {
 			int r,g,b;
 			bool operator==(const Color &other) const { return r == other.r && g == other.g && b == other.b; }
 			bool operator!=(const Color &other) const { return !(*this == other); }
+			explicit operator bool() const { return (*this != UNDEFINED); }
 
 			static const Color UNDEFINED;// = {-1, -1, -1};
 		};
