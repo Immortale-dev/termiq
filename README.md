@@ -24,6 +24,8 @@ C++ library that provides a **high** *(or higher)* level of abstraction on stand
 		* [void termiq::move(int r, int c)](#void-termiqmoveint-r-int-c)
 		* [void termiq::move_left([int steps])](#void-termiqmove_leftint-steps)
 		* [void termiq::move_right([int steps])](#void-termiqmove_rightint-steps)
+		* [void termiq::move_up([int steps])](#void-termiqmove_upint-steps)
+		* [void termiq::move_down([int steps])](#void-termiqmove_downint-steps)
 		* [void termiq::save_cursor_position()](#void-termiqsave_cursor_position)
 		* [void termiq::restore_cursor_position()](#void-termiqrestore_cursor_position)
 		* [void termiq::cursor_hidden()](#void-termiqcursor_hidden)
@@ -86,8 +88,10 @@ C++ library that provides a **high** *(or higher)* level of abstraction on stand
 		* [virtual protected void termiq::canvas::Canvas<CC>::paint_row(size_t index)](#virtual-protected-void-termiqcanvascanvasccpaint_rowsize_t-index)
 		* [virtual protected void termiq::canvas::Canvas<CC>::move_cursor(unsigned int row, unsigned int col)](#virtual-protected-void-termiqcanvascanvasccmove_cursorunsigned-int-row-unsigned-int-col)
 		* [virtual protected void termiq::canvas::Canvas<CC>::set_paint_state(CharState* state)](#virtual-protected-void-termiqcanvascanvasccset_paint_statecharstate-state)
+	* [concept termiq::canvas::Type](#concept-termiqcanvastype)
+	* [concept termiq::canvas::State](#concept-termiqcanvasstate)
 	* [struct termiq::canvas::CharState](#struct-termiqcanvascharstate)
-	* [struct termiq::canvas::CharCell<CT>](#struct-termiqcanvascharcellct)
+	* [struct termiq::canvas::CharCell<CT, CS>](#struct-termiqcanvascharcellct-cs)
 		* [bool termiq::canvas::CharCell<CT>::is_transparent()](#bool-termiqcanvascharcellctis_transparent)
 	* [struct termiq::canvas::CanvasPiece<CC>](#struct-termiqcanvascanvaspiececc)
 	* [struct termiq::canvas::CanvasPieces<CC>](#struct-termiqcanvascanvaspiecescc)
@@ -100,7 +104,11 @@ C++ library that provides a **high** *(or higher)* level of abstraction on stand
 		* [virtual void termiq::canvas::Content<CC>::built(CanvasPieces<CC> &pieces)](#virtual-void-termiqcanvascontentccbuiltcanvaspiecescc-pieces)
 	* [class Nothing : public Content<CC>](#class-nothing--public-contentcc)
 	* [class termiq::canvas::Text : public Content<CC>](#class-termiqcanvastext--public-contentcc)
-		* [termiq::canvas::Text<CC>::Text([char_type* txt])](#termiqcanvastextcctextchar_type-txt)
+		* [termiq::canvas::Text<CC>::Text()](#termiqcanvastextcctext)
+		* [termiq::canvas::Text<CC>::Text(std::span<char_type> line)](#termiqcanvastextcctextstdspanchar_type-line)
+		* [termiq::canvas::Text<CC>::Text(std::span<std::vector<char_type>> multiline)](#termiqcanvastextcctextstdspanstdvectorchar_type-multiline)
+		* [termiq::canvas::Text<CC>::Text(std::vector<char_type>&& line)](#termiqcanvastextcctextstdvectorchar_type-line)
+		* [termiq::canvas::Text<CC>::Text(std::vector<std::vector<char_type>>&& multiline)](#termiqcanvastextcctextstdvectorstdvectorchar_type-multiline)
 		* [void termiq::canvas::Text<CC>::set_foreground_color(termiq::style::Color &&color)](#void-termiqcanvastextccset_foreground_colortermiqstylecolor-color)
 		* [void termiq::canvas::Text<CC>::set_background_color(termiq::style::Color &&color);](#void-termiqcanvastextccset_background_colortermiqstylecolor-color)
 		* [void termiq::canvas::Text<CC>::set_bold()](#void-termiqcanvastextccset_bold)
@@ -191,7 +199,7 @@ This function throws a `std::logic_error` instance if the initialization did not
 
 It requires one *string* parameter - the name of the capability you want to check, and returns the state of the *boolean* terminal capability, e.g.: if the automatic margins are on.
 
-In case the capability wasn't found - returns `false`, otherwise returns `true` if the capability is on and `false` if it's off. 
+In case the capability wasn't found - returns `false`, otherwise returns `true` if the capability is on and `false` if it's off.
 
 ***Example:***
 
@@ -285,16 +293,28 @@ Accepts one optional *int* parameter **steps**, and moves the cursor **steps** c
 
 By default it moves the cursor `1` character right.
 
+#### void termiq::move_up([int steps])
+
+Accepts one optional *int* parameter **steps**, and moves the cursor **steps** characters up.
+
+By default it moves the cursor `1` character up.
+
+#### void termiq::move_down([int steps])
+
+Accepts one optional *int* parameter **steps**, and moves the cursor **steps** characters down.
+
+By default it moves the cursor `1` character down.
+
 #### void termiq::save_cursor_position()
 
-Save the current position of the cursor. The position can be restored using `void termiq::restore_cursor_position()`. 
+Save the current position of the cursor. The position can be restored using `void termiq::restore_cursor_position()`.
 
 >[!NOTE]
 >There is no stack of saved cursor positions you can restore using `restore_cursor_position` function call. Every next `save_cursor_position` call overrides the previous saved position.
 
 #### void termiq::restore_cursor_position()
 
-Restores the saved cursor position by calling `void termiq::save_cursor_position()` function. 
+Restores the saved cursor position by calling `void termiq::save_cursor_position()` function.
 
 #### void termiq::cursor_hidden()
 
@@ -431,9 +451,9 @@ It contains next **constexpr** *char* properties:
 * **termiq::alt_chars::C_HT** - represents a horizontal line with an additional perpendicular line touching horizontal line from top, e.g.: `┴`.
 * **termiq::alt_chars::C_HB** - represents a horizontal line with an additional perpendicular line touching horizontal line from bottom, e.g.: `┬`.
 * **termiq::alt_chars::C_VL** - represents a vertical line with an additional perpendicular line touching vertical line from right, e.g.: `├`.
-* **termiq::alt_chars::C_VR** - represents a vertical line with an additional perpendicular line touching vertical line from left, e.g.: `┤`. 
+* **termiq::alt_chars::C_VR** - represents a vertical line with an additional perpendicular line touching vertical line from left, e.g.: `┤`.
 * **termiq::alt_chars::C_TL** - represents the 2 perpendicular lines coming from top and left and touching each other in the middle, e.g.: `┘`.
-* **termiq::alt_chars::C_TR** - represents the 2 perpendicular lines coming from top and right and touching each other in the middle, e.g.: `└`. 
+* **termiq::alt_chars::C_TR** - represents the 2 perpendicular lines coming from top and right and touching each other in the middle, e.g.: `└`.
 * **termiq::alt_chars::C_BL** - represents the 2 perpendicular lines coming from bottom and left and touching each other in the middle, e.g.: `┐`.
 * **termiq::alt_chars::C_BR** - represents the 2 perpendicular lines coming from bottom and right and touching each other in the middle, e.g.: `┌`.
 
@@ -444,41 +464,41 @@ Using these special characters, you can draw rectangles or grids.
 ```c++
 termiq::alternate_chars_on();
 std::cout
-	// First line
-	<< termiq::alt_chars::C_BR
-	<< termiq::alt_chars::C_H
-	<< termiq::alt_chars::C_HB
-	<< termiq::alt_chars::C_H
-	<< termiq::alt_chars::C_BL
-	<< '\n';
-	// Second line
-	<< termiq::alt_chars::C_V
-	<< ' '
-	<< termiq::alt_chars::C_V
-	<< ' '
-	<< termiq::alt_chars::C_V
-	<< '\n'
-	// Third line
-	<< termiq::alt_chars::C_HR
-	<< termiq::alt_chars::C_H
-	<< termiq::alt_chars::C_X
-	<< termiq::alt_chars::C_H
-	<< termiq::alt_chars::C_HL
-	<< '\n'
-	// Fourth line
-	<< termiq::alt_chars::C_V
-	<< ' '
-	<< termiq::alt_chars::C_V
-	<< ' '
-	<< termiq::alt_chars::C_V
-	<< '\n'
-	// Fifths line
-	<< termiq::alt_chars::C_TR
-	<< termiq::alt_chars::C_H
-	<< termiq::alt_chars::C_HT
-	<< termiq::alt_chars::C_H
-	<< termiq::alt_chars::C_TL
-	<< std::endl;
+        // First line
+        << termiq::alt_chars::C_BR
+        << termiq::alt_chars::C_H
+        << termiq::alt_chars::C_HB
+        << termiq::alt_chars::C_H
+        << termiq::alt_chars::C_BL
+        << '\n';
+        // Second line
+        << termiq::alt_chars::C_V
+        << ' '
+        << termiq::alt_chars::C_V
+        << ' '
+        << termiq::alt_chars::C_V
+        << '\n'
+        // Third line
+        << termiq::alt_chars::C_HR
+        << termiq::alt_chars::C_H
+        << termiq::alt_chars::C_X
+        << termiq::alt_chars::C_H
+        << termiq::alt_chars::C_HL
+        << '\n'
+        // Fourth line
+        << termiq::alt_chars::C_V
+        << ' '
+        << termiq::alt_chars::C_V
+        << ' '
+        << termiq::alt_chars::C_V
+        << '\n'
+        // Fifths line
+        << termiq::alt_chars::C_TR
+        << termiq::alt_chars::C_H
+        << termiq::alt_chars::C_HT
+        << termiq::alt_chars::C_H
+        << termiq::alt_chars::C_TL
+        << std::endl;
 termiq::alternate_chars_off();
 
 // Result:
@@ -598,7 +618,7 @@ Sets both *foreground* and *background* together with **5** text attributes: *bo
 
 *(declared in tq_term_canvas.h)*
 
-Where **CC** stands for *char cell* type, and declares the content of the internal canvas matrix ***"pixel"*** .
+Where **CC** stands for *char cell* type, and declares the `Type` and `State` of the internal canvas matrix ***"pixel"*** .
 
 Another high level abstraction for **text style** and **text position** manipulation.
 
@@ -686,6 +706,41 @@ This method is used in the default implementation of the `paint_row` function, a
 
 This method is used in the default implementation of the `paint_row` function, and is called whenever the text style needs to be changed.
 
+### concept termiq::canvas::Type
+
+Declares restrictions for the type that can be passed to the **CharCell**'s `CT` template argument.
+
+It requires the type to be:
+* **default constructible**
+* have **constructor(termiq::canvas::symbol_char_type\* begin, termiq::canvas::symbol_char_type\* end)**
+* have **constructor(std::contagious_iterator begin, std::contagious_iterator end)**
+* have **termiq::canvas::symbol_char_type\* begin()** method that returns the pointer to the first byte of the stored symbol.
+* have **termiq::canvas::symbol_char_type\* end()** method that returns the end pointer *(the pointer that points directly after the next to the last symbol's byte)* of the stored symbol.
+
+### concept termiq::canvas::State
+
+Declares restrictions for the type that can be passed to the **CharCell**'s `CS` template argument.
+
+It requires the type to be:
+* **default constructible**
+* have **termiq::style::Color foreground()** method that returns symbol's foreground color.
+* have **termiq::style::Color boreground()** method that returns symbol's background color.
+* have **bool bold()** method that return `true` if the symbol is suppose to be bold.
+* have **bool italic()** method that return `true` if the symbol is suppose to be italic.
+* have **bool dim()** method that return `true` if the symbol is suppose to be dim.
+* have **bool inverse()** method that return `true` if the symbol is suppose to be inversed.
+* have **bool underline()** method that return `true` if the symbol is suppose to be underlined.
+* have **bool special()** method that return `true` if the symbol is suppose to be displayed as a special character (default line drawing character).
+* have **void foreground(termiq::style::Color)** method that sets new foreground color.
+* have **void background(termiq::style::Color)** method that sets new background color.
+* have **void bold(bool)** method that sets the bold state of the character.
+* have **void italic(bool)** method that sets the italic state of the character.
+* have **void dim(bool)** method that sets the dim state of the character.
+* have **void inverse(bool)** method that sets the inverse state of the character.
+* have **void underline(bool)** method that sets the underline state of the character.
+* have **void special(bool)** method that sets the special character state of the character.
+* comparable with `==` and `!=` operators.
+
 ### struct termiq::canvas::CharState
 
 *(declared in tq_term_canvas_utils.h)*
@@ -704,15 +759,23 @@ It defines the next public properties:
 
 This struct also overrides `==` and `!=` operators so two **CharState** objects can be compared.
 
-### struct termiq::canvas::CharCell\<CT\>
+### struct termiq::canvas::CharCell\<CT, CS\>
 
 *(declared in tq_term_canvas_utils.h)*
 
-**CT** stands for **char type** and represents the type that is used to store the character information. It can be **char**, **wchar_t** or any other char type.
+**CT** stands for **char type** and represents the type that is used to store the character information. `CT` must obey `termiq::canvas::Type` concept. 
+
+There are 2 already implemented types that can be passed as **CT** template argument:
+* **termiq::canvas::CharType** - store a single **char** symbol.
+* **termiq::canvas::WCharType** - store a sequence of **char** symbols encoded in *UTF-8* encoding.
+
+**CS** stands for **char state** and represents the type that is used to store the character's style information.
+
+There is 1 already implemented type that can be passed as **CS** template argument: **termiq::canvas::CharState**.
 
 The structure declares next attributes:
 
-* *CT* **symbol** - character contained in the CharCell instance. By default is `' '` (empty space).
+* *CT* **symbol** - character contained in the CharCell instance. By default is represents `' '` (empty space).
 * *std::shared_ptr\<CharState\>* **state** - a style of the CharCell instance. By default is `nullptr`.
 
 It also overrides `==` and `!=` operators, so 2 *CharCell* instances can be compared.
@@ -788,7 +851,7 @@ The function that is called after the **pieces** instance was built, but before 
 
 **CC** represents a canvas cell type *(more details above)*.
 
-Represents the content that is not displayed and does not occupy any space. 
+Represents the content that is not displayed and does not occupy any space.
 
 All **\*_width** and **\*_height** methods return `0`, and **build()** function call returns an empty *CanvasPieces* instance.
 
@@ -802,9 +865,37 @@ Canvas content class that allows to build and draw text content on a canvas.
 
 The class declares **using char_type = typename CC::char_type** that is used for character related types.
 
-#### termiq::canvas::Text\<CC\>::Text([char_type* txt])
+#### termiq::canvas::Text\<CC\>::Text()
 
-The constructor accepts the text as an only parameter, that needs to be drawn to the canvas. By default equals to `nullptr`.
+Default constructor represents empty text.
+
+#### termiq::canvas::Text\<CC\>::Text(std::span\<char_type\> line)
+
+Accepts **std::span** of char type as one line of characters.
+
+>[!IMPORTANT]
+>The characters are going to be printed as is, meaning it's on your responsibility to not send line breaks, line ending characters or any other characters that modify cursor behavior.
+
+#### termiq::canvas::Text\<CC\>::Text(std::span\<std::vector\<char_type\>\> multiline)
+
+Accepts multiple lines of characters, and builds a multi line content.
+
+>[!IMPORTANT]
+>The characters are going to be printed as is, meaning it's on your responsibility to not send line breaks, line ending characters or any other characters that modify cursor behavior.
+
+>[!NOTE]
+>There are 2 helper functions to help building the multiline content: `std::vector<std::vector<termiq::canvas::CharType>>` and `std::vector<std::vector<termiq::canvas::WCharType>>`:
+>* **std::vector\<std::vector\<termiq::canvas::CharType\>\> termiq::canvas::build_char_lines\<T\>(std::basic_string_view\<T\> str)**
+>* **std::vector\<std::vector\<termiq::canvas::CharType\>\> termiq::canvas::build_wchar_lines\<T\>(std::basic_string_view\<T\> str)**
+>Where `T` is `char` for **build_char_lines** by default, and `char16_t` for **build_wchar_lines** by default.
+
+#### termiq::canvas::Text\<CC\>::Text(std::vector\<char_type\>&& line)
+
+Same as above, but moves the line instead of copying.
+
+#### termiq::canvas::Text\<CC\>::Text(std::vector\<std::vector\<char_type\>\>&& multiline)
+
+Same as above, but moves the content instead of copying.
 
 ####  void termiq::canvas::Text\<CC\>::set_foreground_color(termiq::style::Color &&color)
 
@@ -884,7 +975,10 @@ ___
 ***Example:***
 
 ```c++
-termiq::canvas::Text<termiq::canvas::CharCell<char>> tb("Hello Wordl!");
+termiq::canvas::Text<termiq::canvas::CharCell<
+	termiq::canvas::CharType,
+	termiq::canvas::CharState
+>> tb(termiq::canvas::build_char_lines("Hello Wordl!"));
 
 tb.set_bold();
 tb.set_width(6);
@@ -893,7 +987,7 @@ auto pieces = tb.build()
 
 // It is going to be drawn in two lines as the width is limited to 6 characters.
 /*
-Hello 
+Hello
 World!
 */
 ```
@@ -963,7 +1057,7 @@ Defines background color for the **selected cell**. Color provided for a disting
 
 #### void termiq::canvas::Grid\<CC\>::set_cell_width(unsigned int width)
 
-Defines width property for the **selected cell**. 
+Defines width property for the **selected cell**.
 
 #### void termiq::canvas::Grid\<CC\>::set_cell_height(unsigned int height)
 
@@ -980,10 +1074,10 @@ Provides **selected cell** with the content that will be displayed inside the ce
 ***Example:***
 
 ```c++
-using CC = termiq::canvas::CharCell<wchar_t>;
+using CC = termiq::canvas::CharCell<termiq::canvas::WCharType,termiq::canvas::CharState>;
 termiq::canvas::Grid<CC> grid(1,2);
-termiq::canvas::Text<CC> txt1(L"Hello");
-termiq::canvas::Text<CC> txt2(L"World!");
+termiq::canvas::Text<CC> txt1(termiq::canvas::build_wchar_lines(u"Hello"));
+termiq::canvas::Text<CC> txt2(termiq::canvas::build_wchar_lines(u"World!"));
 
 grid.set_cell_type(termiq::canvas::GridType::DOUBLE);
 
@@ -1039,7 +1133,7 @@ Should be called when the grid column or row sizes need to be calculated.
 
 Returns `true` if the grid sizes are valid and `false` otherwise.
 
-___ 
+___
 
 More protected properties you can find in the class declaration fine *(tq_term_canvas_grid.h)*.
 
@@ -1074,10 +1168,10 @@ Grid content class that respects **Flexible** interface and influences its conte
 ***Example:***
 
 ```c++
-using CC = termiq::canvas::CharCell<wchar_t>;
+using CC = termiq::canvas::CharCell<termiq::canvas::WCharType, termiq::canvas::CharState>;
 termiq::canvas::FlexGrid<CC> grid(1,2);
-termiq::canvas::FlexText<CC> txt1(L"Hello");
-termiq::canvas::FlexText<CC> txt2(L"Hello world!");
+termiq::canvas::FlexText<CC> txt1(termiq::canvas::build_wchar_lines(L"Hello"));
+termiq::canvas::FlexText<CC> txt2(termiq::canvas::build_wchar_lines(L"Hello world!"));
 
 grid.set_cell_type(termiq::canvas::GridType::SINGLE);
 grid.set_width(12); // The width is too small to fit everything in one line.
@@ -1115,18 +1209,18 @@ termiq::init_term();
 const int rows = termiq::get_rows();
 const int cols = termiq::get_cols();
 
-using CC = termiq::canvas::CharCell<wchar_t>;
+using CC = termiq::canvas::CharCell<termiq::canvas::WCharType, termiq::canvas::CharState>;
 using BText = termiq::canvas::FlexText<CC>;
 using BGrid = termiq::canvas::FlexGrid<CC>;
 
 termiq::canvas::Canvas<CC> canvas(rows-1,cols,0,0);
 
 // Defines text instances.
-auto tb1 = BText(L"woohoo");
+auto tb1 = BText(termiq::canvas::build_wchar_lines(L"woohoo"));
 tb1.set_background_color({200, 200, 900});
-auto tb2 = BText(L"hello\nworld");
-auto tb3 = BText(L"Awesome");
-auto tb4 = BText(L"Nice");
+auto tb2 = BText(termiq::canvas::build_wchar_lines(L"hello\nworld"));
+auto tb3 = BText(termiq::canvas::build_wchar_lines(L"Awesome"));
+auto tb4 = BText(termiq::canvas::build_wchar_lines(L"Nice"));
 
 // Defines and configures grid instance.
 auto gb1 = BGrid(1,2);
@@ -1157,7 +1251,7 @@ gb3.set_cell_content(&gb1);
 // Draw the grid.
 canvas.draw(3, 5, gb3.build());
 
-// Enter alternate buffer screen and 
+// Enter alternate buffer screen and
 termiq::enter_alternate_buffer();
 
 // Paint the canvas to the terminal.
