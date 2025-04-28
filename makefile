@@ -2,7 +2,7 @@
 
 CC=g++
 OPT=-g
-CFLAGS=-c -Wall -Wextra -Wpedantic -std=c++17
+CFLAGS=-c -Wall -Wextra -Wpedantic -std=c++20
 SRCPATH:=src/
 TEST_SRCPATH:=test/src/
 SRCS:=$(wildcard $(SRCPATH)*.cpp)
