@@ -1,11 +1,17 @@
 template<typename CC>
-termiq::canvas::Text<CC>::Text(const char_type* txt) : Content<CC>() {
-	if (!txt) return;
-	for(size_t i=0;txt[i]!=STRING_TERMINATOR;++i) {
-		_txt.push_back(txt[i]);
-	}
-	invalidate_lines();
-}
+termiq::canvas::Text<CC>::Text() : Content<CC>() {}
+
+template<typename CC>
+termiq::canvas::Text<CC>::Text(std::span<char_type> line) : Text({line}) {}
+
+template<typename CC>
+termiq::canvas::Text<CC>::Text(std::span<std::vector<char_type>> multiline) : Content<CC>(), _txt(multiline) {}
+
+template<typename CC>
+termiq::canvas::Text<CC>::Text(std::vector<char_type>&& line) : Text({line}) {}
+
+template<typename CC>
+termiq::canvas::Text<CC>::Text(std::vector<std::vector<char_type>>&& multiline) : _txt(std::move(multiline)) {}
 
 template<typename CC>
 void termiq::canvas::Text<CC>::set_foreground_color(termiq::style::Color &&color) {
@@ -57,13 +63,13 @@ void termiq::canvas::Text<CC>::set_height(unsigned int h) {
 template<typename CC>
 typename termiq::canvas::CanvasPieces<CC> termiq::canvas::Text<CC>::build() {
 	auto cs = std::make_shared<CharState>();
-	cs->foreground = _foreground;
-	cs->background = _background;
-	cs->bold = _bold;
-	cs->italic = _italic;
-	cs->dim = _dim;
-	cs->underline = _underline;
-	cs->inverse = _inverse;
+	cs->foreground(_foreground);
+	cs->background(_background);
+	cs->bold(_bold);
+	cs->italic(_italic);
+	cs->dim(_dim);
+	cs->underline(_underline);
+	cs->inverse(_inverse);
 	unsigned int lines_count = get_height();
 	auto& built_lines = get_lines();
 
@@ -129,17 +135,18 @@ void termiq::canvas::Text<CC>::calculate_lines() {
 	std::vector<char_type> line;
 	size_t calc_w = get_calc_width();
 	size_t calc_h = get_calc_height();
-	for (size_t i=0;;++i) {
-		if ( i == _txt.size() || (calc_w && calc_w <= line.size()) || _txt[i] == LINE_TERMINATOR) {
-			max_w = std::max(max_w, line.size());
-			++max_h;
-			_lines.push_back(line);
-			line.resize(0);
+	for (auto& l : _txt) {
+		for (size_t i=0;;++i) {
+			if ( i == l.size() || (calc_w && calc_w <= line.size())) {
+				max_w = std::max(max_w, line.size());
+				++max_h;
+				_lines.push_back(line);
+				line.resize(0);
+			}
+			if (calc_h && _lines.size() >= calc_h) break;
+			if (i >= l.size()) break;
+			line.push_back(l[i]);
 		}
-		if (calc_h && _lines.size() >= calc_h) break;
-		if (i >= _txt.size()) break;
-		if (_txt[i] == LINE_TERMINATOR) continue;
-		line.push_back(_txt[i]);
 	}
 	_text_width = max_w;
 	_text_height = max_h;

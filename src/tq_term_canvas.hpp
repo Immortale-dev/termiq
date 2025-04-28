@@ -104,9 +104,10 @@ void termiq::canvas::Canvas<CC>::drawn() {}
 
 template<typename CC>
 void termiq::canvas::Canvas<CC>::paint_cell(CC &cell) {
-	const size_t char_sz = sizeof(char_type);
 	set_paint_state(cell.state ? cell.state.get() : nullptr);
-	printf(char_sz == 1 ? "%c" : "%lc", cell.symbol);
+	for (auto b = cell.symbol.begin();b!=cell.symbol.end();++b) {
+		printf("%c", *b);
+	}
 }
 
 template<typename CC>
@@ -121,6 +122,6 @@ void termiq::canvas::Canvas<CC>::set_paint_state(CharState* state) {
 		termiq::style::special_chars(false);
 		return;
 	}
-	termiq::style::style(state->foreground, state->background, state->bold, state->italic, state->dim, state->underline, state->inverse);
-	termiq::style::special_chars(state->special);
+	termiq::style::style(state->foreground(), state->background(), state->bold(), state->italic(), state->dim(), state->underline(), state->inverse());
+	termiq::style::special_chars(state->special());
 }

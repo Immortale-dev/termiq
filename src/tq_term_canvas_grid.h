@@ -24,6 +24,7 @@ namespace termiq {
 		template <typename CC>
 		class Grid : public Content<CC> {
 			using char_type = typename CC::char_type;
+//			using symbol_type = char_type::symbol_type;
 			struct GridCellState {
 				termiq::style::Color background = style::Color::UNDEFINED;
 				Content<CC>* content = nullptr;
@@ -100,7 +101,7 @@ namespace termiq {
 
 				bool _valid_calc = false;
 
-				static inline char_type EMPTY_SPACE = ' ';
+				static inline char_type EMPTY_SPACE = {' '};
 		};
 	}
 }

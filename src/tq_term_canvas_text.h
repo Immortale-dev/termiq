@@ -1,6 +1,9 @@
 #ifndef _TQ_TERM_CANVAS_TEXT
 #define _TQ_TERM_CANVAS_TEXT
 
+#include <span>
+#include <vector>
+
 #include "tq_term_canvas_utils.h"
 
 namespace termiq {
@@ -11,7 +14,11 @@ namespace termiq {
 				using char_type = typename CC::char_type;
 				using CanvasMatrix = std::vector<std::vector<char_type>>;
 
-				Text(const char_type* txt = nullptr);
+				Text();
+				Text(std::span<char_type> line);
+				Text(std::span<std::vector<char_type>> multiline);
+				Text(std::vector<char_type>&& line);
+				Text(std::vector<std::vector<char_type>>&& multiline);
 
 				void set_foreground_color(termiq::style::Color &&color);
 				void set_background_color(termiq::style::Color &&color);
@@ -38,7 +45,7 @@ namespace termiq {
 				virtual unsigned int get_calc_width();
 				virtual unsigned int get_calc_height();
 
-				std::vector<char_type> _txt;
+				std::vector<std::vector<char_type>> _txt;
 				termiq::style::Color _foreground = style::Color::UNDEFINED;
 				termiq::style::Color _background = style::Color::UNDEFINED;
 				bool _bold = false;
@@ -53,10 +60,7 @@ namespace termiq {
 				CanvasMatrix _lines;
 
 			private:
-				bool _valid_lines = true;
-
-				static inline char_type STRING_TERMINATOR = '\0';
-				static inline char_type LINE_TERMINATOR = '\n';
+				bool _valid_lines = false;
 		};
 	}
 }

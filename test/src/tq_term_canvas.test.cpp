@@ -6,7 +6,7 @@
 #include "tq_term_canvas_text.h"
 
 namespace canvas_test {
-	using CC = termiq::canvas::CharCell<wchar_t>;
+	using CC = termiq::canvas::CharCell<termiq::canvas::WCharType, termiq::canvas::CharState>;
 
 	std::vector<std::pair<unsigned int, unsigned int>> size_on_resized;
 	std::vector<std::pair<unsigned int, unsigned int>> position_on_moved;
@@ -42,6 +42,8 @@ namespace canvas_test {
 }
 
 SCENARIO_START
+
+using namespace canvas_test;
 
 DESCRIBE("canvas", {
 	DESCRIBE("20x25 on [3;5] instance of MyCanvas is created.", {
@@ -85,21 +87,21 @@ DESCRIBE("canvas", {
 		});
 
 		IT("should call drawn protected function once when draw is called with rvalue", {
-			auto pieces = termiq::canvas::Text<canvas_test::CC>(L"test").build();
+			auto pieces = termiq::canvas::Text<canvas_test::CC>(build_text<CC,char16_t>(u"test")).build();
 			canvas.draw(3, 4, std::move(pieces));
 
 			EXPECT(canvas_test::drawn_called_times).toBe(1);
 		});
 
 		IT("should call drawn protected function once when draw is called with lvalue ref", {
-			auto pieces = termiq::canvas::Text<canvas_test::CC>(L"test").build();
+			auto pieces = termiq::canvas::Text<canvas_test::CC>(build_text<CC,char16_t>(u"test")).build();
 			canvas.draw(3, 4, pieces);
 
 			EXPECT(canvas_test::drawn_called_times).toBe(1);
 		});
 
 		IT("should correctly draw pieces", {
-			auto pieces = termiq::canvas::Text<canvas_test::CC>(L"Hello\nWorld!");
+			auto pieces = termiq::canvas::Text<canvas_test::CC>(build_text<CC,char16_t>(u"Hello\nWorld!"));
 			canvas.draw(3, 4, pieces.build());
 
 			int filled_cells = 0;
@@ -111,7 +113,7 @@ DESCRIBE("canvas", {
 					}
 				}
 			}
-			auto text_lines = grid_to_text<canvas_test::CC>(matrix);
+			auto text_lines = grid_to_text<canvas_test::CC,char16_t>(matrix);
 			int text_cells = 0;
 			for (auto &l : text_lines) {
 				for (auto c : l) {
@@ -120,9 +122,9 @@ DESCRIBE("canvas", {
 					}
 				}
 			}
-			std::vector<std::basic_string<wchar_t>> part;
+			std::vector<std::basic_string<char16_t>> part;
 			for (int i=0;i<2;i++) {
-				std::basic_string<wchar_t> str;
+				std::basic_string<char16_t> str;
 				for(int j=0;j<6;j++) {
 					str.push_back(text_lines[3+i][4+j]);
 				}
@@ -130,8 +132,8 @@ DESCRIBE("canvas", {
 			}
 
 			EXPECT(part).toBe({
-				L"Hello ",
-				L"World!",
+				u"Hello ",
+				u"World!",
 			});
 
 			EXPECT(filled_cells).toBe(11);
@@ -204,7 +206,7 @@ DESCRIBE("canvas", {
 						}
 					}
 				}
-				auto text_lines = grid_to_text<canvas_test::CC>(matrix);
+				auto text_lines = grid_to_text<canvas_test::CC,char16_t>(matrix);
 				int text_cells = 0;
 				for (auto &l : text_lines) {
 					for (auto c : l) {
@@ -213,20 +215,20 @@ DESCRIBE("canvas", {
 						}
 					}
 				}
-				std::vector<std::basic_string<wchar_t>> part;
+				std::vector<std::basic_string<char16_t>> part;
 				for (int i=0;i<3;i++) {
-					std::basic_string<wchar_t> str;
+					std::basic_string<char16_t> str;
 					for(int j=0;j<3;j++) {
 						str.push_back(text_lines[3+i][6+j]);
 					}
 					part.push_back(str);
 				}
 
-				EXPECT(part).toBe({
-					L"TTT",
-					L"L R",
-					L"BBB",
-				});
+				EXPECT(part).toBe({{
+					u"TTT",
+					u"L R",
+					u"BBB",
+				}});
 
 				EXPECT(filled_cells).toBe(8);
 				EXPECT(text_cells).toBe(8);

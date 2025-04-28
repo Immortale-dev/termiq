@@ -10,4 +10,7 @@
 #include "src/tq_term_canvas_flex.test.cpp"
 #include "src/tq_term_canvas.test.cpp"
 
-int main() { return 0; }
+int main() {
+	setlocale(LC_ALL, "C.UTF-8");
+	return 0;
+}

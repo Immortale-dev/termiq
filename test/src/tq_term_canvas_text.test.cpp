@@ -1,3 +1,5 @@
+#include <vector>
+
 #include "tq_term_canvas_utils.h"
 #include "tq_term_canvas_text.h"
 
@@ -5,11 +7,11 @@ SCENARIO_START
 
 DESCRIBE("Canvas", {
 	DESCRIBE("Text", {
-		using CC = termiq::canvas::CharCell<char>;
+		using CC = termiq::canvas::CharCell<termiq::canvas::CharType, termiq::canvas::CharState>;
 		termiq::canvas::Text<CC>* text;
 		DESCRIBE("'lorem ipsum' char instance is created", {
 			BEFORE_EACH({
-				text = new termiq::canvas::Text<CC>("lorem ipsum");
+				text = new termiq::canvas::Text<CC>(build_text<CC, char>("lorem ipsum"));
 			});
 			AFTER_EACH({
 				delete text;
@@ -42,14 +44,14 @@ DESCRIBE("Canvas", {
 				auto state = pieces_to_grid(text->build())[0][0].state;
 
 				termiq::canvas::CharState compare;
-				compare.bold = true;
+				compare.bold(true);
 				EXPECT(*state).toBe(compare);
 			});
 			IT("should apply italic style", {
 				text->set_italic();
 				auto state = pieces_to_grid(text->build())[0][0].state;
 				termiq::canvas::CharState compare;
-				compare.italic = true;
+				compare.italic(true);
 
 				EXPECT(*state).toBe(compare);
 			});
@@ -58,7 +60,7 @@ DESCRIBE("Canvas", {
 				text->set_dim();
 				auto state = pieces_to_grid(text->build())[0][0].state;
 				termiq::canvas::CharState compare;
-				compare.dim = true;
+				compare.dim(true);
 
 				EXPECT(*state).toBe(compare);
 			});
@@ -67,7 +69,7 @@ DESCRIBE("Canvas", {
 				text->set_inverse();
 				auto state = pieces_to_grid(text->build())[0][0].state;
 				termiq::canvas::CharState compare;
-				compare.inverse = true;
+				compare.inverse(true);
 
 				EXPECT(*state).toBe(compare);
 			});
@@ -76,7 +78,7 @@ DESCRIBE("Canvas", {
 				text->set_foreground_color({100, 100, 100});
 				auto state = pieces_to_grid(text->build())[0][0].state;
 				termiq::canvas::CharState compare;
-				compare.foreground = {100, 100, 100};
+				compare.foreground({100, 100, 100});
 
 				EXPECT(*state).toBe(compare);
 			});
@@ -85,7 +87,7 @@ DESCRIBE("Canvas", {
 				text->set_background_color({200, 200, 200});
 				auto state = pieces_to_grid(text->build())[0][0].state;
 				termiq::canvas::CharState compare;
-				compare.background = {200, 200, 200};
+				compare.background({200, 200, 200});
 
 				EXPECT(*state).toBe(compare);
 			});
@@ -96,17 +98,14 @@ DESCRIBE("Canvas", {
 				text->set_inverse();
 
 				auto state = pieces_to_grid(text->build())[0][0].state;
-				termiq::canvas::CharState compare;
-				compare.background = {100, 120, 150};
-				compare.bold = true;
-				compare.inverse = true;
+				termiq::canvas::CharState compare({.background={100,120,150}, .bold=true, .inverse=true});
 
 				EXPECT(*state).toBe(compare);
 			});
 
 			IT("should build one liner text", {
 				auto built = text->build();
-				auto text_result = pieces_to_text(built);
+				auto text_result = pieces_to_text<CC, char>(built);
 
 				EXPECT(text_result).toBe({
 					{"lorem ipsum"}
@@ -116,7 +115,7 @@ DESCRIBE("Canvas", {
 			IT("should build multiline text", {
 				text->set_width(3);
 
-				auto text_result = pieces_to_text(text->build());
+				auto text_result = pieces_to_text<CC, char>(text->build());
 
 				EXPECT(text_result).toBe({
 					{"lor", "em ", "ips", "um "}
@@ -126,14 +125,14 @@ DESCRIBE("Canvas", {
 
 		DESCRIBE("'Lorem ipsum<br>dolor sit amet' char instance is created", {
 			BEFORE_EACH({
-				text = new termiq::canvas::Text<CC>("lorem ipsum\ndolor sit amet");
+				text = new termiq::canvas::Text<CC>(build_text<CC,char>("lorem ipsum\ndolor sit amet"));
 			});
 			AFTER_EACH({
 				delete text;
 			});
 
 			IT("should show 2 lines of text", {
-				auto text_result = pieces_to_text(text->build());
+				auto text_result = pieces_to_text<CC,char>(text->build());
 
 				EXPECT(text_result.size()).toBe(2);
 				EXPECT(text_result[0]).toBe("lorem ipsum   ");
@@ -144,7 +143,7 @@ DESCRIBE("Canvas", {
 				text->set_width(6);
 				text->set_height(2);
 
-				auto text_result = pieces_to_text(text->build());
+				auto text_result = pieces_to_text<CC,char>(text->build());
 
 				EXPECT(text_result).toBe({
 					"lorem ", "ipsum "

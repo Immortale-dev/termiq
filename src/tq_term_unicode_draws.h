@@ -5,59 +5,60 @@
 
 namespace termiq {
 	namespace draw_chars {
-		inline constexpr wchar_t C_H = L'\u2500';
-		inline constexpr wchar_t C_V = L'\u2502';
-		inline constexpr wchar_t C_X = L'\u253c';
-		inline constexpr wchar_t C_HT = L'\u2534';
-		inline constexpr wchar_t C_HB = L'\u252c';
-		inline constexpr wchar_t C_VL = L'\u2524';
-		inline constexpr wchar_t C_VR = L'\u251c';
-		inline constexpr wchar_t C_TL = L'\u2518';
-		inline constexpr wchar_t C_TR = L'\u2514';
-		inline constexpr wchar_t C_BL = L'\u2510';
-		inline constexpr wchar_t C_BR = L'\u250c';
+		using draw_char_t = std::basic_string<unsigned char>;
+		inline constexpr draw_char_t C_H{0xE2, 0x94, 0x80};
+		inline constexpr draw_char_t C_V{0xE2, 0x94, 0x82};
+		inline constexpr draw_char_t C_X{0xE2, 0x94, 0xBC};
+		inline constexpr draw_char_t C_HT{0xE2, 0x94, 0xB4};
+		inline constexpr draw_char_t C_HB{0xE2, 0x94, 0xAC};
+		inline constexpr draw_char_t C_VL{0xE2, 0x94, 0xA4};
+		inline constexpr draw_char_t C_VR{0xE2, 0x94, 0x9C};
+		inline constexpr draw_char_t C_TL{0xE2, 0x94, 0x98};
+		inline constexpr draw_char_t C_TR{0xE2, 0x94, 0x94};
+		inline constexpr draw_char_t C_BL{0xE2, 0x94, 0x90};
+		inline constexpr draw_char_t C_BR{0xE2, 0x94, 0x8C};
 
-		inline constexpr wchar_t C_H_BOLD = L'\u2501';
-		inline constexpr wchar_t C_V_BOLD = L'\u2503';
-		inline constexpr wchar_t C_X_BOLD = L'\u254b';
-		inline constexpr wchar_t C_HT_BOLD = L'\u253b';
-		inline constexpr wchar_t C_HB_BOLD = L'\u2533';
-		inline constexpr wchar_t C_VL_BOLD = L'\u252b';
-		inline constexpr wchar_t C_VR_BOLD = L'\u2523';
-		inline constexpr wchar_t C_TL_BOLD = L'\u251b';
-		inline constexpr wchar_t C_TR_BOLD = L'\u2517';
-		inline constexpr wchar_t C_BL_BOLD = L'\u2513';
-		inline constexpr wchar_t C_BR_BOLD = L'\u250f';
+		inline constexpr draw_char_t C_H_BOLD{0xE2, 0x94, 0x81};
+		inline constexpr draw_char_t C_V_BOLD{0xE2, 0x94, 0x83};
+		inline constexpr draw_char_t C_X_BOLD{0xE2, 0x95, 0x8B};
+		inline constexpr draw_char_t C_HT_BOLD{0xE2, 0x94, 0xBB};
+		inline constexpr draw_char_t C_HB_BOLD{0xE2, 0x94, 0xB3};
+		inline constexpr draw_char_t C_VL_BOLD{0xE2, 0x94, 0xAB};
+		inline constexpr draw_char_t C_VR_BOLD{0xE2, 0x94, 0xA3};
+		inline constexpr draw_char_t C_TL_BOLD{0xE2, 0x94, 0x9B};
+		inline constexpr draw_char_t C_TR_BOLD{0xE2, 0x94, 0x97};
+		inline constexpr draw_char_t C_BL_BOLD{0xE2, 0x94, 0x93};
+		inline constexpr draw_char_t C_BR_BOLD{0xE2, 0x94, 0x8F};
 
-		inline constexpr wchar_t C_H_DOUBLE = L'\u2550';
-		inline constexpr wchar_t C_V_DOUBLE = L'\u2551';
-		inline constexpr wchar_t C_X_DOUBLE = L'\u256c';
-		inline constexpr wchar_t C_HT_DOUBLE = L'\u2569';
-		inline constexpr wchar_t C_HB_DOUBLE = L'\u2566';
-		inline constexpr wchar_t C_VL_DOUBLE = L'\u2563';
-		inline constexpr wchar_t C_VR_DOUBLE = L'\u2560';
-		inline constexpr wchar_t C_TL_DOUBLE = L'\u255d';
-		inline constexpr wchar_t C_TR_DOUBLE = L'\u255a';
-		inline constexpr wchar_t C_BL_DOUBLE = L'\u2557';
-		inline constexpr wchar_t C_BR_DOUBLE = L'\u2554';
+		inline constexpr draw_char_t C_H_DOUBLE{0xE2, 0x95, 0x90};
+		inline constexpr draw_char_t C_V_DOUBLE{0xE2, 0x95, 0x91};
+		inline constexpr draw_char_t C_X_DOUBLE{0xE2, 0x95, 0xAC};
+		inline constexpr draw_char_t C_HT_DOUBLE{0xE2, 0x95, 0xA9};
+		inline constexpr draw_char_t C_HB_DOUBLE{0xE2, 0x95, 0xA6};
+		inline constexpr draw_char_t C_VL_DOUBLE{0xE2, 0x95, 0xA3};
+		inline constexpr draw_char_t C_VR_DOUBLE{0xE2, 0x95, 0xA0};
+		inline constexpr draw_char_t C_TL_DOUBLE{0xE2, 0x95, 0x9D};
+		inline constexpr draw_char_t C_TR_DOUBLE{0xE2, 0x95, 0x9A};
+		inline constexpr draw_char_t C_BL_DOUBLE{0xE2, 0x95, 0x97};
+		inline constexpr draw_char_t C_BR_DOUBLE{0xE2, 0x95, 0x94};
 
-		inline constexpr wchar_t C_H_GAP = L'\u254c';
-		inline constexpr wchar_t C_V_GAP = L'\u254e';
-		inline constexpr wchar_t C_H_GAP_BOLD = L'\u254d';
-		inline constexpr wchar_t C_V_GAP_BOLD = L'\u254f';
-		inline constexpr wchar_t C_H_DASHED = L'\u2504';
-		inline constexpr wchar_t C_V_DASHED = L'\u2506';
-		inline constexpr wchar_t C_H_DASHED_BOLD = L'\u2505';
-		inline constexpr wchar_t C_V_DASHED_BOLD = L'\u2507';
-		inline constexpr wchar_t C_H_DOTTED = L'\u2508';
-		inline constexpr wchar_t C_V_DOTTED = L'\u250a';
-		inline constexpr wchar_t C_H_DOTTED_BOLD = L'\u2509';
-		inline constexpr wchar_t C_V_DOTTED_BOLD = L'\u250b';
+		inline constexpr draw_char_t C_H_GAP{0xE2, 0x95, 0x8C};
+		inline constexpr draw_char_t C_V_GAP{0xE2, 0x95, 0x8E};
+		inline constexpr draw_char_t C_H_GAP_BOLD{0xE2, 0x95, 0x8D};
+		inline constexpr draw_char_t C_V_GAP_BOLD{0xE2, 0x95, 0x8F};
+		inline constexpr draw_char_t C_H_DASHED{0xE2, 0x94, 0x84};
+		inline constexpr draw_char_t C_V_DASHED{0xE2, 0x94, 0x86};
+		inline constexpr draw_char_t C_H_DASHED_BOLD{0xE2, 0x94, 0x85};
+		inline constexpr draw_char_t C_V_DASHED_BOLD{0xE2, 0x94, 0x87};
+		inline constexpr draw_char_t C_H_DOTTED{0xE2, 0x94, 0x88};
+		inline constexpr draw_char_t C_V_DOTTED{0xE2, 0x94, 0x8A};
+		inline constexpr draw_char_t C_H_DOTTED_BOLD{0xE2, 0x94, 0x89};
+		inline constexpr draw_char_t C_V_DOTTED_BOLD{0xE2, 0x94, 0x8B};
 
-		inline constexpr wchar_t C_TL_ROUND = L'\u256f';
-		inline constexpr wchar_t C_TR_ROUND = L'\u2570';
-		inline constexpr wchar_t C_BL_ROUND = L'\u256e';
-		inline constexpr wchar_t C_BR_ROUND = L'\u256d';
+		inline constexpr draw_char_t C_TL_ROUND{0xE2, 0x95, 0xAF};
+		inline constexpr draw_char_t C_TR_ROUND{0xE2, 0x95, 0xB0};
+		inline constexpr draw_char_t C_BL_ROUND{0xE2, 0x95, 0xAE};
+		inline constexpr draw_char_t C_BR_ROUND{0xE2, 0x95, 0xAD};
 	}
 }
 

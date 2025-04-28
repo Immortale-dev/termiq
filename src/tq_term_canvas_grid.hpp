@@ -93,20 +93,20 @@ typename termiq::canvas::CanvasPieces<CC> termiq::canvas::Grid<CC>::build() {
 	if (_border_type != BorderType::NONE) {
 		auto cs = std::make_shared<CharState>();
 		if (_border_type == BorderType::SINGLE_ASCII) {
-			cs->special = true;
+			cs->special(true);
 		}
-		cs->foreground = _border_foreground_color;
-		cs->background = _border_background_color;
+		cs->foreground(_border_foreground_color);
+		cs->background(_border_background_color);
 
 		for (size_t r=1;r<height-1;++r) {
 			for (size_t l=0,c=0;l<=_cols;c+=cols_widths[l++]+1) {
-				canvas[r][c] = {border.C_V, cs};
+				canvas[r][c] = {char_type{&*border.C_V.begin(), &*border.C_V.end()}, cs};
 				if (l == _cols) break;
 			}
 		}
 		for (size_t c=1;c<width-1;++c) {
 			for (size_t l=0,r=0;l<=_rows;r+=rows_heights[l++]+1) {
-				canvas[r][c] = {border.C_H, cs};
+				canvas[r][c] = {char_type{&*border.C_H.begin(), &*border.C_H.end()}, cs};
 				if (l == _rows) break;
 			}
 		}
@@ -135,7 +135,7 @@ typename termiq::canvas::CanvasPieces<CC> termiq::canvas::Grid<CC>::build() {
 		for (size_t j=0,c=border_size;c<width;c+=cols_widths[j++]+border_size) {
 			GridCellState& cell = _grid[i][j];
 			auto cs = std::make_shared<CharState>();
-			cs->background = cell.background;
+			cs->background(cell.background);
 			bool has_content = cell.content != nullptr;
 			auto built_text = has_content ? cell.content->build() : CanvasPieces<CC>();
 			for (size_t ri=r,rr=0;rr<rows_heights[i];ri++,++rr) {
@@ -150,8 +150,8 @@ typename termiq::canvas::CanvasPieces<CC> termiq::canvas::Grid<CC>::build() {
 						if (cc >= cols_widths[j]) break;
 						auto &cell = canvas[r+rr][c+cc];
 						cell = piece.canvas[ri][ci];
-						if (!termiq::style::is_color_defined(cell.state->background)) {
-							cell.state->background = cs->background;
+						if (!termiq::style::is_color_defined(cell.state->background())) {
+							cell.state->background(cs->background());
 						}
 					}
 				}
@@ -351,25 +351,61 @@ template<typename CC>
 typename termiq::canvas::Grid<CC>::GridBorders termiq::canvas::Grid<CC>::get_border(BorderType type) {
 	if (type == BorderType::SINGLE_ASCII) {
 		using namespace alt_chars;
-		return GridBorders{C_H, C_V, C_X, C_HT, C_HB, C_VL, C_VR, C_TL, C_TR, C_BL, C_BR};
+		return GridBorders{
+			{&C_H, &C_H+1}, {&C_V, &C_V+1}, {&C_X, &C_X+1},
+			{&C_HT, &C_HT+1}, {&C_HB, &C_HB+1}, {&C_VL, &C_VL+1},
+			{&C_VR, &C_VR+1}, {&C_TL, &C_TL+1}, {&C_TR, &C_TR+1},
+			{&C_BL, &C_BL+1}, {&C_BR, &C_BR+1}
+		};
 	} else {
 		using namespace draw_chars;
 		switch(type) {
 			case BorderType::SINGLE:
-				return GridBorders{char_type(C_H), char_type(C_V), char_type(C_X), char_type(C_HT), char_type(C_HB), char_type(C_VL), char_type(C_VR), char_type(C_TL), char_type(C_TR), char_type(C_BL), char_type(C_BR)};
+				return GridBorders{
+					char_type(C_H.begin(), C_H.end()), char_type(C_V.begin(), C_V.end()), char_type(C_X.begin(), C_X.end()),
+					char_type(C_HT.begin(), C_HT.end()), char_type(C_HB.begin(), C_HB.end()), char_type(C_VL.begin(), C_VL.end()),
+					char_type(C_VR.begin(), C_VR.end()), char_type(C_TL.begin(), C_TL.end()), char_type(C_TR.begin(), C_TR.end()),
+					char_type(C_BL.begin(), C_BL.end()), char_type(C_BR.begin(), C_BR.end())
+				};
 			case BorderType::DOUBLE:
-				return GridBorders{char_type(C_H_DOUBLE), char_type(C_V_DOUBLE), char_type(C_X_DOUBLE), char_type(C_HT_DOUBLE), char_type(C_HB_DOUBLE), char_type(C_VL_DOUBLE), char_type(C_VR_DOUBLE), char_type(C_TL_DOUBLE), char_type(C_TR_DOUBLE), char_type(C_BL_DOUBLE), char_type(C_BR_DOUBLE)};
+				return GridBorders{
+					char_type(C_H_DOUBLE.begin(), C_H_DOUBLE.end()), char_type(C_V_DOUBLE.begin(), C_V_DOUBLE.end()),
+					char_type(C_X_DOUBLE.begin(), C_X_DOUBLE.end()), char_type(C_HT_DOUBLE.begin(), C_HT_DOUBLE.end()),
+					char_type(C_HB_DOUBLE.begin(), C_HB_DOUBLE.end()), char_type(C_VL_DOUBLE.begin(), C_VL_DOUBLE.end()),
+					char_type(C_VR_DOUBLE.begin(), C_VR_DOUBLE.end()), char_type(C_TL_DOUBLE.begin(), C_TL_DOUBLE.end()),
+					char_type(C_TR_DOUBLE.begin(), C_TR_DOUBLE.end()), char_type(C_BL_DOUBLE.begin(), C_BL_DOUBLE.end()),
+					char_type(C_BR_DOUBLE.begin(), C_BR_DOUBLE.end())
+				};
 			case BorderType::BOLD:
-				return GridBorders{char_type(C_H_BOLD), char_type(C_V_BOLD), char_type(C_X_BOLD), char_type(C_HT_BOLD), char_type(C_HB_BOLD), char_type(C_VL_BOLD), char_type(C_VR_BOLD), char_type(C_TL_BOLD), char_type(C_TR_BOLD), char_type(C_BL_BOLD), char_type(C_BR_BOLD)};
+				return GridBorders{
+					char_type(C_H_BOLD.begin(), C_H_BOLD.end()), char_type(C_V_BOLD.begin(), C_V_BOLD.end()),
+					char_type(C_X_BOLD.begin(), C_X_BOLD.end()), char_type(C_HT_BOLD.begin(), C_HT_BOLD.end()),
+					char_type(C_HB_BOLD.begin(), C_HB_BOLD.end()), char_type(C_VL_BOLD.begin(), C_VL_BOLD.end()),
+					char_type(C_VR_BOLD.begin(), C_VR_BOLD.end()), char_type(C_TL_BOLD.begin(), C_TL_BOLD.end()),
+					char_type(C_TR_BOLD.begin(), C_TR_BOLD.end()), char_type(C_BL_BOLD.begin(), C_BL_BOLD.end()),
+					char_type(C_BR_BOLD.begin(), C_BR_BOLD.end())
+				};
 			case BorderType::ROUND:
-				return GridBorders{char_type(C_H), char_type(C_V), char_type(C_X), char_type(C_HT), char_type(C_HB), char_type(C_VL), char_type(C_VR), char_type(C_TL_ROUND), char_type(C_TR_ROUND), char_type(C_BL_ROUND), char_type(C_BR_ROUND)};
+				return GridBorders{
+					char_type(C_H.begin(), C_H.end()), char_type(C_V.begin(), C_V.end()), char_type(C_X.begin(), C_X.end()),
+					char_type(C_HT.begin(), C_HT.end()), char_type(C_HB.begin(), C_HB.end()), char_type(C_VL.begin(), C_VL.end()),
+					char_type(C_VR.begin(), C_VR.end()), char_type(C_TL_ROUND.begin(), C_TL_ROUND.end()),
+					char_type(C_TR_ROUND.begin(), C_TR_ROUND.end()), char_type(C_BL_ROUND.begin(), C_BL_ROUND.end()),
+					char_type(C_BR_ROUND.begin(), C_BR_ROUND.end())
+				};
 			case BorderType::EMPTY:
 			{
-				char_type invis_char = ' ';
+				std::basic_string<unsigned char> invis_ch{' '};
+				char_type invis_char{invis_ch.begin(), invis_ch.end()};
 				return GridBorders{invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char, invis_char};
 			}
 			default:
-				return GridBorders{char_type(C_H), char_type(C_V), char_type(C_X), char_type(C_HT), char_type(C_HB), char_type(C_VL), char_type(C_VR), char_type(C_TL), char_type(C_TR), char_type(C_BL), char_type(C_BR)};
+				return GridBorders{
+					char_type(C_H.begin(), C_H.end()), char_type(C_V.begin(), C_V.end()), char_type(C_X.begin(), C_X.end()),
+					char_type(C_HT.begin(), C_HT.end()), char_type(C_HB.begin(), C_HB.end()), char_type(C_VL.begin(), C_VL.end()),
+					char_type(C_VR.begin(), C_VR.end()), char_type(C_TL.begin(), C_TL.end()), char_type(C_TR.begin(), C_TR.end()),
+					char_type(C_BL.begin(), C_BL.end()), char_type(C_BR.begin(), C_BR.end())
+				};
 		}
 	}
 }

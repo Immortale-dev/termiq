@@ -9,8 +9,8 @@ SCENARIO_START
 
 DESCRIBE("Canvas", {
 	DESCRIBE("Grid", {
-		using CC_CHAR = termiq::canvas::CharCell<char>;
-		using CC = termiq::canvas::CharCell<wchar_t>;
+		using CC_CHAR = termiq::canvas::CharCell<termiq::canvas::CharType, termiq::canvas::CharState>;
+		using CC = termiq::canvas::CharCell<termiq::canvas::WCharType, termiq::canvas::CharState>;
 		termiq::canvas::Grid<CC>* grid;
 
 		DESCRIBE("a 2x2 instance of char grid has been created", {
@@ -25,7 +25,7 @@ DESCRIBE("Canvas", {
 			IT("should render ascii char borders", {
 				char_grid->set_width(5);
 				char_grid->set_height(5);
-				auto result = pieces_to_text(char_grid->build());
+				auto result = pieces_to_text<CC_CHAR, char>(char_grid->build());
 
 				EXPECT(result).toBe({
 					{"lqwqk", "x x x", "tqnqu", "x x x", "mqvqj"}
@@ -43,18 +43,18 @@ DESCRIBE("Canvas", {
 			});
 
 			IT("should render empty grid", {
-				auto result = pieces_to_text(grid->build());
+				auto result = pieces_to_text<CC, char16_t>(grid->build());
 
 				EXPECT(result).toBe({
-					{L"┌┬┬┐",
-					 L"├┼┼┤",
-					 L"└┴┴┘"}
+					{u"┌┬┬┐",
+					 u"├┼┼┤",
+					 u"└┴┴┘"}
 				});
 			});
 
 			IT("should render grid with texts", {
-				termiq::canvas::Text<CC> t1(L"Hello");
-				termiq::canvas::Text<CC> t2(L"World");
+				termiq::canvas::Text<CC> t1(build_text<CC,char16_t>(u"Hello"));
+				termiq::canvas::Text<CC> t2(build_text<CC,char16_t>(u"World"));
 				grid->select_cell(1);
 				grid->set_cell_content(&t1);
 				grid->set_cell_width(3);
@@ -65,33 +65,33 @@ DESCRIBE("Canvas", {
 				grid->set_cell_height(2);
 				grid->set_width(4);
 				grid->set_height(7);
-				auto result = pieces_to_text(grid->build());
+				auto result = pieces_to_text<CC,char16_t>(grid->build());
 
 				EXPECT(result).toBe({{
-					 L"┌┬───┬──┐",
-					 L"││Hel│  │",
-					 L"││   │  │",
-					 L"├┼───┼──┤",
-					 L"││   │Wo│",
-					 L"││   │  │",
-					 L"└┴───┴──┘",
+					 u"┌┬───┬──┐",
+					 u"││Hel│  │",
+					 u"││   │  │",
+					 u"├┼───┼──┤",
+					 u"││   │Wo│",
+					 u"││   │  │",
+					 u"└┴───┴──┘",
 				 }});
 			});
 
 			IT("should distribute space correctly", {
-				termiq::canvas::Text<CC> t1(L"Hello");
+				termiq::canvas::Text<CC> t1(build_text<CC,char16_t>(u"Hello"));
 				grid->select_cell(1);
 				grid->set_cell_content(&t1);
 				grid->set_cell_width(5);
 				grid->set_cell_height(1);
 				grid->set_width(15);
-				auto result = pieces_to_text(grid->build());
+				auto result = pieces_to_text<CC,char16_t>(grid->build());
 
 				EXPECT(result).toBe({{
-					 L"┌───┬─────┬───┐",
-					 L"│   │Hello│   │",
-					 L"├───┼─────┼───┤",
-					 L"└───┴─────┴───┘",
+					 u"┌───┬─────┬───┐",
+					 u"│   │Hello│   │",
+					 u"├───┼─────┼───┤",
+					 u"└───┴─────┴───┘",
 				 }});
 			});
 		});
@@ -100,7 +100,7 @@ DESCRIBE("Canvas", {
 			termiq::canvas::Text<CC>* txt;
 			BEFORE_EACH({
 				grid = new termiq::canvas::Grid<CC>(2,2);
-				txt = new termiq::canvas::Text<CC>(L"Hello W!");
+				txt = new termiq::canvas::Text<CC>(build_text<CC,char16_t>(u"Hello W!"));
 				grid->select_cell(0,0);
 				grid->set_cell_content(txt);
 				grid->set_cell_width(10);
@@ -115,62 +115,62 @@ DESCRIBE("Canvas", {
 			IT("should display empty border", {
 				grid->set_border_type(termiq::canvas::BorderType::EMPTY);
 
-				auto result = pieces_to_text(grid->build());
+				auto result = pieces_to_text<CC,char16_t>(grid->build());
 
 				EXPECT(result).toBe({{
-					 L"               ",
-					 L" Hello W!      ",
-					 L"               ",
-					 L"               ",
+					 u"               ",
+					 u" Hello W!      ",
+					 u"               ",
+					 u"               ",
 				 }});
 			});
 
 			IT("should not display border", {
 				grid->set_border_type(termiq::canvas::BorderType::NONE);
 
-				auto result = pieces_to_text(grid->build());
+				auto result = pieces_to_text<CC,char16_t>(grid->build());
 
 				EXPECT(result).toBe({{
-					 L"Hello W!       ",
+					 u"Hello W!       ",
 				 }});
 			});
 
 			IT("should display double border", {
 				grid->set_border_type(termiq::canvas::BorderType::DOUBLE);
 
-				auto result = pieces_to_text(grid->build());
+				auto result = pieces_to_text<CC,char16_t>(grid->build());
 
 				EXPECT(result).toBe({{
-					 L"╔══════════╦══╗",
-					 L"║Hello W!  ║  ║",
-					 L"╠══════════╬══╣",
-					 L"╚══════════╩══╝",
+					 u"╔══════════╦══╗",
+					 u"║Hello W!  ║  ║",
+					 u"╠══════════╬══╣",
+					 u"╚══════════╩══╝",
 				 }});
 			});
 
 			IT("should display bold border", {
 				grid->set_border_type(termiq::canvas::BorderType::BOLD);
 
-				auto result = pieces_to_text(grid->build());
+				auto result = pieces_to_text<CC,char16_t>(grid->build());
 
 				EXPECT(result).toBe({{
-					 L"┏━━━━━━━━━━┳━━┓",
-					 L"┃Hello W!  ┃  ┃",
-					 L"┣━━━━━━━━━━╋━━┫",
-					 L"┗━━━━━━━━━━┻━━┛",
+					 u"┏━━━━━━━━━━┳━━┓",
+					 u"┃Hello W!  ┃  ┃",
+					 u"┣━━━━━━━━━━╋━━┫",
+					 u"┗━━━━━━━━━━┻━━┛",
 				 }});
 			});
 
 			IT("should display rounded border", {
 				grid->set_border_type(termiq::canvas::BorderType::ROUND);
 
-				auto result = pieces_to_text(grid->build());
+				auto result = pieces_to_text<CC,char16_t>(grid->build());
 
 				EXPECT(result).toBe({{
-					 L"╭──────────┬──╮",
-					 L"│Hello W!  │  │",
-					 L"├──────────┼──┤",
-					 L"╰──────────┴──╯",
+					 u"╭──────────┬──╮",
+					 u"│Hello W!  │  │",
+					 u"├──────────┼──┤",
+					 u"╰──────────┴──╯",
 				 }});
 			});
 		});
@@ -179,7 +179,7 @@ DESCRIBE("Canvas", {
 			termiq::canvas::Text<CC>* txt;
 			BEFORE_EACH({
 				grid = new termiq::canvas::Grid<CC>(1,1);
-				txt = new termiq::canvas::Text<CC>(L"¯\\_(ツ)_/¯");
+				txt = new termiq::canvas::Text<CC>(build_text<CC,char16_t>(u"¯\\_(ツ)_/¯"));
 				grid->select_cell(0,0);
 				grid->set_border_type(termiq::canvas::BorderType::SINGLE);
 				grid->set_cell_content(txt);
@@ -224,11 +224,11 @@ DESCRIBE("Canvas", {
 				auto b_state = state[0][0].state;
 				auto t_state = state[1][1].state;
 
-				auto expected = termiq::canvas::CharState{
+				auto expected = termiq::canvas::CharState({
 					termiq::style::Color::UNDEFINED,
 					termiq::style::Color::UNDEFINED,
 					false, false, false, false, false, false
-				};
+				});
 
 				EXPECT(*b_state).toBe(expected);
 				EXPECT(*t_state).toBe(expected);
@@ -260,10 +260,10 @@ DESCRIBE("Canvas", {
 				auto t_state = state[1][1].state;
 
 				auto e_text = termiq::canvas::CharState{};
-				auto e_border = termiq::canvas::CharState{
+				auto e_border = termiq::canvas::CharState({
 					termiq::style::Color::UNDEFINED,
 					{100, 100, 100},
-				};
+				});
 
 				EXPECT(*t_state).toBe(e_text);
 				EXPECT(*b_state).toBe(e_border);
@@ -277,10 +277,10 @@ DESCRIBE("Canvas", {
 				auto b_state = state[0][0].state;
 				auto t_state = state[1][1].state;
 
-				auto e_text = termiq::canvas::CharState{
+				auto e_text = termiq::canvas::CharState({
 					termiq::style::Color::UNDEFINED,
 					{100, 100, 100}
-				};
+				});
 				auto e_border = termiq::canvas::CharState{};
 
 				EXPECT(*t_state).toBe(e_text);

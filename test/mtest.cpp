@@ -10,7 +10,7 @@
 #include "tq_term_canvas_flextext.h"
 #include "tq_term_canvas_flexgrid.h"
 
-using CC = termiq::canvas::CharCell<wchar_t>;
+using CC = termiq::canvas::CharCell<termiq::canvas::WCharType, termiq::canvas::CharState>;
 using BText = termiq::canvas::FlexText<CC>;
 using BGrid = termiq::canvas::FlexGrid<CC>;
 
@@ -59,11 +59,11 @@ void paint_canvas() {
 
 	auto t1 = std::chrono::system_clock::now();
 
-	auto tb1 = BText(L"woohoo");
+	auto tb1 = BText(termiq::canvas::build_wchar_lines<char16_t>(u"woohoo"));
 	tb1.set_background_color({200, 200, 900});
-	auto tb2 = BText(L"hello\nworld");
-	auto tb3 = BText(L"Awesome"); //.set_width(4);
-	auto tb4 = BText(L"Nice");
+	auto tb2 = BText(termiq::canvas::build_wchar_lines<char16_t>(u"hello\nworld"));
+	auto tb3 = BText(termiq::canvas::build_wchar_lines<char16_t>(u"Awesome")); //.set_width(4);
+	auto tb4 = BText(termiq::canvas::build_wchar_lines<char16_t>(u"Nice"));
 	auto gb1 = BGrid(1,2);
 	gb1.set_width(10);
 	gb1.set_border_type(termiq::canvas::BorderType::SINGLE);
@@ -72,10 +72,10 @@ void paint_canvas() {
 	gb1.select_cell(0,0);
 	gb1.set_cell_content(&tb4);
 
-	auto gt1 = BText(L"a");
-	auto gt2 = BText(L"aa");
-	auto gt3 = BText(L"aa aa aa");
-	auto gt4 = BText(L"aaaaaaaaaaaaaaaa aaaaaaaaaaaaa");
+	auto gt1 = BText(termiq::canvas::build_wchar_lines<char16_t>(u"a"));
+	auto gt2 = BText(termiq::canvas::build_wchar_lines<char16_t>(u"aa"));
+	auto gt3 = BText(termiq::canvas::build_wchar_lines<char16_t>(u"aa aa aa"));
+	auto gt4 = BText(termiq::canvas::build_wchar_lines<char16_t>(u"aaaaaaaaaaaaaaaa aaaaaaaaaaaaa"));
 	BGrid gb2 = BGrid(2,4);
 	gb2.set_width(40);
 	gb2.set_border_type(termiq::canvas::BorderType::SINGLE);
@@ -102,12 +102,12 @@ void paint_canvas() {
 	gb3.select_cell(0,2);
 	gb3.set_cell_content(&gb1);
 
-	auto tbf1 = BText(L"hello world");
+	auto tbf1 = BText(termiq::canvas::build_wchar_lines<char16_t>(u"hello world"));
 	tbf1.set_bold();
 	tbf1.set_background_color({300,700,300});
 	tbf1.set_width(6);
 
-	auto tbf2 = BText(L"kavabanga халоу ворлд how are you?");
+	auto tbf2 = BText(termiq::canvas::build_wchar_lines<char16_t>(u"kavabanga халоу ворлд how are you?"));
 	tbf2.set_foreground_color({1000, 300, 0});
 	tbf2.set_width(4);
 	tbf2.set_height(5);
@@ -144,7 +144,7 @@ void paint_full_screen() {
 	auto t1 = std::chrono::system_clock::now();
 	for(int r=0;r<rows-1;r++) {
 		for(int c=0;c<cols;c++) {
-			auto builder = BText(L"A");
+			auto builder = BText(termiq::canvas::build_wchar_lines<char16_t>(u"A"));
 			builder.set_foreground_color({(c%10 <= 5) ? 1000 : 500, 100, 100}); //.set_bold().set_inverse().build()
 			if (c%10 <= 5) {
 				builder.set_bold();

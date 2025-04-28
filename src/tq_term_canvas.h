@@ -14,6 +14,7 @@ namespace termiq {
 			template<typename T>
 			using container = std::vector<T>;
 			using char_type = typename CC::char_type;
+			using CharState = typename CC::char_state_type;
 
 			public:
 				Canvas() = default;
