@@ -24,7 +24,6 @@ namespace termiq {
 		template <typename CC>
 		class Grid : public Content<CC> {
 			using char_type = typename CC::char_type;
-//			using symbol_type = char_type::symbol_type;
 			struct GridCellState {
 				termiq::style::Color background = style::Color::UNDEFINED;
 				Content<CC>* content = nullptr;
