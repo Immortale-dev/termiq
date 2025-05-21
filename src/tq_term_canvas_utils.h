@@ -195,7 +195,7 @@ namespace termiq {
 			using char_type = CT;
 			using char_state_type = CS;
 			bool operator==(const CharCell &other) const {
-				if (state == nullptr && other.state != nullptr || state != nullptr && other.state == nullptr) return false;
+				if ((state == nullptr && other.state != nullptr) || (state != nullptr && other.state == nullptr)) return false;
 				return symbol == other.symbol && (state == other.state || *state == *(other.state));
 			}
 			bool operator!=(const CharCell &other) const {
