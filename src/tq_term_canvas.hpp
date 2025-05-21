@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <functional>
 
+#include "tq_term_adv.h"
 #include "tq_term_canvas_utils.h"
 
 template<typename CC>
