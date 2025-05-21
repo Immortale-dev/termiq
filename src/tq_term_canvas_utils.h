@@ -14,7 +14,7 @@
 
 namespace termiq {
 	namespace canvas {
-		using symbol_char_type = unsigned char;
+		using symbol_char_type = char;
 
 		template<typename T>
 		concept Char = requires(T t) {

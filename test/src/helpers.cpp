@@ -23,7 +23,7 @@ std::vector<std::vector<typename CC::char_type>> build_text(std::basic_string<C>
 			auto utf8 = cvt.to_bytes({c});
 			line.push_back(char_type(utf8.begin(), utf8.end()));
 		} else {
-			line.push_back({(unsigned char)(c)});
+			line.push_back({c});
 		}
 	}
 	if (line.size()) {
