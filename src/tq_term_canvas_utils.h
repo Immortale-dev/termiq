@@ -212,7 +212,7 @@ namespace termiq {
 		// Piece of the canvas.
 		template<typename CC>
 		struct CanvasPiece {
-			const std::vector<std::vector<CC>> canvas;
+			std::vector<std::vector<CC>> canvas;
 			const unsigned int rows;
 			const unsigned int cols;
 			const int offset_rows = 0;
@@ -222,7 +222,7 @@ namespace termiq {
 		// Collection of pieces.
 		template<typename CC>
 		struct CanvasPieces {
-			const std::vector<CanvasPiece<CC>> pieces;
+			std::vector<CanvasPiece<CC>> pieces;
 		};
 
 		// Buildable content interface
