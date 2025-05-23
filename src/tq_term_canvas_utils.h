@@ -57,9 +57,9 @@ namespace termiq {
 				CharType() : symbol(' ') {}
 				CharType(symbol_char_type s) : symbol(s) {}
 
-				CharType(symbol_char_type* b, symbol_char_type* e) { std::memcpy(begin(), b, std::min(size_t(e-b), sizeof(char))); }
+				CharType(symbol_char_type* b, symbol_char_type* e) { std::memcpy(begin(), b, std::min(size_t(e-b), sizeof(symbol_char_type))); }
 				template<typename IT>
-				CharType(IT b, IT e) { std::memcpy(begin(), &*b, std::min(size_t(std::distance(b,e)), sizeof(char))); }
+				CharType(IT b, IT e) { std::memcpy(begin(), &*b, std::min(size_t(std::distance(b,e)), sizeof(symbol_char_type))); }
 
 				symbol_char_type* begin() { return reinterpret_cast<symbol_char_type*>(&symbol); }
 				symbol_char_type* end() { return begin() + sizeof(symbol_char_type); }
