@@ -72,7 +72,7 @@ std::vector<std::basic_string<C>> grid_to_text(std::vector<std::vector<CC>> grid
 		for(int c=0;c<max_w;c++) {
 			CT &symbol = grid[r][c].symbol;
 			if constexpr (std::is_same_v<C,char16_t>) {
-				auto str = cvt.from_bytes(std::basic_string<char>(reinterpret_cast<char*>(symbol.begin()), size_t(symbol.end()-symbol.begin())));
+				auto str = cvt.from_bytes(std::basic_string<char>(reinterpret_cast<const char*>(symbol.begin()), size_t(symbol.end()-symbol.begin())));
 				result[r][c] = str[0];
 			} else {
 				result[r][c] = *symbol.begin();
