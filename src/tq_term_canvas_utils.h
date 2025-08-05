@@ -7,8 +7,8 @@
 #include <cstring>
 #include <iterator>
 #include <type_traits>
-#include <locale>
-#include <codecvt>
+#include <cuchar>
+#include <climits>
 
 #include "tq_term_style.h"
 
@@ -115,7 +115,8 @@ namespace termiq {
 			using char_type = WCharType;
 			std::vector<std::vector<char_type>> res;
 			std::vector<char_type> line;
-			std::wstring_convert<std::codecvt_utf8<T>, T> cvt;
+			std::mbstate_t state{};
+			char out[MB_LEN_MAX]{};
 			for (auto c : str) {
 				if (c == '\n') {
 					res.push_back(line);
@@ -123,8 +124,11 @@ namespace termiq {
 					continue;
 				}
 				if (c == '\0') break;
-				auto utf8 = cvt.to_bytes({c});
-				line.push_back(char_type(utf8.begin(), utf8.end()));
+				size_t rc = std::c16rtomb(out, c, &state);
+				if (rc != (size_t)-1) {
+					std::string_view utf8(out, rc);
+					line.push_back(char_type(utf8.begin(), utf8.end()));
+				}
 			}
 			if (line.size()) {
 				res.push_back(line);

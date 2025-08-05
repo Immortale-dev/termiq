@@ -1,8 +1,8 @@
 #include <string>
 #include <algorithm>
 #include <type_traits>
-#include <locale>
-#include <codecvt>
+#include <cuchar>
+#include <climits>
 
 #include "tq_term_canvas_utils.h"
 
@@ -11,7 +11,8 @@ std::vector<std::vector<typename CC::char_type>> build_text(std::basic_string<C>
 	using char_type = typename CC::char_type;
 	std::vector<std::vector<char_type>> res;
 	std::vector<char_type> line;
-	std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> cvt;
+	std::mbstate_t state{};
+	char out[MB_LEN_MAX]{};
 	for (auto c : str) {
 		if (c == '\n') {
 			res.push_back(line);
@@ -20,8 +21,11 @@ std::vector<std::vector<typename CC::char_type>> build_text(std::basic_string<C>
 		}
 		if (c == '\0') break;
 		if constexpr (std::is_same_v<C,char16_t>) {
-			auto utf8 = cvt.to_bytes({c});
-			line.push_back(char_type(utf8.begin(), utf8.end()));
+			size_t rc = std::c16rtomb(out, c, &state);
+			if (rc != (size_t)-1) {
+				std::string_view utf8(out, rc);
+				line.push_back(char_type(utf8.begin(), utf8.end()));
+			}
 		} else {
 			line.push_back({c});
 		}
@@ -66,14 +70,15 @@ std::vector<std::basic_string<C>> grid_to_text(std::vector<std::vector<CC>> grid
 	int max_h = grid.size();
 	int max_w = grid.size()>0 ? grid[0].size() : 0;
 	std::vector<std::basic_string<symbol_type>> result(max_h, std::basic_string<symbol_type>(max_w, ' '));
-	std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> cvt;
+	std::mbstate_t state{};
+	char16_t c16{};
 
 	for(int r=0;r<max_h;r++) {
 		for(int c=0;c<max_w;c++) {
 			CT &symbol = grid[r][c].symbol;
 			if constexpr (std::is_same_v<C,char16_t>) {
-				auto str = cvt.from_bytes(std::basic_string<char>(reinterpret_cast<const char*>(symbol.begin()), size_t(symbol.end()-symbol.begin())));
-				result[r][c] = str[0];
+				std::mbrtoc16(&c16, symbol.begin(), symbol.end() - symbol.begin(), &state);
+				result[r][c] = c16;
 			} else {
 				result[r][c] = *symbol.begin();
 			}
