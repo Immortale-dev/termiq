@@ -1,257 +1,317 @@
-#include "tq_term_adv.h"
 #include "tq_term_style.h"
 
-#include <iostream>
-#include <unordered_map>
-#include <list>
-#include <utility>
+#include <variant>
 
-namespace {
-	std::unordered_map<int, std::list<std::pair<int, int>>::iterator> saved_colors;
-	std::list<std::pair<int, int>> color_prior;
+#include "tq_term.h"
+#include "tq_term_adv.h"
 
-	int max_colors_count = 0;
-	int start_colors_offset = 16;
+namespace termiq::style {
+	namespace {
+		termiq::color_t current_foreground = ::termiq::Color::NONE;
+		termiq::color_t current_background = ::termiq::Color::NONE;
+		bool is_bold = false;
+		bool is_dim = false;
+		bool is_italic = false;
+		std::variant<bool, Underline> is_underline = false;
+		bool is_blinking = false;
+		bool is_inverse = false;
+		bool is_hidden = false;
+		bool is_strike = false;
 
-	termiq::style::Color current_foreground = termiq::style::Color::UNDEFINED;
-	termiq::style::Color current_background = termiq::style::Color::UNDEFINED;
-	bool is_bold = false;
-	bool is_italic = false;
-	bool is_underline = false;
-	bool is_dim = false;
-	bool is_inverse = false;
-	bool is_special = false;
+		termiq::color_t current_terminal_foreground = ::termiq::Color::NONE;
+		termiq::color_t current_terminal_background = ::termiq::Color::NONE;
+		termiq::color_t current_terminal_selection_foreground = ::termiq::Color::NONE;
+		termiq::color_t current_terminal_selection_background = ::termiq::Color::NONE;
+		termiq::color_t current_terminal_cursor_foreground = ::termiq::Color::NONE;
+		termiq::color_t current_terminal_cursor_background = ::termiq::Color::NONE;
 
-	bool is_foreground_set() {
-		return termiq::style::is_color_defined(current_foreground);
+		void reset_color_values() {
+			current_foreground = Color::NONE;
+			current_background = Color::NONE;
+		}
+
+		void reset_attr_values() {
+			is_bold = false;
+			is_dim = false;
+			is_italic = false;
+			is_underline = false;
+			is_blinking = false;
+			is_inverse = false;
+			is_hidden = false;
+			is_strike = false;
+		}
 	}
-	bool is_background_set() {
-		return termiq::style::is_color_defined(current_background);
+}
+
+void termiq::style::style(style::FontStyle s) {
+	std::vector<StyleProp> list{};
+	if (s.foreground.index() == 0) {
+		::termiq::style::foreground(std::get<0>(s.foreground));
 	}
-	void reset_background() {
-		current_background = termiq::style::Color::UNDEFINED;
+	if (s.background.index() == 0) {
+		::termiq::style::background(std::get<0>(s.background));
 	}
-	void reset_foreground() {
-		current_foreground = termiq::style::Color::UNDEFINED;
+
+	bool bold_changed = false;
+	bool dim_changed = false;
+	if (s.bold && *s.bold != is_bold) {
+		is_bold = *s.bold;
+		bold_changed = true;
 	}
-	void update_attrs() {
-		if (is_bold || is_dim || is_inverse || is_underline) {
-			termiq::set_attrs(is_bold, is_dim, is_inverse, is_underline);
+	if (s.dim && *s.dim != is_dim) {
+		is_dim = *s.dim;
+		dim_changed = true;
+	}
+	if ((bold_changed && !is_bold) || (dim_changed && !is_dim)) list.push_back(StyleProp::NORMAL);
+	if (is_bold) list.push_back(StyleProp::BOLD);
+	if (is_dim) list.push_back(StyleProp::DIM);
+
+	if (s.italic && is_italic != *s.italic) {
+		is_italic = *s.italic;
+		list.push_back(is_italic ? StyleProp::ITALIC : StyleProp::STRAIGHT);
+	}
+
+	if (s.underline && *s.underline != is_underline) {
+		is_underline = *s.underline;
+		if (is_underline.index() == 0) {
+			bool st = std::get<0>(is_underline);
+			list.push_back(st ? StyleProp::UNDERLINE : StyleProp::NONDERLINE);
 		} else {
-			termiq::reset_attrs();
-		}
-		if (is_italic) {
-			termiq::set_italic_on();
-		}
-	}
-	void update_colors() {
-		if (is_foreground_set()) {
-			termiq::style::foreground(current_foreground);
-		}
-		if (is_background_set()) {
-			termiq::style::background(current_background);
+			Underline &u = std::get<1>(is_underline);
+			detail::executor->execute<se::set_underline_color>(u.color);
+			detail::executor->execute<se::set_underline_style>(u.style);
 		}
 	}
-	int color_hash(int r, int g, int b) {
-		return ((r * 2050 + g) * 2050) + b;
+
+	if (s.blinking && *s.blinking != is_blinking) {
+		is_blinking = *s.blinking;
+		list.push_back(is_blinking ? StyleProp::BLINKING : StyleProp::STARING);
 	}
-	int define_color(const termiq::style::Color &color) {
-		const auto [r,g,b] = color;
-		if (!max_colors_count) {
-			max_colors_count = termiq::get_max_colors() - start_colors_offset;
-		}
-		const int hash = color_hash(r,g,b);
-		auto color_it = saved_colors.find(hash);
-		int color_id;
-		if (color_it == saved_colors.end()) {
-			if ((int)saved_colors.size() >= max_colors_count) {
-				auto least_used_color = color_prior.back();
-				color_prior.pop_back();
-				color_id = least_used_color.second;
-				saved_colors.erase(least_used_color.first);
-			} else {
-				color_id = saved_colors.size() + start_colors_offset;
-			}
-			color_prior.push_front({hash, color_id});
-			saved_colors.insert({hash, color_prior.begin()});
-			termiq::define_color(color_id, r, g, b);
-		} else {
-			color_id = color_it->second->second;
-			color_prior.splice(color_prior.begin(), color_prior, color_it->second);
-		}
-		return color_id;
+
+	if (s.inverse && *s.inverse != is_inverse) {
+		is_inverse = *s.inverse;
+		list.push_back(is_inverse ? StyleProp::INVERSE : StyleProp::OUTVERSE);
 	}
+
+	if (s.hidden && *s.hidden != is_hidden) {
+		is_hidden = *s.hidden;
+		list.push_back(is_hidden ? StyleProp::HIDDEN : StyleProp::VISIBLE);
+	}
+
+	if (s.strike && *s.strike != is_strike) {
+		is_strike = *s.strike;
+		list.push_back(is_strike ? StyleProp::STRIKE : StyleProp::UNSTRIKE);
+	}
+
+	if (!list.size()) return;
+
+	detail::executor->execute<se::set_styles>(std::move(list));
 }
 
-// For testing.
-#ifdef STUBTERM
-namespace termiq {
-	void term_stub_reset_styles_() {
-		max_colors_count = 0;
-		saved_colors.clear();
-		color_prior.clear();
-		reset_background();
-		reset_foreground();
-		is_bold = is_italic = is_special = is_dim = is_underline = is_inverse = false;
-	}
-}
-#endif // STUBTERM
-
-const termiq::style::Color termiq::style::Color::UNDEFINED = {-1, -1, -1};
-
-void termiq::style::style(Color fg, Color bg, bool bold, bool italic, bool dim, bool underline, bool inverse) {
-	bool attr_updated = false;
-	if (is_bold != bold) {
-		is_bold = bold;
-		attr_updated = true;
-	}
-	if (is_italic != italic) {
-		is_italic = italic;
-		attr_updated = true;
-	}
-	if (is_dim != dim) {
-		is_dim = dim;
-		attr_updated = true;
-	}
-	if (is_underline != underline) {
-		is_underline = underline;
-		attr_updated = true;
-	}
-	if (is_inverse != inverse) {
-		is_inverse = inverse;
-		attr_updated = true;
-	}
-	if (attr_updated) {
-		update_attrs();
-	}
-	bool clrs_updated = false;
-	if (!attr_updated && ( (is_foreground_set() && !termiq::style::is_color_defined(fg)) || (is_background_set() && !termiq::style::is_color_defined(bg)) )) {
-		reset_colors();
-		clrs_updated = true;
-	}
-	if (current_foreground != fg) {
-		current_foreground = fg;
-		clrs_updated = true;
-	}
-	if (current_background != bg) {
-		current_background = bg;
-		clrs_updated = true;
-	}
-	if (clrs_updated) {
-		update_colors();
-	}
-}
-
-void termiq::style::foreground(const Color color) {
-	if (!is_color_defined(color)) {
-		if (!is_foreground_set()) return;
-		reset_colors();
-		reset_foreground();
-		update_colors();
-		return;
-	}
-	const int color_id = ::define_color(color);
-	set_foreground_color(color_id);
+void termiq::style::foreground(const color_t color) {
+	if (color == current_foreground) return;
 	current_foreground = color;
+	detail::executor->execute<se::set_foreground_color>(color);
 }
 
-void termiq::style::background(const Color color) {
-	if (!is_color_defined(color)) {
-		if (!is_background_set()) return;
-		reset_colors();
-		reset_background();
-		update_colors();
-		return;
-	}
-	const int color_id = ::define_color(color);
-	set_background_color(color_id);
+void termiq::style::background(const color_t color) {
+	if (color == current_background) return;
 	current_background = color;
+	detail::executor->execute<se::set_background_color>(color);
 }
 
 void termiq::style::bold(bool state) {
 	if (is_bold == state) return;
 	is_bold = state;
-	update_attrs();
-	update_colors();
-}
-
-void termiq::style::italic(bool state) {
-	if (is_italic == state) return;
-	is_italic = state;
-	if (is_italic) {
-		termiq::set_italic_on();
+	if (state) {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::BOLD});
+	} else if (is_dim) {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::NORMAL, StyleProp::DIM});
 	} else {
-		termiq::set_italic_off();
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::NORMAL});
 	}
-}
-
-void termiq::style::special_chars(bool state) {
-	if (state == is_special) return;
-	is_special = state;
-	if (is_special) {
-		termiq::alternate_chars_on();
-	} else {
-		termiq::alternate_chars_off();
-	}
-}
-
-void termiq::style::underline(bool state) {
-	if (is_underline == state) return;
-	is_underline = state;
-	update_attrs();
-	update_colors();
 }
 
 void termiq::style::dim(bool state) {
 	if (is_dim == state) return;
 	is_dim = state;
-	update_attrs();
-	update_colors();
+	if (state) {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::DIM});
+	} else if (is_bold) {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::NORMAL, StyleProp::BOLD});
+	} else {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::NORMAL});
+	}
+}
+
+void termiq::style::italic(bool state) {
+	if (is_italic == state) return;
+	is_italic = state;
+	if (state) {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::ITALIC});
+	} else {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::STRAIGHT});
+	}
+}
+
+void termiq::style::underline(std::variant<bool, Underline> state) {
+	if (is_underline == state) return;
+	is_underline = state;
+	if (state.index() == 0) {
+		bool s = std::get<0>(state);
+		if (s) {
+			detail::executor->execute<se::set_styles>(std::vector{StyleProp::UNDERLINE});
+		} else {
+			detail::executor->execute<se::set_styles>(std::vector{StyleProp::NONDERLINE});
+		}
+	} else {
+		Underline &u = std::get<1>(state);
+		detail::executor->execute<se::set_underline_color>(u.color);
+		detail::executor->execute<se::set_underline_style>(u.style);
+	}
+}
+
+void termiq::style::blinking(bool state) {
+	if (is_blinking == state) return;
+	is_blinking = state;
+	if (state) {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::BLINKING});
+	} else {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::STARING});
+	}
 }
 
 void termiq::style::inverse(bool state) {
 	if (is_inverse == state) return;
 	is_inverse = state;
-	update_attrs();
-	update_colors();
-}
-
-void termiq::style::clear_styles(bool also_clear_colors) {
-	if (!is_bold && !is_italic && !is_underline && !is_dim && !is_inverse) {
-		clear_colors();
-		return;
+	if (state) {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::INVERSE});
+	} else {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::OUTVERSE});
 	}
-	is_bold = false;
-	is_italic = false;
-	is_underline = false;
-	is_dim = false;
-	is_inverse = false;
-	update_attrs();
-	if(also_clear_colors) {
-		reset_background();
-		reset_foreground();
+}
+
+void termiq::style::hidden(bool state) {
+	if (is_hidden == state) return;
+	is_hidden = state;
+	if (state) {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::HIDDEN});
+	} else {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::VISIBLE});
 	}
-	update_colors();
 }
 
-void termiq::style::clear_colors() {
-	if (!is_foreground_set() && !is_background_set()) {
-		return;
+void termiq::style::strike(bool state) {
+	if (is_strike == state) return;
+	is_strike = state;
+	if (state) {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::STRIKE});
+	} else {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::UNSTRIKE});
 	}
-	termiq::reset_colors();
-	reset_background();
-	reset_foreground();
 }
 
-void termiq::style::clear() {
-	clear_styles(true);
+void termiq::style::style_reset() {
+	reset_attr_values();
+	reset_color_values();
+	detail::executor->execute<se::reset_styles>();
 }
 
-void termiq::style::reset() {
-	termiq::undefine_colors();
-	clear();
+void termiq::style::props_reset()
+{
+	std::vector<StyleProp> list;
+	if (is_bold || is_dim) list.push_back(StyleProp::NORMAL);
+	if (is_italic) list.push_back(StyleProp::STRAIGHT);
+	if (is_underline.index() == 1 || (is_underline.index() == 0 && std::get<0>(is_underline))) list.push_back(StyleProp::NONDERLINE);
+	if (is_blinking) list.push_back(StyleProp::STARING);
+	if (is_inverse) list.push_back(StyleProp::OUTVERSE);
+	if (is_hidden) list.push_back(StyleProp::VISIBLE);
+	if (is_strike) list.push_back(StyleProp::UNSTRIKE);
+	if (!list.size()) return;
+	detail::executor->execute<se::set_styles>(std::move(list));
+	reset_attr_values();
 }
 
-bool termiq::style::is_color_defined(const termiq::style::Color &color) {
-	return color.r >= 0;
+void termiq::style::colors_reset() {
+	foreground(Color::NONE);
+	background(Color::NONE);
+}
+
+void termiq::style::update() {
+	style(FontStyle{
+		.foreground = current_foreground,
+		.background = current_background,
+		.bold = is_bold,
+		.dim = is_dim,
+		.italic = is_italic,
+		.underline = is_underline,
+		.blinking = is_blinking,
+		.inverse = is_inverse,
+		.hidden = is_hidden,
+		.strike = is_strike,
+	});
+}
+
+void termiq::style::terminal_style(TerminalStyle style)
+{
+	if (style.foreground.index() == 0) terminal_foreground(std::get<0>(style.foreground));
+	if (style.background.index() == 0) terminal_background(std::get<0>(style.background));
+	if (style.selection_foreground.index() == 0) selection_foreground(std::get<0>(style.selection_foreground));
+	if (style.selection_background.index() == 0) selection_background(std::get<0>(style.selection_background));
+	if (style.cursor_foreground.index() == 0) cursor_foreground(std::get<0>(style.cursor_foreground));
+	if (style.cursor_background.index() == 0) cursor_background(std::get<0>(style.cursor_background));
+}
+
+void termiq::style::terminal_foreground(termiq::color_t color)
+{
+	if (color == current_terminal_foreground) return;
+	current_terminal_foreground = color;
+	detail::executor->execute<se::set_color>(ColorType::FOREGROUND, color);
+}
+
+void termiq::style::terminal_background(termiq::color_t color)
+{
+	if (color == current_terminal_background) return;
+	current_terminal_background = color;
+	detail::executor->execute<se::set_color>(ColorType::BACKGROUND, color);
+}
+
+void termiq::style::selection_foreground(termiq::color_t color)
+{
+	if (color == current_terminal_selection_foreground) return;
+	current_terminal_selection_foreground = color;
+	detail::executor->execute<se::set_color>(ColorType::SELECTION_FOREGROUND, color);
+}
+
+void termiq::style::selection_background(termiq::color_t color)
+{
+	if (color == current_terminal_selection_background) return;
+	current_terminal_selection_background = color;
+	detail::executor->execute<se::set_color>(ColorType::SELECTION_BACKGROUND, color);
+}
+
+void termiq::style::cursor_foreground(termiq::color_t color)
+{
+	if (color == current_terminal_cursor_foreground) return;
+	current_terminal_cursor_foreground = color;
+	detail::executor->execute<se::set_color>(ColorType::CURSOR_FOREGROUND, color);
+}
+
+void termiq::style::cursor_background(termiq::color_t color)
+{
+	if (color == current_terminal_cursor_background) return;
+	current_terminal_cursor_background = color;
+	detail::executor->execute<se::set_color>(ColorType::CURSOR_BACKGROUND, color);
+}
+
+void termiq::style::terminal_style_reset()
+{
+	terminal_style(TerminalStyle{
+		.foreground = Color::NONE,
+		.background = Color::NONE,
+		.selection_foreground = Color::NONE,
+		.selection_background = Color::NONE,
+		.cursor_foreground = Color::NONE,
+		.cursor_background = Color::NONE,
+	});
 }
