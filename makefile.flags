@@ -1,2 +1,2 @@
-LIBS_LD+=-ltinfo
+# LIBS_LD+=
 # LIBS_INC+=

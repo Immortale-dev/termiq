@@ -24,7 +24,7 @@ flagsinc=$(foreach d,$(wildcard $(1:=/inc/*)),$(call flagsinc,$d) $(d:=/makefile
 -include makefile.flags
 
 # Extra test flags
-EXTRA_TF=-DSTUBTERM
+EXTRA_TF=
 
 LDFLAGS:=$(LIBS_LD)
 INCL=-Isrc -Itest -Iinc $(LIBS_INC) $(MOD_INC)
