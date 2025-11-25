@@ -30,23 +30,21 @@ namespace termiq {
 		concept State = requires(T t, T g) {
 			std::is_default_constructible_v<T>;
 
-			{ t.foreground() } -> std::same_as<style::Color>;
-			{ t.background() } -> std::same_as<style::Color>;
+			{ t.foreground() } -> std::same_as<::termiq::color_t>;
+			{ t.background() } -> std::same_as<::termiq::color_t>;
 			{ t.bold() } -> std::same_as<bool>;
 			{ t.italic() } -> std::same_as<bool>;
 			{ t.dim() } -> std::same_as<bool>;
 			{ t.inverse() } -> std::same_as<bool>;
 			{ t.underline() } -> std::same_as<bool>;
-			{ t.special() } -> std::same_as<bool>;
 
-			{ t.foreground(style::Color{}) };
-			{ t.background(style::Color{}) };
+			{ t.foreground(termiq::Color::NONE) };
+			{ t.background(termiq::Color::NONE) };
 			{ t.bold(true) };
 			{ t.italic(true) };
 			{ t.dim(true) };
 			{ t.inverse(true) };
 			{ t.underline(true) };
-			{ t.special(true) };
 
 			{ t == g } -> std::same_as<bool>;
 			{ t != g } -> std::same_as<bool>;
@@ -139,55 +137,51 @@ namespace termiq {
 		class CharState {
 			public:
 				struct Builder {
-					style::Color foreground = style::Color::UNDEFINED;
-					style::Color background = style::Color::UNDEFINED;
+					termiq::color_t foreground = termiq::Color::NONE;
+					termiq::color_t background = termiq::Color::NONE;
 					bool bold = false;
 					bool italic = false;
 					bool dim = false;
 					bool inverse = false;
 					bool underline = false;
-					bool special = false;
 				};
 
 			public:
 				CharState() = default;
-				CharState(Builder b) : foreground_(b.foreground), background_(b.background), bold_(b.bold), italic_(b.italic), dim_(b.dim), inverse_(b.inverse), underline_(b.underline), special_(b.special) {}
+				CharState(Builder b) : foreground_(b.foreground), background_(b.background), bold_(b.bold), italic_(b.italic), dim_(b.dim), inverse_(b.inverse), underline_(b.underline) {}
 
-				style::Color foreground() const { return foreground_; }
-				style::Color background() const { return background_; }
+				termiq::color_t foreground() const { return foreground_; }
+				termiq::color_t background() const { return background_; }
 				bool bold() const { return bold_; }
 				bool italic() const { return italic_; }
 				bool dim() const { return dim_; }
 				bool inverse() const { return inverse_; }
 				bool underline() const { return underline_; }
-				bool special() const { return special_; }
 
-				void foreground(style::Color color) { foreground_ = color; }
-				void background(style::Color color) { background_ = color; }
+				void foreground(termiq::color_t color) { foreground_ = color; }
+				void background(termiq::color_t color) { background_ = color; }
 				void bold(bool state) { bold_ = state; }
 				void italic(bool state) { italic_ = state; }
 				void dim(bool state) { dim_ = state; }
 				void inverse(bool state) { inverse_ = state; }
 				void underline(bool state) { underline_ = state; }
-				void special(bool state) { special_ = state; }
 
 				bool operator==(const CharState &other) const {
 					return foreground() == other.foreground() && background() == other.background() && bold() == other.bold() && italic() == other.italic()
-						&& dim() == other.dim() && inverse() == other.inverse() && underline() == other.underline() && special() == other.special();
+						&& dim() == other.dim() && inverse() == other.inverse() && underline() == other.underline();
 				}
 				bool operator!=(const CharState &other) const {
 					return !(*this == other);
 				}
 
 			private:
-				termiq::style::Color foreground_ = style::Color::UNDEFINED;
-				termiq::style::Color background_ = style::Color::UNDEFINED;
+				termiq::color_t foreground_ = termiq::Color::NONE;
+				termiq::color_t background_ = termiq::Color::NONE;
 				bool bold_ = false;
 				bool italic_ = false;
 				bool dim_ = false;
 				bool inverse_ = false;
 				bool underline_ = false;
-				bool special_ = false;
 		};
 
 		// CT - char type, e.g. WCharType

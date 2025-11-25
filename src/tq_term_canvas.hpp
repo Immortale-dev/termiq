@@ -7,7 +7,7 @@
 #include "tq_term_canvas_utils.h"
 
 template<typename CC>
-termiq::canvas::Canvas<CC>::Canvas(unsigned int h, unsigned int w, unsigned int r, unsigned int c): _height(h), _width(w), _row(r), _col(c), _canvas(h, container<CC>(w)) {}
+termiq::canvas::Canvas<CC>::Canvas(SequenceExecutor* se, unsigned int h, unsigned int w, unsigned int r, unsigned int c): se_(se), _height(h), _width(w), _row(r), _col(c), _canvas(h, container<CC>(w)) {}
 
 template<typename CC>
 void termiq::canvas::Canvas<CC>::resize(unsigned int height, unsigned int width) {
@@ -113,16 +113,22 @@ void termiq::canvas::Canvas<CC>::paint_cell(CC &cell) {
 
 template<typename CC>
 void termiq::canvas::Canvas<CC>::move_cursor(unsigned int row, unsigned int col) {
-	termiq::move(row, col);
+	se_->execute<termiq::se::move>(row, col);
 }
 
 template<typename CC>
 void termiq::canvas::Canvas<CC>::set_paint_state(CharState* state) {
 	if (!state) {
-		termiq::style::clear();
-		termiq::style::special_chars(false);
+		termiq::style::style_reset();
 		return;
 	}
-	termiq::style::style(state->foreground(), state->background(), state->bold(), state->italic(), state->dim(), state->underline(), state->inverse());
-	termiq::style::special_chars(state->special());
+	termiq::style::style({
+		.foreground = state->foreground(),
+		.background = state->background(),
+		.bold = state->bold(),
+		.dim = state->dim(),
+		.italic = state->italic(),
+		.underline = state->underline(),
+		.inverse = state->inverse(),
+	});
 }

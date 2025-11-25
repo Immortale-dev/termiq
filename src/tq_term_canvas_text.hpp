@@ -14,12 +14,12 @@ template<typename CC>
 termiq::canvas::Text<CC>::Text(std::vector<std::vector<char_type>>&& multiline) : _txt(std::move(multiline)) {}
 
 template<typename CC>
-void termiq::canvas::Text<CC>::set_foreground_color(termiq::style::Color &&color) {
+void termiq::canvas::Text<CC>::set_foreground_color(termiq::color_t color) {
 	_foreground = color;
 }
 
 template<typename CC>
-void termiq::canvas::Text<CC>::set_background_color(termiq::style::Color &&color) {
+void termiq::canvas::Text<CC>::set_background_color(termiq::color_t color) {
 	_background = color;
 }
 

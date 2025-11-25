@@ -20,8 +20,8 @@ namespace termiq {
 				Text(std::vector<char_type>&& line);
 				Text(std::vector<std::vector<char_type>>&& multiline);
 
-				void set_foreground_color(termiq::style::Color &&color);
-				void set_background_color(termiq::style::Color &&color);
+				void set_foreground_color(termiq::color_t color);
+				void set_background_color(termiq::color_t color);
 				void set_bold();
 				void set_italic();
 				void set_dim();
@@ -46,8 +46,8 @@ namespace termiq {
 				virtual unsigned int get_calc_height();
 
 				std::vector<std::vector<char_type>> _txt;
-				termiq::style::Color _foreground = style::Color::UNDEFINED;
-				termiq::style::Color _background = style::Color::UNDEFINED;
+				termiq::color_t _foreground = ::termiq::Color::NONE;
+				termiq::color_t _background = ::termiq::Color::NONE;
 				bool _bold = false;
 				bool _italic = false;
 				bool _dim = false;

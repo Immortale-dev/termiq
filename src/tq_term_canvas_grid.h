@@ -13,19 +13,18 @@ namespace termiq {
 	namespace canvas {
 		enum class BorderType {
 			NONE = 0,
-			SINGLE_ASCII = 1,
-			SINGLE = 2,
-			DOUBLE = 3,
-			BOLD = 4,
-			ROUND = 5,
-			EMPTY = 6
+			SINGLE = 1,
+			DOUBLE = 2,
+			BOLD = 3,
+			ROUND = 4,
+			EMPTY = 5
 		};
 
 		template <typename CC>
 		class Grid : public Content<CC> {
 			using char_type = typename CC::char_type;
 			struct GridCellState {
-				termiq::style::Color background = style::Color::UNDEFINED;
+				termiq::color_t background = ::termiq::Color::NONE;
 				Content<CC>* content = nullptr;
 				unsigned int width = 0;
 				unsigned int height = 0;
@@ -48,10 +47,10 @@ namespace termiq {
 				Grid(unsigned int rows=1, unsigned int cols=1);
 				void select_cell(size_t c);
 				void select_cell(size_t r, size_t c);
-				void set_background_color(termiq::style::Color color);
-				void set_border_foreground_color(termiq::style::Color color);
-				void set_border_background_color(termiq::style::Color color);
-				void set_cell_background_color(termiq::style::Color color);
+				void set_background_color(termiq::color_t color);
+				void set_border_foreground_color(termiq::color_t color);
+				void set_border_background_color(termiq::color_t color);
+				void set_cell_background_color(termiq::color_t color);
 				void set_cell_content(Content<CC>* content);
 				void set_width(unsigned int width);
 				void set_height(unsigned int height);
@@ -87,9 +86,9 @@ namespace termiq {
 				std::vector<std::vector<GridCellState>> _grid;
 				size_t _current_cell_r = 0;
 				size_t _current_cell_c = 0;
-				termiq::style::Color _border_foreground_color = style::Color::UNDEFINED;
-				termiq::style::Color _border_background_color = style::Color::UNDEFINED;
-				BorderType _border_type = BorderType::SINGLE_ASCII;
+				termiq::color_t _border_foreground_color = termiq::Color::NONE;
+				termiq::color_t _border_background_color = termiq::Color::NONE;
+				BorderType _border_type = BorderType::SINGLE;
 
 			private:
 				GridBorders get_border(BorderType type);

@@ -18,7 +18,7 @@ namespace termiq {
 
 			public:
 				Canvas() = default;
-				Canvas(unsigned int h, unsigned int w, unsigned int r=0, unsigned int c=0);
+				Canvas(SequenceExecutor* se, unsigned int h, unsigned int w, unsigned int r=0, unsigned int c=0);
 				virtual ~Canvas() = default;
 
 				void resize(unsigned int height, unsigned int width);
@@ -45,6 +45,7 @@ namespace termiq {
 				void draw(unsigned int row, unsigned int col, const CanvasPiece<CC>& piece);
 				void paint_cell(CC &cell);
 
+				SequenceExecutor* se_;
 				unsigned int _height;
 				unsigned int _width;
 				unsigned int _row;
