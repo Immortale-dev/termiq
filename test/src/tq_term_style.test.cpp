@@ -1,318 +1,257 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <memory>
+#include <iostream>
+#include <sstream>
 
+#include "tq_term.h"
 #include "tq_term_adv.h"
 #include "tq_term_style.h"
-
-namespace termiq {
-	extern int get_max_colors_stub_ret_;
-	extern void term_stub_reset_styles_();
-	extern std::vector<std::string> term_stub_calls_;
-	extern std::vector<std::tuple<int, int, int ,int>> define_color_stub_;
-	extern std::vector<std::tuple<int>> set_foreground_color_stub_;
-	extern std::vector<std::tuple<int>> set_background_color_stub_;
-	extern std::vector<std::tuple<bool, bool, bool, bool>> set_attrs_stub_;
-}
 
 SCENARIO_START
 
 DESCRIBE("Term Style", {
-	DESCRIBE("terminal has max 21 colors", {
+	DESCRIBE("Streams are assigned", {
+		std::istringstream input_sstream;
+		std::ostringstream output_sstream;
+		std::unique_ptr<std::istream> input_stream;
+		std::unique_ptr<std::ostream> output_stream;
+		std::unique_ptr<termiq::Reader> reader;
+		std::unique_ptr<termiq::Writer> writer;
+		std::unique_ptr<termiq::SequenceExecutor> se;
 		BEFORE_EACH({
-			termiq::get_max_colors_stub_ret_ = 21;
+			input_sstream = std::istringstream();
+			output_sstream = std::ostringstream();
+			input_stream = std::make_unique<std::istream>(input_sstream.rdbuf());
+			output_stream = std::make_unique<std::ostream>(output_sstream.rdbuf());
+			reader = std::make_unique<termiq::StreamReader>(input_stream.get());
+			writer = std::make_unique<termiq::StreamWriter>(output_stream.get());
+			se = std::make_unique<termiq::SequenceExecutor>(reader.get(), writer.get());
+			termiq::style::init(se.get());
 		});
 		AFTER_EACH({
-			termiq::term_stub_reset_styles_();
-			termiq::term_stub_calls_.clear();
+			termiq::style::style_reset();
 		});
-		DESCRIBE("Foreground color is set", {
-			BEFORE_EACH({
-				termiq::style::foreground({100, 120, 130});
-			});
-			AFTER_EACH({
-				termiq::define_color_stub_.clear();
-				termiq::set_foreground_color_stub_.clear();
-				termiq::set_background_color_stub_.clear();
-			});
 
-			IT("should call max colors check", {
-				EXPECT(termiq::term_stub_calls_[0]).toBe("get_max_colors");
+		DESCRIBE("Colors", {
+			IT("should set foreground color", {
+				termiq::style::foreground(termiq::Color{10, 20, 30});
+
+				std::string str = output_sstream.str();
+				EXPECT(str).toBe("\033[38;2;10;20;30m");
 			});
 
-			IT("should define color with id 16 and color {100, 120, 130}", {
-				auto tpl = termiq::define_color_stub_[0];
+			IT("should set background color", {
+				termiq::style::background(termiq::Color{50, 20, 30});
 
-				EXPECT(termiq::term_stub_calls_[1]).toBe("define_color");
-				EXPECT(std::get<0>(tpl)).toBe(16);
-				EXPECT(std::get<1>(tpl)).toBe(100);
-				EXPECT(std::get<2>(tpl)).toBe(120);
-				EXPECT(std::get<3>(tpl)).toBe(130);
-			});
-
-			IT("should call set foreground with id 16", {
-				auto tpl = termiq::set_foreground_color_stub_[0];
-
-				EXPECT(termiq::term_stub_calls_[2]).toBe("set_foreground_color");
-				EXPECT(std::get<0>(tpl)).toBe(16);
-			});
-
-			IT("should define and use additional color with id 17", {
-				termiq::style::background({200, 120, 130});
-
-				auto tpl = termiq::define_color_stub_[1];
-				auto tpl_bg = termiq::set_background_color_stub_[0];
-
-				EXPECT(std::get<0>(tpl)).toBe(17);
-				EXPECT(std::get<1>(tpl)).toBe(200);
-				EXPECT(std::get<2>(tpl)).toBe(120);
-				EXPECT(std::get<3>(tpl)).toBe(130);
-				EXPECT(std::get<0>(tpl_bg)).toBe(17);
+				std::string str = output_sstream.str();
+				EXPECT(str).toBe("\033[48;2;50;20;30m");
 			});
 
 			IT("should not reset colors", {
-				termiq::style::background(termiq::style::Color::UNDEFINED);
-				EXPECT(termiq::term_stub_calls_.size()).toBe(3);
+				termiq::style::background(termiq::Color::NONE);
+
+				std::string str = output_sstream.str();
+				EXPECT(str).toBe("");
 			});
 
 			IT("should reset background color", {
-				termiq::style::background({100, 120, 130});
-				termiq::style::background(termiq::style::Color::UNDEFINED);
+				termiq::style::background(termiq::Color{10, 20, 30});
+				size_t cur_str = output_sstream.str().size();
+				termiq::style::background(termiq::Color::NONE);
 
-				// Reset and foreground reassign.
-				EXPECT(termiq::term_stub_calls_.size()).toBe(6);
-				EXPECT(termiq::term_stub_calls_[4]).toBe("reset_colors");
-				EXPECT(termiq::term_stub_calls_[5]).toBe("set_foreground_color");
+				std::string str = output_sstream.str();
+				EXPECT(std::string(str.begin() + cur_str, str.end())).toBe("\033[49m");
 			});
 
 			IT("should reset foreground color", {
-				termiq::style::foreground(termiq::style::Color::UNDEFINED);
+				termiq::style::foreground(termiq::Color{10, 20, 30});
+				size_t cur_str = output_sstream.str().size();
+				termiq::style::colors_reset();
 
-				// No background reassignment as it is undefined.
-				EXPECT(termiq::term_stub_calls_.size()).toBe(4);
-				EXPECT(termiq::term_stub_calls_[3]).toBe("reset_colors");
+				std::string str = output_sstream.str();
+				EXPECT(std::string(str.begin() + cur_str, str.end())).toBe("\033[39m");
 			});
 
 			IT("should reset colors", {
-				termiq::style::clear_colors();
+				termiq::style::foreground(termiq::Color{10, 20, 30});
+				termiq::style::background(termiq::Color{100, 20, 30});
+				size_t cur_str = output_sstream.str().size();
+				termiq::style::colors_reset();
 
-				EXPECT(termiq::term_stub_calls_.size()).toBe(4);
-				EXPECT(termiq::term_stub_calls_[3]).toBe("reset_colors");
-			});
-
-			DESCRIBE("clear colors is called", {
-				BEFORE_EACH({
-					termiq::style::clear_colors();
-				});
-
-				IT("should not clear colors", {
-					termiq::style::clear_colors();
-
-					// Extra call is skipped.
-					EXPECT(termiq::term_stub_calls_.size()).toBe(4);
-					EXPECT(termiq::term_stub_calls_[3]).toBe("reset_colors");
-				});
-			});
-
-			DESCRIBE("2 more colors are defined", {
-				BEFORE_EACH({
-					termiq::style::foreground({500, 0, 0});
-					termiq::style::foreground({0, 500, 0});
-				});
-
-				IT("should reuse the color id 17", {
-					termiq::style::background({500, 0, 0});
-
-					auto tpl = termiq::set_background_color_stub_[0];
-
-					EXPECT(std::get<0>(tpl)).toBe(17);
-				});
-			});
-
-			DESCRIBE("4 more colors are defined", {
-				BEFORE_EACH({
-					termiq::style::background({100, 100, 0});
-					termiq::style::background({0, 100, 100});
-					termiq::style::background({100, 0, 100});
-					termiq::style::background({100, 100, 100});
-				});
-
-				IT("should define all colors with unique ids", {
-					EXPECT(std::get<0>(termiq::define_color_stub_[1])).toBe(17);
-					EXPECT(std::get<0>(termiq::define_color_stub_[2])).toBe(18);
-					EXPECT(std::get<0>(termiq::define_color_stub_[3])).toBe(19);
-					EXPECT(std::get<0>(termiq::define_color_stub_[4])).toBe(20);
-				});
-
-				IT("should redefine id 17 with new color", {
-					// Use the first color one more time
-					termiq::style::background({100, 120, 130});
-					// Use new color
-					termiq::style::foreground({200, 200, 200});
-
-					EXPECT(std::get<0>(termiq::define_color_stub_[5])).toBe(17);
-				});
+				std::string str = output_sstream.str();
+				EXPECT(std::string(str.begin() + cur_str, str.end())).toBe("\033[39m\033[49m");
 			});
 		});
-		DESCRIBE("attributes", {
-			AFTER_EACH({
-				termiq::set_attrs_stub_.clear();
-			});
-			IT("should turn on bold", {
-				termiq::style::bold(true);
 
-				auto tpl = termiq::set_attrs_stub_[0];
-
-				EXPECT(termiq::term_stub_calls_[0]).toBe("set_attrs");
-				EXPECT(std::get<0>(tpl)).toBe(true);
-				EXPECT(std::get<1>(tpl)).toBe(false);
-				EXPECT(std::get<2>(tpl)).toBe(false);
-				EXPECT(std::get<3>(tpl)).toBe(false);
-			});
-			IT("should turn on bold and bold, dim, underline and inverse", {
+		DESCRIBE("Props", {
+			IT("should turn on props one by one", {
 				termiq::style::bold(true);
-				termiq::style::dim(true);
+				termiq::style::italic(true);
 				termiq::style::underline(true);
 				termiq::style::inverse(true);
+				termiq::style::strike(true);
 
-				auto tpl2 = termiq::set_attrs_stub_[1];
-				auto tpl3 = termiq::set_attrs_stub_[2];
-				auto tpl4 = termiq::set_attrs_stub_[3];
-
-				EXPECT(termiq::term_stub_calls_.size()).toBe(4);
-				EXPECT(std::get<0>(tpl2)).toBe(true);
-				EXPECT(std::get<1>(tpl2)).toBe(true);
-				EXPECT(std::get<2>(tpl2)).toBe(false);
-				EXPECT(std::get<3>(tpl2)).toBe(false);
-
-				EXPECT(std::get<0>(tpl3)).toBe(true);
-				EXPECT(std::get<1>(tpl3)).toBe(true);
-				EXPECT(std::get<2>(tpl3)).toBe(false);
-				EXPECT(std::get<3>(tpl3)).toBe(true);
-
-				EXPECT(std::get<0>(tpl4)).toBe(true);
-				EXPECT(std::get<1>(tpl4)).toBe(true);
-				EXPECT(std::get<2>(tpl4)).toBe(true);
-				EXPECT(std::get<3>(tpl4)).toBe(true);
+				std::string str = output_sstream.str();
+				EXPECT(str).toBe("\033[1m\033[3m\033[4m\033[7m\033[9m");
 			});
 
-			IT("should left just inverse turned on", {
+			IT("should not turn off inactive props", {
 				termiq::style::bold(true);
-				termiq::style::inverse(true);
+				termiq::style::italic(true);
+				termiq::style::underline(true);
+				termiq::style::strike(false);
+				termiq::style::italic(false);
+
+				std::string str = output_sstream.str();
+				EXPECT(str).toBe("\033[1m\033[3m\033[4m\033[23m");
+			});
+
+			IT("should correctly turn off bold but not dim", {
+				termiq::style::bold(true);
+				termiq::style::dim(true);
 				termiq::style::bold(false);
 
-				auto tpl3 = termiq::set_attrs_stub_[2];
-
-				EXPECT(termiq::term_stub_calls_.size()).toBe(3);
-				EXPECT(std::get<0>(tpl3)).toBe(false);
-				EXPECT(std::get<1>(tpl3)).toBe(false);
-				EXPECT(std::get<2>(tpl3)).toBe(true);
-				EXPECT(std::get<3>(tpl3)).toBe(false);
+				std::string str = output_sstream.str();
+				EXPECT(str).toBe("\033[1m\033[2m\033[22;2m");
 			});
 
-			IT("should turn in italic", {
-				termiq::style::italic(true);
-
-				EXPECT(termiq::term_stub_calls_.size()).toBe(1);
-				EXPECT(termiq::term_stub_calls_[0]).toBe("set_italic_on");
-			});
-
-			IT("should turn on italic and dim", {
-				termiq::style::italic(true);
+			IT("should correctly turn off dim but not bold", {
+				termiq::style::bold(true);
 				termiq::style::dim(true);
+				termiq::style::dim(false);
 
-				EXPECT(termiq::term_stub_calls_.size()).toBe(3);
-				EXPECT(termiq::term_stub_calls_[1]).toBe("set_attrs");
-				EXPECT(termiq::term_stub_calls_[2]).toBe("set_italic_on");
+				std::string str = output_sstream.str();
+				EXPECT(str).toBe("\033[1m\033[2m\033[22;1m");
 			});
 
-			IT("should reenable colors if attribute changed", {
-				termiq::style::foreground({100, 0, 0});
-				termiq::style::background({100, 0, 0});
-				termiq::style::underline(true);
-
-				EXPECT(termiq::term_stub_calls_.size()).toBe(7);
-				EXPECT(termiq::term_stub_calls_[4]).toBe("set_attrs");
-				EXPECT(termiq::term_stub_calls_[5]).toBe("set_foreground_color");
-				EXPECT(termiq::term_stub_calls_[6]).toBe("set_background_color");
-			});
-
-			IT("should call reset_attrs", {
+			IT("should turn off bold", {
 				termiq::style::bold(true);
 				termiq::style::bold(false);
 
-				EXPECT(termiq::term_stub_calls_.size()).toBe(2);
-				EXPECT(termiq::term_stub_calls_[1]).toBe("reset_attrs");
+				std::string str = output_sstream.str();
+				EXPECT(str).toBe("\033[1m\033[22m");
+			});
+
+			IT("should turn on advanced underline", {
+				termiq::style::underline(termiq::style::Underline{
+					.color=termiq::Color{10,20,30},
+					.style=termiq::UnderlineStyle::CURLY,
+				});
+
+				std::string str = output_sstream.str();
+				EXPECT(str).toBe("\033[58;2;10;20;30m\033[4:3m");
+			});
+
+			IT("should turn off only underline color", {
+				termiq::style::underline(termiq::style::Underline{
+					.color=termiq::Color{10,20,30},
+					.style=termiq::UnderlineStyle::CURLY,
+				});
+				size_t cur_str = output_sstream.str().size();
+				termiq::style::underline(termiq::style::Underline{
+					.color=termiq::Color::NONE,
+					.style=termiq::UnderlineStyle::CURLY,
+				});
+
+				std::string str = output_sstream.str();
+				EXPECT(std::string(str.begin() + cur_str, str.end())).toBe("\033[59m\033[4:3m");
+			});
+
+			IT("should turn off fancy underline", {
+				termiq::style::underline(termiq::style::Underline{
+					.color=termiq::Color{10,20,30},
+					.style=termiq::UnderlineStyle::CURLY,
+				});
+				size_t cur_str = output_sstream.str().size();
+				termiq::style::underline(false);
+
+				std::string str = output_sstream.str();
+				EXPECT(std::string(str.begin() + cur_str, str.end())).toBe("\033[24m");
 			});
 		});
+
 		DESCRIBE("Style", {
-			AFTER_EACH({
-				termiq::set_attrs_stub_.clear();
-				termiq::define_color_stub_.clear();
-				termiq::set_foreground_color_stub_.clear();
-				termiq::set_background_color_stub_.clear();
-			});
-
 			IT("should set all styles correctly", {
-				termiq::style::style({100, 0, 0}, {200, 0, 0}, true, true, true, true, true);
+				termiq::style::style({
+					.foreground=termiq::Color{100, 0, 0},
+					.background=termiq::Color{200, 0, 0},
+					.bold=true,
+					.dim=true,
+					.italic=true,
+					.underline=true,
+					.inverse=true,
+				});
 
-				auto tpl = termiq::set_attrs_stub_[0];
-
-				EXPECT(termiq::term_stub_calls_).toBe({"set_attrs", "set_italic_on", "get_max_colors", "define_color", "set_foreground_color", "define_color", "set_background_color"});
-				EXPECT(std::get<0>(tpl)).toBe(true);
-				EXPECT(std::get<1>(tpl)).toBe(true);
-				EXPECT(std::get<2>(tpl)).toBe(true);
-				EXPECT(std::get<3>(tpl)).toBe(true);
+				std::string str = output_sstream.str();
+				EXPECT(str).toBe("\033[38;2;100;0;0m\033[48;2;200;0;0m\033[1;2;3;4;7m");
 			});
 
-			IT("should only call set_attrs", {
-				termiq::style::style(termiq::style::Color::UNDEFINED, termiq::style::Color::UNDEFINED, true, false, false, false, false);
+			IT("should only set bold", {
+				termiq::style::style({termiq::Color::NONE, termiq::Color::NONE, true, false, false, false, false});
 
-				EXPECT(termiq::term_stub_calls_).toBe({"set_attrs"});
-			});
-
-			IT("should not call set_attrs", {
-				termiq::style::style({200, 0, 0}, {200, 0, 0}, false, false, false, false, false);
-
-				EXPECT(termiq::term_stub_calls_).toBe({"get_max_colors", "define_color", "set_foreground_color", "set_background_color"});
+				std::string str = output_sstream.str();
+				EXPECT(str).toBe("\033[1m");
 			});
 
 			DESCRIBE("Style is set with colors and attributes", {
+				size_t pos;
 				BEFORE_EACH({
-					termiq::style::style({100, 0, 0}, {200, 0, 0}, true, true, true, true, true);
+					termiq::style::style({
+						.foreground=termiq::Color{100, 0, 0},
+						.background=termiq::Color{200, 0, 0},
+						.bold=true,
+						.dim=true,
+						.italic=true,
+						.underline=true,
+						.inverse=true,
+					});
+					pos = output_sstream.str().size();
 				});
 
-				IT("should call both set_attrs and set backgrounds", {
-					termiq::style::style({200, 0, 0}, {100, 0, 0}, true, false, true, true, true);
+				IT("should change colors and disable bold", {
+					termiq::style::style({
+						.foreground=termiq::Color{200, 0, 0},
+						.background=termiq::Color{100, 0, 0},
+						.bold=true,
+						.dim=false,
+						.italic=true,
+						.underline=true,
+						.inverse=true,
+					});
 
-					EXPECT(termiq::term_stub_calls_.size()).toBe(10);
-					EXPECT(termiq::term_stub_calls_[7]).toBe("set_attrs");
-					EXPECT(termiq::term_stub_calls_[8]).toBe("set_foreground_color");
-					EXPECT(termiq::term_stub_calls_[9]).toBe("set_background_color");
+					std::string str = output_sstream.str();
+					EXPECT(std::string(str.begin()+pos, str.end())).toBe("\033[38;2;200;0;0m\033[48;2;100;0;0m\033[22;1m");
 				});
 
-				IT("should call only set_attrs and set_italic_on", {
-					termiq::style::style(termiq::style::Color::UNDEFINED, termiq::style::Color::UNDEFINED, false, true, false, false, false);
+				IT("should reset colors and attributes", {
+					termiq::style::style({
+						.foreground=termiq::Color::NONE,
+						.background=termiq::Color::NONE,
+						.bold=false,
+						.dim=false,
+						.italic=true,
+						.underline=false,
+						.inverse=false,
+					});
 
-					EXPECT(termiq::term_stub_calls_.size()).toBe(9);
-					EXPECT(termiq::term_stub_calls_[7]).toBe("reset_attrs");
-					EXPECT(termiq::term_stub_calls_[8]).toBe("set_italic_on");
+					std::string str = output_sstream.str();
+					EXPECT(std::string(str.begin()+pos, str.end())).toBe("\033[39m\033[49m\033[22;24;27m");
 				});
 
-				IT("should call reset_attrs and set_background_color", {
-					termiq::style::style({100, 0, 0}, termiq::style::Color::UNDEFINED, false, false, false, false, false);
+				IT("should reset attributes", {
+					termiq::style::props_reset();
 
-					EXPECT(termiq::term_stub_calls_.size()).toBe(9);
-					EXPECT(termiq::term_stub_calls_[7]).toBe("reset_attrs");
-					EXPECT(termiq::term_stub_calls_[8]).toBe("set_foreground_color");
+					std::string str = output_sstream.str();
+					EXPECT(std::string(str.begin()+pos, str.end())).toBe("\033[22;23;24;27m");
 				});
 
-				IT("should call reset_attrs and set_background_color", {
-					termiq::style::style(termiq::style::Color::UNDEFINED, {200, 0, 0}, false, false, false, false, false);
+				IT("should reset all", {
+					termiq::style::style_reset();
 
-					EXPECT(termiq::term_stub_calls_.size()).toBe(9);
-					EXPECT(termiq::term_stub_calls_[7]).toBe("reset_attrs");
-					EXPECT(termiq::term_stub_calls_[8]).toBe("set_background_color");
+					std::string str = output_sstream.str();
+					EXPECT(std::string(str.begin()+pos, str.end())).toBe("\033[0m");
 				});
 			});
 		});

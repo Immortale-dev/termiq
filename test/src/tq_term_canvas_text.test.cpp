@@ -75,30 +75,30 @@ DESCRIBE("Canvas", {
 			});
 
 			IT("should apply foreground color", {
-				text->set_foreground_color({100, 100, 100});
+				text->set_foreground_color(termiq::Color{100, 100, 100});
 				auto state = pieces_to_grid(text->build())[0][0].state;
 				termiq::canvas::CharState compare;
-				compare.foreground({100, 100, 100});
+				compare.foreground(termiq::Color{100, 100, 100});
 
 				EXPECT(*state).toBe(compare);
 			});
 
 			IT("should apply background color", {
-				text->set_background_color({200, 200, 200});
+				text->set_background_color(termiq::Color{200, 200, 200});
 				auto state = pieces_to_grid(text->build())[0][0].state;
 				termiq::canvas::CharState compare;
-				compare.background({200, 200, 200});
+				compare.background(termiq::Color{200, 200, 200});
 
 				EXPECT(*state).toBe(compare);
 			});
 
 			IT("should mix colors and styles", {
-				text->set_background_color({100, 120, 150});
+				text->set_background_color(termiq::Color{100, 120, 150});
 				text->set_bold();
 				text->set_inverse();
 
 				auto state = pieces_to_grid(text->build())[0][0].state;
-				termiq::canvas::CharState compare({.background={100,120,150}, .bold=true, .inverse=true});
+				termiq::canvas::CharState compare({.background=termiq::Color{100,120,150}, .bold=true, .inverse=true});
 
 				EXPECT(*state).toBe(compare);
 			});

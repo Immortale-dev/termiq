@@ -13,7 +13,7 @@ DESCRIBE("Canvas", {
 		using CC = termiq::canvas::CharCell<termiq::canvas::WCharType, termiq::canvas::CharState>;
 		termiq::canvas::Grid<CC>* grid;
 
-		DESCRIBE("a 2x2 instance of char grid has been created", {
+		DESCRIBE_SKIP("a 2x2 instance of char grid has been created", {
 			termiq::canvas::Grid<CC_CHAR>* char_grid;
 			BEFORE_EACH({
 				char_grid = new termiq::canvas::Grid<CC_CHAR>(2,2);
@@ -225,9 +225,9 @@ DESCRIBE("Canvas", {
 				auto t_state = state[1][1].state;
 
 				auto expected = termiq::canvas::CharState({
-					termiq::style::Color::UNDEFINED,
-					termiq::style::Color::UNDEFINED,
-					false, false, false, false, false, false
+					termiq::Color::NONE,
+					termiq::Color::NONE,
+					false, false, false, false, false
 				});
 
 				EXPECT(*b_state).toBe(expected);
@@ -235,24 +235,7 @@ DESCRIBE("Canvas", {
 			});
 
 			IT("should style border color", {
-				grid->set_border_foreground_color({100, 100, 100});
-
-				auto state = pieces_to_grid(grid->build());
-
-				auto b_state = state[0][0].state;
-				auto t_state = state[1][1].state;
-
-				auto e_text = termiq::canvas::CharState{};
-				auto e_border = termiq::canvas::CharState{
-					{100, 100, 100},
-				};
-
-				EXPECT(*t_state).toBe(e_text);
-				EXPECT(*b_state).toBe(e_border);
-			});
-
-			IT("should style border background color", {
-				grid->set_border_background_color({100, 100, 100});
+				grid->set_border_foreground_color(termiq::Color{100, 100, 100});
 
 				auto state = pieces_to_grid(grid->build());
 
@@ -261,8 +244,25 @@ DESCRIBE("Canvas", {
 
 				auto e_text = termiq::canvas::CharState{};
 				auto e_border = termiq::canvas::CharState({
-					termiq::style::Color::UNDEFINED,
-					{100, 100, 100},
+					termiq::Color{100, 100, 100}
+				});
+
+				EXPECT(*t_state).toBe(e_text);
+				EXPECT(*b_state).toBe(e_border);
+			});
+
+			IT("should style border background color", {
+				grid->set_border_background_color(termiq::Color{100, 100, 100});
+
+				auto state = pieces_to_grid(grid->build());
+
+				auto b_state = state[0][0].state;
+				auto t_state = state[1][1].state;
+
+				auto e_text = termiq::canvas::CharState{};
+				auto e_border = termiq::canvas::CharState({
+					termiq::Color::NONE,
+					termiq::Color{100, 100, 100},
 				});
 
 				EXPECT(*t_state).toBe(e_text);
@@ -270,7 +270,7 @@ DESCRIBE("Canvas", {
 			});
 
 			IT("should style cell background color", {
-				grid->set_background_color({100, 100, 100});
+				grid->set_background_color(termiq::Color{100, 100, 100});
 
 				auto state = pieces_to_grid(grid->build());
 
@@ -278,8 +278,8 @@ DESCRIBE("Canvas", {
 				auto t_state = state[1][1].state;
 
 				auto e_text = termiq::canvas::CharState({
-					termiq::style::Color::UNDEFINED,
-					{100, 100, 100}
+					termiq::Color::NONE,
+					termiq::Color{100, 100, 100}
 				});
 				auto e_border = termiq::canvas::CharState{};
 

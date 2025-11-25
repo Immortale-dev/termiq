@@ -49,8 +49,26 @@ DESCRIBE("canvas", {
 	DESCRIBE("20x25 on [3;5] instance of MyCanvas is created.", {
 		canvas_test::MyCanvas canvas;
 
+		std::istringstream input_sstream;
+		std::ostringstream output_sstream;
+		std::unique_ptr<std::istream> input_stream;
+		std::unique_ptr<std::ostream> output_stream;
+		std::unique_ptr<termiq::Reader> reader;
+		std::unique_ptr<termiq::Writer> writer;
+		std::unique_ptr<termiq::SequenceExecutor> se;
 		BEFORE_EACH({
-			canvas = canvas_test::MyCanvas(20, 25, 3, 5);
+			input_sstream = std::istringstream();
+			output_sstream = std::ostringstream();
+			input_stream = std::make_unique<std::istream>(input_sstream.rdbuf());
+			output_stream = std::make_unique<std::ostream>(output_sstream.rdbuf());
+			reader = std::make_unique<termiq::StreamReader>(input_stream.get());
+			writer = std::make_unique<termiq::StreamWriter>(output_stream.get());
+			se = std::make_unique<termiq::SequenceExecutor>(reader.get(), writer.get());
+			termiq::style::init(se.get());
+		});
+
+		BEFORE_EACH({
+			canvas = canvas_test::MyCanvas(se.get(), 20, 25, 3, 5);
 		});
 
 		AFTER_EACH({
