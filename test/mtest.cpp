@@ -94,7 +94,7 @@ void paint_texts() {
 }
 
 void paint_canvas(termiq::SequenceExecutor* se) {
-	termiq::canvas::Canvas<CC> canvas(se, rows,cols,0,0);
+	termiq::canvas::SECanvas<CC> canvas(se, rows,cols,0,0);
 
 	auto t1 = std::chrono::system_clock::now();
 
@@ -185,7 +185,7 @@ void paint_canvas(termiq::SequenceExecutor* se) {
 
 void paint_full_screen(termiq::SequenceExecutor* se) {
 	// TEST FULL SCREEN DRAW
-	termiq::canvas::Canvas<CC> canvas(se, rows, cols, 0, 0);
+	termiq::canvas::SECanvas<CC> canvas(se, rows, cols, 0, 0);
 	auto t1 = std::chrono::system_clock::now();
 	for(int r=0;r<rows;r++) {
 		for(int c=0;c<cols;c++) {

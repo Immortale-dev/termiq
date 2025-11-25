@@ -62,8 +62,8 @@ namespace termiq {
 				writer_->write(F::str(std::forward<Args>(args)...));
 			}
 
-			const Reader* reader() { return reader_; }
-			const Writer* writer() { return writer_; }
+			Reader* reader() { return reader_; }
+			Writer* writer() { return writer_; }
 
 			void flush() { writer_->flush(); }
 

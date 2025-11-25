@@ -24,6 +24,7 @@ namespace termiq {
 
 			{ t.begin() } -> std::same_as<const symbol_char_type*>;
 			{ t.end() } -> std::same_as<const symbol_char_type*>;
+			t.size();
 		};
 
 		template<typename T>
@@ -61,6 +62,7 @@ namespace termiq {
 
 				const symbol_char_type* begin() const { return reinterpret_cast<const symbol_char_type*>(&symbol); }
 				const symbol_char_type* end() const { return begin() + sizeof(symbol_char_type); }
+				size_t size() const { return 1; }
 
 			private:
 				symbol_char_type symbol;
@@ -83,6 +85,7 @@ namespace termiq {
 
 				const symbol_char_type* begin() const { return symbol.data(); }
 				const symbol_char_type* end() const { return symbol.data() + symbol.size(); }
+				size_t size() const { return symbol.size(); }
 
 			private:
 				std::basic_string<symbol_char_type> symbol;
