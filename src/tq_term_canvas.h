@@ -62,7 +62,7 @@ namespace termiq {
 			protected:
 				void move_cursor(unsigned int row, unsigned int col) override;
 				void set_paint_state(CharState* state) override;
-				void paint_cell(CC &cell) override;
+				void paint_cell(const CC &cell) override;
 
 			private:
 				SequenceExecutor* se_;

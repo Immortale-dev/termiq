@@ -38,7 +38,7 @@ namespace canvas_test {
 			void paint_row(size_t index) override {
 				paint_row_called.push_back(index);
 			}
-			void paint_cell([[maybe_unused]] CC &cell) override {}
+			void paint_cell([[maybe_unused]] const CC &cell) override {}
 			void move_cursor([[maybe_unused]] unsigned int row, [[maybe_unused]] unsigned int col) override {}
 			void set_paint_state([[maybe_unused]] CharState* state) override {}
 	};
