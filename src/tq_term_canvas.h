@@ -42,7 +42,7 @@ namespace termiq {
 
 				virtual void move_cursor(unsigned int row, unsigned int col) = 0;
 				virtual void set_paint_state(CharState* state) = 0;
-				virtual void paint_cell(CC &cell) = 0;
+				virtual void paint_cell(const CC &cell) = 0;
 
 			private:
 				void draw(unsigned int row, unsigned int col, const CanvasPiece<CC>& piece);

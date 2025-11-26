@@ -132,7 +132,7 @@ void termiq::canvas::SECanvas<CC>::set_paint_state(CharState* state) {
 }
 
 template<typename CC>
-void termiq::canvas::SECanvas<CC>::paint_cell(CC &cell) {
+void termiq::canvas::SECanvas<CC>::paint_cell(const CC &cell) {
 	set_paint_state(cell.state ? cell.state.get() : nullptr);
 	se_->writer()->write(cell.symbol.begin(), cell.symbol.size());
 }
