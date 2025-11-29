@@ -233,7 +233,7 @@ namespace termiq {
 	// ESC sequences
 
 	std::string push_kitty_keys_str(KittyFlags flags);
-	std::string pop_kitty_keys_str(KittyFlags flags);
+	std::string pop_kitty_keys_str();
 	std::string set_kitty_keys_str(KittyFlags flags);
 	std::string add_kitty_keys_str(KittyFlags flags);
 	std::string remove_kitty_keys_str(KittyFlags flags);
