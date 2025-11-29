@@ -120,14 +120,29 @@ std::optional<size_t> termiq::detail::read_unsigned_until_ch(Reader* reader, cha
 
 // ESC sequences
 
-std::string termiq::enable_kitty_keys_str()
+std::string termiq::push_kitty_keys_str(KittyFlags flags)
 {
-	return std::format("{}{}>1u", ::termiq::code::ST, ::termiq::code::CSI);
+	return std::format("{}{}>{}u", ::termiq::code::ST, ::termiq::code::CSI, (uint32_t)(flags));
 }
 
-std::string termiq::disable_kitty_keys_str()
+std::string termiq::pop_kitty_keys_str(KittyFlags flags)
 {
-	return std::format("{}{}<u", ::termiq::code::ST, ::termiq::code::CSI);
+	return std::format("{}{}<{}u", ::termiq::code::ST, ::termiq::code::CSI, (uint32_t)(flags));
+}
+
+std::string termiq::set_kitty_keys_str(KittyFlags flags)
+{
+	return std::format("{}{}={}1u", ::termiq::code::ST, ::termiq::code::CSI, (uint32_t)(flags));
+}
+
+std::string termiq::add_kitty_keys_str(KittyFlags flags)
+{
+	return std::format("{}{}={}2u", ::termiq::code::ST, ::termiq::code::CSI, (uint32_t)(flags));
+}
+
+std::string termiq::remove_kitty_keys_str(KittyFlags flags)
+{
+	return std::format("{}{}={}3u", ::termiq::code::ST, ::termiq::code::CSI, (uint32_t)(flags));
 }
 
 std::string termiq::get_size_px_str()
@@ -388,6 +403,23 @@ std::string termiq::set_cursor_str(CursorStyle style)
 	return std::format("{}{}{} q", ::termiq::code::ST, ::termiq::code::CSI, (int)style);
 }
 
+std::string termiq::set_cursor_shape_str(CursorShape shape)
+{
+	std::string_view shape_str = detail::cursor_shapes[(size_t)shape];
+	return std::format("{}{}22;{}{}{}", ::termiq::code::ST, ::termiq::code::OSC, shape_str, ::termiq::code::ST, ::termiq::code::BSL);
+}
+
+std::string termiq::push_cursor_shape_str(CursorShape shape)
+{
+	std::string_view shape_str = detail::cursor_shapes[(size_t)shape];
+	return std::format("{}{}22;>{}{}{}", ::termiq::code::ST, ::termiq::code::OSC, shape_str, ::termiq::code::ST, ::termiq::code::BSL);
+}
+
+std::string termiq::pop_cursor_shape_str()
+{
+	return std::format("{}{}22;<{}{}", ::termiq::code::ST, ::termiq::code::OSC, ::termiq::code::ST, ::termiq::code::BSL);
+}
+
 std::string termiq::enable_mouse_buttons_str()
 {
 	return std::format("{}{}?1000h", ::termiq::code::ST, ::termiq::code::CSI);
@@ -416,6 +448,16 @@ std::string termiq::enable_mouse_all_motions_str()
 std::string termiq::disable_mouse_all_motions_str()
 {
 	return std::format("{}{}?1003l", ::termiq::code::ST, ::termiq::code::CSI);
+}
+
+std::string termiq::enable_paste_brackets_str()
+{
+	return std::format("{}{}?2004h", ::termiq::code::ST, ::termiq::code::CSI);
+}
+
+std::string termiq::disable_paste_brackets_str()
+{
+	return std::format("{}{}?2004l", ::termiq::code::ST, ::termiq::code::CSI);
 }
 
 std::string termiq::sync_begin_str()

@@ -124,8 +124,11 @@ namespace termiq {
 	};
 
 	namespace se {
-		DECLARE_SEQUENCE_FUNCTION(enable_kitty_keys, enable_kitty_keys_str);
-		DECLARE_SEQUENCE_FUNCTION(disable_kitty_keys, disable_kitty_keys_str);
+		DECLARE_SEQUENCE_FUNCTION(push_kitty_keys, push_kitty_keys_str);
+		DECLARE_SEQUENCE_FUNCTION(pop_kitty_keys, pop_kitty_keys_str);
+		DECLARE_SEQUENCE_FUNCTION(set_kitty_keys, set_kitty_keys_str);
+		DECLARE_SEQUENCE_FUNCTION(add_kitty_keys, add_kitty_keys_str);
+		DECLARE_SEQUENCE_FUNCTION(remove_kitty_keys, remove_kitty_keys_str);
 
 		DECLARE_SEQUENCE_FUNCTION(get_size_px, get_size_px_str, get_size_px_parser);
 		DECLARE_SEQUENCE_FUNCTION(get_size_ch, get_size_ch_str, get_size_ch_parser);
@@ -174,6 +177,9 @@ namespace termiq {
 		DECLARE_SEQUENCE_FUNCTION(set_underline_color, set_underline_color_str);
 
 		DECLARE_SEQUENCE_FUNCTION(set_cursor, set_cursor_str);
+		DECLARE_SEQUENCE_FUNCTION(set_cursor_shape, set_cursor_shape_str);
+		DECLARE_SEQUENCE_FUNCTION(push_cursor_shape, push_cursor_shape_str);
+		DECLARE_SEQUENCE_FUNCTION(pop_cursor_shape, pop_cursor_shape_str);
 
 		DECLARE_SEQUENCE_FUNCTION(enable_mouse_buttons, enable_mouse_buttons_str);
 		DECLARE_SEQUENCE_FUNCTION(disable_mouse_buttons, disable_mouse_buttons_str);
@@ -181,6 +187,9 @@ namespace termiq {
 		DECLARE_SEQUENCE_FUNCTION(disable_mouse_cell_motions, disable_mouse_cell_motions_str);
 		DECLARE_SEQUENCE_FUNCTION(enable_mouse_all_motions, enable_mouse_all_motions_str);
 		DECLARE_SEQUENCE_FUNCTION(disable_mouse_all_motions, disable_mouse_all_motions_str);
+
+		DECLARE_SEQUENCE_FUNCTION(enable_paste_brackets, enable_paste_brackets_str);
+		DECLARE_SEQUENCE_FUNCTION(disable_paste_brackets, disable_paste_brackets_str);
 
 		DECLARE_SEQUENCE_FUNCTION(sync_begin, sync_begin_str);
 		DECLARE_SEQUENCE_FUNCTION(sync_end, sync_end_str);

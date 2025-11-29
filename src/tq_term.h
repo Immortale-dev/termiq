@@ -68,6 +68,40 @@ namespace termiq {
 		STEADY_BAR          = 6,
 	};
 
+	enum class CursorShape {
+		NONE           = 0,
+		ALIAS          = 1,
+		CELL           = 2,
+		COPY           = 3,
+		CROSSHAIR      = 4,
+		DEFAULT        = 5,
+		E_RESIZE       = 6,
+		EW_RESIZE      = 7,
+		GRAP           = 8,
+		GRABBING       = 9,
+		HELP           = 10,
+		MOVE           = 11,
+		N_RESIZE       = 12,
+		NE_RESIZE      = 13,
+		NESW_RESIZE    = 14,
+		NO_DROP        = 15,
+		NOT_ALLOWED    = 16,
+		NS_RESIZE      = 17,
+		NW_RESIZE      = 18,
+		NWSE_RESIZE    = 19,
+		POINTER        = 20,
+		PROGRESS       = 21,
+		S_RESIZE       = 22,
+		SE_RESIZE      = 23,
+		SW_RESIZE      = 24,
+		TEST           = 25,
+		VERTICAL_TEXT  = 26,
+		W_RESIZE       = 27,
+		WAIT           = 28,
+		ZOOM_IN        = 29,
+		ZOOM_OUT       = 30,
+	};
+
 	enum class ColorType {
 		FOREGROUND            = 0,
 		BACKGROUND            = 1,
@@ -76,6 +110,18 @@ namespace termiq {
 		CURSOR_FOREGROUND     = 4,
 		CURSOR_BACKGROUND     = 5,
 	};
+
+	enum class KittyFlags {
+		DISAMBIGUATE       = 1,
+		EVENT_TYPES        = 2,
+		ALTERNATE_KEYS     = 4,
+		ONLY_ESCAPE_CODES  = 8,
+		ASSOCIATED_TEXT    = 16,
+		ALL                = 31,
+	};
+	inline KittyFlags operator | (KittyFlags a, KittyFlags b) {
+		return static_cast<KittyFlags>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+	}
 
 	namespace code {
 		inline constexpr char BEL = 0x7;  // Bell
@@ -186,8 +232,11 @@ namespace termiq {
 
 	// ESC sequences
 
-	std::string enable_kitty_keys_str();
-	std::string disable_kitty_keys_str();
+	std::string push_kitty_keys_str(KittyFlags flags);
+	std::string pop_kitty_keys_str(KittyFlags flags);
+	std::string set_kitty_keys_str(KittyFlags flags);
+	std::string add_kitty_keys_str(KittyFlags flags);
+	std::string remove_kitty_keys_str(KittyFlags flags);
 
 	std::string get_size_px_str();
 	std::optional<Pos> get_size_px_parser(Reader* reader);
@@ -239,6 +288,9 @@ namespace termiq {
 	std::string set_underline_color_str(color_t color = Color::NONE);
 
 	std::string set_cursor_str(CursorStyle style);
+	std::string set_cursor_shape_str(CursorShape shape);
+	std::string push_cursor_shape_str(CursorShape shape);
+	std::string pop_cursor_shape_str();
 
 	std::string enable_mouse_buttons_str();
 	std::string disable_mouse_buttons_str();
@@ -246,6 +298,9 @@ namespace termiq {
 	std::string disable_mouse_cell_motions_str();
 	std::string enable_mouse_all_motions_str();
 	std::string disable_mouse_all_motions_str();
+
+	std::string enable_paste_brackets_str();
+	std::string disable_paste_brackets_str();
 
 	std::string sync_begin_str();
 	std::string sync_end_str();
@@ -280,6 +335,40 @@ namespace termiq {
 			"selection_background"sv,
 			"cursor"sv,
 			"cursor_text"sv,
+		};
+
+		inline constexpr std::array<std::string_view, 31> cursor_shapes{
+			""sv,
+			"alias"sv,
+			"cell"sv,
+			"copy"sv,
+			"crosshair"sv,
+			"default"sv,
+			"e-resize"sv,
+			"ew-resize"sv,
+			"grab"sv,
+			"grabbing"sv,
+			"help"sv,
+			"move"sv,
+			"n-resize"sv,
+			"ne-resize"sv,
+			"nesw-resize"sv,
+			"no-drop"sv,
+			"not-allowed"sv,
+			"ns-resize"sv,
+			"nw-resize"sv,
+			"nwse-resize"sv,
+			"pointer"sv,
+			"progress"sv,
+			"s-resize"sv,
+			"se-resize"sv,
+			"sw-resize"sv,
+			"text"sv,
+			"vertical-text"sv,
+			"w-resize"sv,
+			"wait"sv,
+			"zoom-in"sv,
+			"zoom-out"sv,
 		};
 	}
 }
