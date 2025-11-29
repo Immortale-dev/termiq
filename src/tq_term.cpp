@@ -125,9 +125,9 @@ std::string termiq::push_kitty_keys_str(KittyFlags flags)
 	return std::format("{}{}>{}u", ::termiq::code::ST, ::termiq::code::CSI, (uint32_t)(flags));
 }
 
-std::string termiq::pop_kitty_keys_str(KittyFlags flags)
+std::string termiq::pop_kitty_keys_str()
 {
-	return std::format("{}{}<{}u", ::termiq::code::ST, ::termiq::code::CSI, (uint32_t)(flags));
+	return std::format("{}{}<u", ::termiq::code::ST, ::termiq::code::CSI);
 }
 
 std::string termiq::set_kitty_keys_str(KittyFlags flags)
