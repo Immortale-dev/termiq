@@ -1,3 +1,5 @@
+#include "qtest.hpp"
+
 #include <vector>
 #include <string>
 #include <utility>
@@ -8,6 +10,7 @@
 #include "tq_term.h"
 #include "tq_term_adv.h"
 #include "tq_term_style.h"
+#include "test/src/helpers.h"
 
 SCENARIO_START
 

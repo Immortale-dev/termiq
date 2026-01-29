@@ -1,11 +1,14 @@
+#include "qtest.hpp"
+
 #include <vector>
 #include <utility>
 
 #include "tq_term_canvas.h"
 #include "tq_term_canvas_utils.h"
 #include "tq_term_canvas_text.h"
+#include "test/src/helpers.h"
 
-namespace canvas_test {
+namespace {
 	using CC = termiq::canvas::CharCell<termiq::canvas::WCharType, termiq::canvas::CharState>;
 
 	std::vector<std::pair<unsigned int, unsigned int>> size_on_resized;
@@ -46,65 +49,63 @@ namespace canvas_test {
 
 SCENARIO_START
 
-using namespace canvas_test;
-
 DESCRIBE("canvas", {
 	DESCRIBE("20x25 on [3;5] instance of MyCanvas is created.", {
-		canvas_test::MyCanvas canvas;
+		MyCanvas canvas;
 
 		BEFORE_EACH({
-			canvas = canvas_test::MyCanvas(20, 25, 3, 5);
+			canvas = MyCanvas(20, 25, 3, 5);
 		});
 
 		AFTER_EACH({
-			canvas_test::test_clear();
+			test_clear();
 		});
 
 		IT("should create correct canvas", {
-			EXPECT(canvas.get_width()).toBe(25);
-			EXPECT(canvas.get_height()).toBe(20);
-			EXPECT(canvas.get_col()).toBe(5);
-			EXPECT(canvas.get_row()).toBe(3);
-			EXPECT(canvas_test::size_on_resized.size()).toBe(0);
-			EXPECT(canvas_test::position_on_moved.size()).toBe(0);
-			EXPECT(canvas_test::drawn_called_times).toBe(0);
-			EXPECT(canvas_test::paint_row_called.size()).toBe(0);
+			EXPECT(canvas.get_width()).toBe(25ull);
+			EXPECT(canvas.get_height()).toBe(20ull);
+			EXPECT(canvas.get_col()).toBe(5u);
+			EXPECT(canvas.get_row()).toBe(3u);
+			EXPECT(size_on_resized.size()).toBe(0ull);
+			EXPECT(position_on_moved.size()).toBe(0ull);
+			EXPECT(drawn_called_times).toBe(0);
+			EXPECT(paint_row_called.size()).toBe(0ull);
 		});
 
 		IT("should call resized protected function once when resize is called", {
 			canvas.resize(15, 18);
 
-			EXPECT(canvas_test::size_on_resized.size()).toBe(1);
-			EXPECT(canvas_test::size_on_resized[0]).toBe({15, 18});
-			EXPECT(canvas.get_width()).toBe(18);
-			EXPECT(canvas.get_height()).toBe(15);
+			EXPECT(size_on_resized.size()).toBe(1ull);
+			EXPECT(size_on_resized[0]).toBe({15, 18});
+			EXPECT(canvas.get_width()).toBe(18u);
+			EXPECT(canvas.get_height()).toBe(15u);
 		});
 
 		IT("should call moved protected function once when move is called", {
 			canvas.move(10, 15);
 
-			EXPECT(canvas_test::position_on_moved.size()).toBe(1);
-			EXPECT(canvas_test::position_on_moved[0]).toBe({10, 15});
-			EXPECT(canvas.get_col()).toBe(15);
-			EXPECT(canvas.get_row()).toBe(10);
+			EXPECT(position_on_moved.size()).toBe(1ull);
+			EXPECT(position_on_moved[0]).toBe({10, 15});
+			EXPECT(canvas.get_col()).toBe(15u);
+			EXPECT(canvas.get_row()).toBe(10u);
 		});
 
 		IT("should call drawn protected function once when draw is called with rvalue", {
-			auto pieces = termiq::canvas::Text<canvas_test::CC>(build_text<CC,char16_t>(u"test")).build();
+			auto pieces = termiq::canvas::Text<CC>(build_text<CC,char16_t>(u"test")).build();
 			canvas.draw(3, 4, std::move(pieces));
 
-			EXPECT(canvas_test::drawn_called_times).toBe(1);
+			EXPECT(drawn_called_times).toBe(1);
 		});
 
 		IT("should call drawn protected function once when draw is called with lvalue ref", {
-			auto pieces = termiq::canvas::Text<canvas_test::CC>(build_text<CC,char16_t>(u"test")).build();
+			auto pieces = termiq::canvas::Text<CC>(build_text<CC,char16_t>(u"test")).build();
 			canvas.draw(3, 4, pieces);
 
-			EXPECT(canvas_test::drawn_called_times).toBe(1);
+			EXPECT(drawn_called_times).toBe(1);
 		});
 
 		IT("should correctly draw pieces", {
-			auto pieces = termiq::canvas::Text<canvas_test::CC>(build_text<CC,char16_t>(u"Hello\nWorld!"));
+			auto pieces = termiq::canvas::Text<CC>(build_text<CC,char16_t>(u"Hello\nWorld!"));
 			canvas.draw(3, 4, pieces.build());
 
 			int filled_cells = 0;
@@ -116,7 +117,7 @@ DESCRIBE("canvas", {
 					}
 				}
 			}
-			auto text_lines = grid_to_text<canvas_test::CC,char16_t>(matrix);
+			auto text_lines = grid_to_text<CC,char16_t>(matrix);
 			int text_cells = 0;
 			for (auto &l : text_lines) {
 				for (auto c : l) {
@@ -146,11 +147,11 @@ DESCRIBE("canvas", {
 		IT("should call paint_row for every row in the canvas", {
 			canvas.paint();
 
-			int i=0;
-			for (auto index : canvas_test::paint_row_called) {
+			size_t i=0;
+			for (auto index : paint_row_called) {
 				EXPECT(index).toBe(i++);
 			}
-			EXPECT(i).toBe(20);
+			EXPECT(i).toBe(20ull);
 		});
 
 		DESCRIBE("canvas has been moved and resized", {
@@ -161,9 +162,9 @@ DESCRIBE("canvas", {
 
 			IT("should correctly draw pieces with complex offsets", {
 				auto piece_state = std::make_shared<termiq::canvas::CharState>();
-				const termiq::canvas::CanvasPieces<canvas_test::CC> built_pieces{
+				const termiq::canvas::CanvasPieces<CC> built_pieces{
 					{
-						termiq::canvas::CanvasPiece<canvas_test::CC>{
+						termiq::canvas::CanvasPiece<CC>{
 							{
 								{
 									{'T', piece_state},
@@ -173,7 +174,7 @@ DESCRIBE("canvas", {
 							},
 							1, 3, -2, 0
 						},
-						termiq::canvas::CanvasPiece<canvas_test::CC>{
+						termiq::canvas::CanvasPiece<CC>{
 							{
 								{
 									{'B', piece_state},
@@ -183,13 +184,13 @@ DESCRIBE("canvas", {
 							},
 							1, 3, 0, 0
 						},
-						termiq::canvas::CanvasPiece<canvas_test::CC>{
+						termiq::canvas::CanvasPiece<CC>{
 							{
 								{{'L', piece_state}},
 							},
 							1, 1, -1, 0
 						},
-						termiq::canvas::CanvasPiece<canvas_test::CC>{
+						termiq::canvas::CanvasPiece<CC>{
 							{
 								{{'R', piece_state}},
 							},
@@ -209,7 +210,7 @@ DESCRIBE("canvas", {
 						}
 					}
 				}
-				auto text_lines = grid_to_text<canvas_test::CC,char16_t>(matrix);
+				auto text_lines = grid_to_text<CC,char16_t>(matrix);
 				int text_cells = 0;
 				for (auto &l : text_lines) {
 					for (auto c : l) {
@@ -240,11 +241,11 @@ DESCRIBE("canvas", {
 			IT("should call paint_row for every row in the canvas", {
 				canvas.paint();
 
-				int i=0;
-				for (auto index : canvas_test::paint_row_called) {
+				size_t i=0;
+				for (auto index : paint_row_called) {
 					EXPECT(index).toBe(i++);
 				}
-				EXPECT(i).toBe(30);
+				EXPECT(i).toBe(30ull);
 			});
 		});
 	});

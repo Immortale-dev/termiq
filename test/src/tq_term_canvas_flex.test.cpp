@@ -1,5 +1,15 @@
+#include "qtest.hpp"
+
+#include <clocale>
+
+#include "tq_term_canvas_utils.h"
+#include "tq_term_canvas.h"
+#include "tq_term_style.h"
+#include "tq_term_canvas_text.h"
+#include "tq_term_canvas_grid.h"
 #include "tq_term_canvas_flexgrid.h"
 #include "tq_term_canvas_flextext.h"
+#include "test/src/helpers.h"
 
 SCENARIO_START
 
@@ -38,7 +48,8 @@ DESCRIBE("Canvas", {
 					});
 
 					IT("should leave first column empty, and give more space to the last column", {
-						auto result = pieces_to_text<CC,char16_t>(grid->build());
+						auto r = grid->build();
+						auto result = pieces_to_text<CC,char16_t>(r);
 
 						EXPECT(result).toBe({{
 							u"┌┬───┬────┐",
@@ -146,7 +157,7 @@ DESCRIBE("Canvas", {
 
 						auto result = pieces_to_text<CC,char16_t>(grid->build());
 
-						EXPECT(result.size()).toBe(2);
+						EXPECT(result.size()).toBe(2ull);
 						EXPECT(result[0]).toBe(u" Hello                        ");
 						EXPECT(result[1]).toBe(u"          Hello World!        ");
 					});

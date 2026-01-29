@@ -1,9 +1,13 @@
+#include "qtest.hpp"
+
 #include <string>
 #include <vector>
 #include <memory>
 
+#include "tq_term_canvas_text.h"
 #include "tq_term_canvas_grid.h"
 #include "tq_term_style.h"
+#include "test/src/helpers.h"
 
 SCENARIO_START
 

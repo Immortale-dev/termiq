@@ -1,5 +1,8 @@
+#include "qtest.hpp"
+
 #include <vector>
 
+#include "test/src/helpers.h"
 #include "tq_term_canvas_utils.h"
 #include "tq_term_canvas_text.h"
 
@@ -134,7 +137,7 @@ DESCRIBE("Canvas", {
 			IT("should show 2 lines of text", {
 				auto text_result = pieces_to_text<CC,char>(text->build());
 
-				EXPECT(text_result.size()).toBe(2);
+				EXPECT(text_result.size()).toBe(2ull);
 				EXPECT(text_result[0]).toBe("lorem ipsum   ");
 				EXPECT(text_result[1]).toBe("dolor sit amet");
 			});

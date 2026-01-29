@@ -1,8 +1,12 @@
+#ifndef TERMIQ_TEST_HELPERS_H_
+#define TERMIQ_TEST_HELPERS_H_
+
 #include <string>
 #include <algorithm>
 #include <type_traits>
 #include <cuchar>
 #include <climits>
+#include <vector>
 
 #include "tq_term_canvas_utils.h"
 
@@ -93,3 +97,5 @@ std::vector<std::basic_string<C>> pieces_to_text(termiq::canvas::CanvasPieces<CC
 	auto grid = pieces_to_grid<CC>(p);
 	return grid_to_text<CC, C>(grid);
 }
+
+#endif // TERMIQ_TEST_HELPERS_H_
