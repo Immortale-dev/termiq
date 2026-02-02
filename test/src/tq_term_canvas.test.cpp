@@ -43,7 +43,7 @@ namespace {
 			}
 			void paint_cell([[maybe_unused]] const CC &cell) override {}
 			void move_cursor([[maybe_unused]] unsigned int row, [[maybe_unused]] unsigned int col) override {}
-			void set_paint_state([[maybe_unused]] CharState* state) override {}
+			void set_paint_state([[maybe_unused]] const char_state_type* state) override {}
 	};
 }
 
@@ -161,7 +161,7 @@ DESCRIBE("canvas", {
 			});
 
 			IT("should correctly draw pieces with complex offsets", {
-				auto piece_state = std::make_shared<termiq::canvas::CharState>();
+				auto piece_state = termiq::canvas::CharState({});
 				const termiq::canvas::CanvasPieces<CC> built_pieces{
 					{
 						termiq::canvas::CanvasPiece<CC>{

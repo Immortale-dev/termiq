@@ -10,6 +10,26 @@
 
 #include "tq_term_canvas_utils.h"
 
+inline std::ostream& operator << (std::ostream& stream, termiq::canvas::CharState state) {
+//	stream << "E:" << state.empty() << ";";
+	stream << "FG:";
+	if (!state.foreground()) {
+		stream << "0;";
+	} else {
+		auto color = state.foreground();
+		stream << (int)color->r << "x" << (int)color->g << "x" << (int)color->b << ";";
+	}
+	stream << "BG:";
+	if (!state.background()) {
+		stream << "0;";
+	} else {
+		auto color = state.background();
+		stream << (int)color->r << "x" << (int)color->g << "x" << (int)color->b << ";";
+	}
+	stream << "A:" << (int)state.bold() << (int)state.dim() << (int)state.italic() << (int)state.inverse() << (int)state.underline() << ";";
+	return stream;
+}
+
 template<typename CC, typename C>
 std::vector<std::vector<typename CC::char_type>> build_text(std::basic_string<C> str){
 	using char_type = typename CC::char_type;

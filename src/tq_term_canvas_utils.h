@@ -150,7 +150,7 @@ namespace termiq {
 				};
 
 			public:
-				CharState() = default;
+				explicit CharState() = default;
 				CharState(Builder b) : foreground_(b.foreground), background_(b.background), bold_(b.bold), italic_(b.italic), dim_(b.dim), inverse_(b.inverse), underline_(b.underline) {}
 
 				termiq::color_t foreground() const { return foreground_; }
@@ -170,8 +170,9 @@ namespace termiq {
 				void underline(bool state) { underline_ = state; }
 
 				bool operator==(const CharState &other) const {
-					return foreground() == other.foreground() && background() == other.background() && bold() == other.bold() && italic() == other.italic()
-						&& dim() == other.dim() && inverse() == other.inverse() && underline() == other.underline();
+					return foreground() == other.foreground() && background() == other.background()
+						&& bold() == other.bold() && italic() == other.italic() && dim() == other.dim() && inverse() == other.inverse()
+						&& underline() == other.underline();
 				}
 				bool operator!=(const CharState &other) const {
 					return !(*this == other);
@@ -191,24 +192,27 @@ namespace termiq {
 		// CS - char state, e.g. CharState
 		template<Char CT, State CS>
 		struct CharCell {
+			CharCell() {}
+			CharCell(CT symb, CS st) : symbol(symb), state(st), transparent(false) {}
+
 			CT symbol;
-			std::shared_ptr<CS> state = nullptr;
+			CS state;
+			bool transparent = true;
 			using char_type = CT;
 			using char_state_type = CS;
 			bool operator==(const CharCell &other) const {
-				if ((state == nullptr && other.state != nullptr) || (state != nullptr && other.state == nullptr)) return false;
-				return symbol == other.symbol && (state == other.state || *state == *(other.state));
+				return symbol == other.symbol && state == other.state;
 			}
 			bool operator!=(const CharCell &other) const {
 				return !(*this == other);
 			}
-			bool is_transparent() const { return !state; }
+			bool is_transparent() const { return transparent; }
 
 			static const CharCell<CT,CS> TRANSPARENT;
 		};
 
 		template<Char CT, State CS>
-		const CharCell<CT,CS> CharCell<CT,CS>::TRANSPARENT = CharCell<CT,CS>();
+		const CharCell<CT,CS> CharCell<CT,CS>::TRANSPARENT = CharCell<CT,CS>({},{},1);
 
 		// Piece of the canvas.
 		template<typename CC>

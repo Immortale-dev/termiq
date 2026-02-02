@@ -23,6 +23,7 @@ namespace termiq {
 		template <typename CC>
 		class Grid : public Content<CC> {
 			using char_type = typename CC::char_type;
+			using char_state_type = typename CC::char_state_type;
 			struct GridCellState {
 				termiq::color_t background = ::termiq::Color::NONE;
 				Content<CC>* content = nullptr;

@@ -62,14 +62,14 @@ void termiq::canvas::Text<CC>::set_height(unsigned int h) {
 
 template<typename CC>
 typename termiq::canvas::CanvasPieces<CC> termiq::canvas::Text<CC>::build() {
-	auto cs = std::make_shared<CharState>();
-	cs->foreground(_foreground);
-	cs->background(_background);
-	cs->bold(_bold);
-	cs->italic(_italic);
-	cs->dim(_dim);
-	cs->underline(_underline);
-	cs->inverse(_inverse);
+	char_state_type cs;
+	cs.foreground(_foreground);
+	cs.background(_background);
+	cs.bold(_bold);
+	cs.italic(_italic);
+	cs.dim(_dim);
+	cs.underline(_underline);
+	cs.inverse(_inverse);
 	unsigned int lines_count = get_height();
 	auto& built_lines = get_lines();
 

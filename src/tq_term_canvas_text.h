@@ -12,6 +12,7 @@ namespace termiq {
 		class Text : public Content<CC> {
 			public:
 				using char_type = typename CC::char_type;
+				using char_state_type = typename CC::char_state_type;
 				using CanvasMatrix = std::vector<std::vector<char_type>>;
 
 				Text();

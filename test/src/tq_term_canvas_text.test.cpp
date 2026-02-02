@@ -28,7 +28,6 @@ DESCRIBE("Canvas", {
 				auto first_state = grid[0][0].state;
 				int transparent_count = 0;
 
-				EXPECT(first_state).NOT().toBe(nullptr);
 				for (auto &row : grid) {
 					for (auto &cell : row) {
 						if (cell.is_transparent()){
@@ -48,7 +47,7 @@ DESCRIBE("Canvas", {
 
 				termiq::canvas::CharState compare;
 				compare.bold(true);
-				EXPECT(*state).toBe(compare);
+				EXPECT(state).toBe(compare);
 			});
 			IT("should apply italic style", {
 				text->set_italic();
@@ -56,7 +55,7 @@ DESCRIBE("Canvas", {
 				termiq::canvas::CharState compare;
 				compare.italic(true);
 
-				EXPECT(*state).toBe(compare);
+				EXPECT(state).toBe(compare);
 			});
 
 			IT("should apply dim style", {
@@ -65,7 +64,7 @@ DESCRIBE("Canvas", {
 				termiq::canvas::CharState compare;
 				compare.dim(true);
 
-				EXPECT(*state).toBe(compare);
+				EXPECT(state).toBe(compare);
 			});
 
 			IT("should apply inverse style", {
@@ -74,7 +73,7 @@ DESCRIBE("Canvas", {
 				termiq::canvas::CharState compare;
 				compare.inverse(true);
 
-				EXPECT(*state).toBe(compare);
+				EXPECT(state).toBe(compare);
 			});
 
 			IT("should apply foreground color", {
@@ -83,7 +82,7 @@ DESCRIBE("Canvas", {
 				termiq::canvas::CharState compare;
 				compare.foreground(termiq::Color{100, 100, 100});
 
-				EXPECT(*state).toBe(compare);
+				EXPECT(state).toBe(compare);
 			});
 
 			IT("should apply background color", {
@@ -92,7 +91,7 @@ DESCRIBE("Canvas", {
 				termiq::canvas::CharState compare;
 				compare.background(termiq::Color{200, 200, 200});
 
-				EXPECT(*state).toBe(compare);
+				EXPECT(state).toBe(compare);
 			});
 
 			IT("should mix colors and styles", {
@@ -103,7 +102,7 @@ DESCRIBE("Canvas", {
 				auto state = pieces_to_grid(text->build())[0][0].state;
 				termiq::canvas::CharState compare({.background=termiq::Color{100,120,150}, .bold=true, .inverse=true});
 
-				EXPECT(*state).toBe(compare);
+				EXPECT(state).toBe(compare);
 			});
 
 			IT("should build one liner text", {

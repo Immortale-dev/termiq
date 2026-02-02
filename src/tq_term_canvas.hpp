@@ -29,7 +29,7 @@ void termiq::canvas::Canvas<CC>::draw(unsigned int row, unsigned int col, const 
 		for(size_t pc=0;pc<piece.cols;pc++) {
 			size_t r = pr + row + piece.offset_rows;
 			size_t c = pc + col + piece.offset_cols;
-			if (r >= _height || c >= _width || !piece.canvas[pr][pc].state) continue;
+			if (r >= _height || c >= _width || piece.canvas[pr][pc].transparent) continue;
 			_canvas[r][c] = piece.canvas[pr][pc];
 		}
 	}
@@ -115,7 +115,7 @@ void termiq::canvas::SECanvas<CC>::move_cursor(unsigned int row, unsigned int co
 }
 
 template<typename CC>
-void termiq::canvas::SECanvas<CC>::set_paint_state(CharState* state) {
+void termiq::canvas::SECanvas<CC>::set_paint_state(const char_state_type* state) {
 	if (!state) {
 		termiq::style::style_reset();
 		return;
@@ -133,6 +133,6 @@ void termiq::canvas::SECanvas<CC>::set_paint_state(CharState* state) {
 
 template<typename CC>
 void termiq::canvas::SECanvas<CC>::paint_cell(const CC &cell) {
-	set_paint_state(cell.state ? cell.state.get() : nullptr);
+	set_paint_state(&cell.state);
 	se_->writer()->write(cell.symbol.begin(), cell.symbol.size());
 }

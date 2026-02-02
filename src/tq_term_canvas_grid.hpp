@@ -91,9 +91,9 @@ typename termiq::canvas::CanvasPieces<CC> termiq::canvas::Grid<CC>::build() {
 
 	// Fill in borders.
 	if (_border_type != BorderType::NONE) {
-		auto cs = std::make_shared<CharState>();
-		cs->foreground(_border_foreground_color);
-		cs->background(_border_background_color);
+		char_state_type cs;
+		cs.foreground(_border_foreground_color);
+		cs.background(_border_background_color);
 
 		for (size_t r=1;r<height-1;++r) {
 			for (size_t l=0,c=0;l<=_cols;c+=cols_widths[l++]+1) {
@@ -131,8 +131,8 @@ typename termiq::canvas::CanvasPieces<CC> termiq::canvas::Grid<CC>::build() {
 	for (size_t i=0,r=border_size;r<height;r+=rows_heights[i++]+border_size) {
 		for (size_t j=0,c=border_size;c<width;c+=cols_widths[j++]+border_size) {
 			GridCellState& cell = _grid[i][j];
-			auto cs = std::make_shared<CharState>();
-			cs->background(cell.background);
+			char_state_type cs;
+			cs.background(cell.background);
 			bool has_content = cell.content != nullptr;
 			auto built_text = has_content ? cell.content->build() : CanvasPieces<CC>();
 			for (size_t ri=r,rr=0;rr<rows_heights[i];ri++,++rr) {
@@ -147,8 +147,8 @@ typename termiq::canvas::CanvasPieces<CC> termiq::canvas::Grid<CC>::build() {
 						if (cc >= cols_widths[j]) break;
 						auto &cell = canvas[r+rr][c+cc];
 						cell = piece.canvas[ri][ci];
-						if (!termiq::style::is_color_defined(cell.state->background())) {
-							cell.state->background(cs->background());
+						if (!termiq::style::is_color_defined(cell.state.background())) {
+							cell.state.background(cs.background());
 						}
 					}
 				}

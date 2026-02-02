@@ -197,29 +197,29 @@ DESCRIBE("Canvas", {
 
 			IT("should share style state among the text and borders", {
 				auto state = pieces_to_grid(grid->build());
-				std::vector<std::shared_ptr<termiq::canvas::CharState>> borders;
-				std::vector<std::shared_ptr<termiq::canvas::CharState>> text;
+				std::vector<termiq::canvas::CharState*> borders;
+				std::vector<termiq::canvas::CharState*> text;
 
 				for (size_t i=0;i<state[0].size();i++) {
-					borders.push_back(state[0][i].state);
-					borders.push_back(state[2][i].state);
+					borders.push_back(&state[0][i].state);
+					borders.push_back(&state[2][i].state);
 				}
-				borders.push_back(state[1][0].state);
-				borders.push_back(state[1][state[0].size()-1].state);
+				borders.push_back(&state[1][0].state);
+				borders.push_back(&state[1][state[0].size()-1].state);
 				for (size_t i=1;i<state[0].size()-1;i++) {
-					text.push_back(state[1][i].state);
+					text.push_back(&state[1][i].state);
 				}
 
 				auto b_state = borders[0];
 				auto t_state = text[0];
 
 				for (auto &b : borders) {
-					EXPECT(b).toBe(b_state);
+					EXPECT(*b).toBe(*b_state);
 				}
 				for (auto &t : text) {
-					EXPECT(t).toBe(t_state);
+					EXPECT(*t).toBe(*t_state);
 				}
-				EXPECT(b_state).NOT().toBe(t_state);
+				EXPECT(*b_state).toBe(*t_state);
 			});
 
 			IT("should not be stylized", {
@@ -234,8 +234,8 @@ DESCRIBE("Canvas", {
 					false, false, false, false, false
 				});
 
-				EXPECT(*b_state).toBe(expected);
-				EXPECT(*t_state).toBe(expected);
+				EXPECT(b_state).toBe(expected);
+				EXPECT(t_state).toBe(expected);
 			});
 
 			IT("should style border color", {
@@ -246,13 +246,13 @@ DESCRIBE("Canvas", {
 				auto b_state = state[0][0].state;
 				auto t_state = state[1][1].state;
 
-				auto e_text = termiq::canvas::CharState{};
+				auto e_text = termiq::canvas::CharState({});
 				auto e_border = termiq::canvas::CharState({
 					termiq::Color{100, 100, 100}
 				});
 
-				EXPECT(*t_state).toBe(e_text);
-				EXPECT(*b_state).toBe(e_border);
+				EXPECT(t_state).toBe(e_text);
+				EXPECT(b_state).toBe(e_border);
 			});
 
 			IT("should style border background color", {
@@ -263,14 +263,14 @@ DESCRIBE("Canvas", {
 				auto b_state = state[0][0].state;
 				auto t_state = state[1][1].state;
 
-				auto e_text = termiq::canvas::CharState{};
+				auto e_text = termiq::canvas::CharState({});
 				auto e_border = termiq::canvas::CharState({
 					termiq::Color::NONE,
 					termiq::Color{100, 100, 100},
 				});
 
-				EXPECT(*t_state).toBe(e_text);
-				EXPECT(*b_state).toBe(e_border);
+				EXPECT(t_state).toBe(e_text);
+				EXPECT(b_state).toBe(e_border);
 			});
 
 			IT("should style cell background color", {
@@ -285,10 +285,10 @@ DESCRIBE("Canvas", {
 					termiq::Color::NONE,
 					termiq::Color{100, 100, 100}
 				});
-				auto e_border = termiq::canvas::CharState{};
+				auto e_border = termiq::canvas::CharState({});
 
-				EXPECT(*t_state).toBe(e_text);
-				EXPECT(*b_state).toBe(e_border);
+				EXPECT(t_state).toBe(e_text);
+				EXPECT(b_state).toBe(e_border);
 			});
 		});
 	});

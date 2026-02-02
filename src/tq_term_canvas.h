@@ -15,7 +15,7 @@ namespace termiq {
 				template<typename T>
 				using container = std::vector<T>;
 				using char_type = typename CC::char_type;
-				using CharState = typename CC::char_state_type;
+				using char_state_type = typename CC::char_state_type;
 
 			public:
 				Canvas() = default;
@@ -41,7 +41,7 @@ namespace termiq {
 				virtual void paint_row(size_t index);
 
 				virtual void move_cursor(unsigned int row, unsigned int col) = 0;
-				virtual void set_paint_state(CharState* state) = 0;
+				virtual void set_paint_state(const char_state_type* state) = 0;
 				virtual void paint_cell(const CC &cell) = 0;
 
 			private:
@@ -57,11 +57,14 @@ namespace termiq {
 		template<typename CC>
 		class SECanvas : public Canvas<CC> {
 			public:
+				using char_state_type = typename CC::char_state_type;
+
+			public:
 				SECanvas(SequenceExecutor* se, unsigned int h, unsigned int w, unsigned int r=0, unsigned int c=0);
 
 			protected:
 				void move_cursor(unsigned int row, unsigned int col) override;
-				void set_paint_state(CharState* state) override;
+				void set_paint_state(const char_state_type* state) override;
 				void paint_cell(const CC &cell) override;
 
 			private:
