@@ -38,6 +38,8 @@ namespace termiq {
 				virtual void moved();
 				virtual void resized();
 				virtual void drawn();
+				virtual void prepaint();
+				virtual void painted();
 				virtual void paint_row(size_t index);
 
 				virtual void move_cursor(unsigned int row, unsigned int col) = 0;

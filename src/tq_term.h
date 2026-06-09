@@ -30,7 +30,7 @@ namespace termiq {
 		int32_t r,c;
 	};
 
-	enum class UnderlineStyle {
+	enum class UnderlineStyle : uint8_t {
 		NONE      = 0,
 		STRAIGHT  = 1,
 		DOUBLE    = 2,
@@ -39,7 +39,7 @@ namespace termiq {
 		DASHED    = 5,
 	};
 
-	enum class StyleProp {
+	enum class StyleProp : uint8_t {
 		RESET       = 0,
 		BOLD        = 1,
 		DIM         = 2,
@@ -227,7 +227,7 @@ namespace termiq {
 	void set_utf_locale();
 
 	void enable_raw_mode(size_t limit = 0, size_t timeout = 1, bool stop_sigs = true);
-	void disable_raw_mode();
+	void disable_raw_mode(bool force = false);
 	bool in_raw_mode();
 
 	// ESC sequences
@@ -299,8 +299,14 @@ namespace termiq {
 	std::string enable_mouse_all_motions_str();
 	std::string disable_mouse_all_motions_str();
 
+	std::string enable_resize_report_str();
+	std::string disable_resize_report_str();
+
 	std::string enable_paste_brackets_str();
 	std::string disable_paste_brackets_str();
+
+	std::string enable_unicode_graphemes();
+	std::string disable_unicode_graphemes();
 
 	std::string sync_begin_str();
 	std::string sync_end_str();

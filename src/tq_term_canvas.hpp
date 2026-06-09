@@ -13,6 +13,10 @@ template<typename CC>
 void termiq::canvas::Canvas<CC>::resize(unsigned int height, unsigned int width) {
 	_width = width;
 	_height = height;
+	_canvas.resize(_height);
+	for(auto &c : _canvas) {
+		c.resize(_width);
+	}
 	resized();
 }
 
@@ -51,9 +55,11 @@ void termiq::canvas::Canvas<CC>::draw(unsigned int row, unsigned int col, const 
 
 template<typename CC>
 void termiq::canvas::Canvas<CC>::paint() {
+	prepaint();
 	for(size_t cr=0;cr<_height;cr++) {
 		paint_row(cr);
 	}
+	painted();
 }
 
 template<typename CC>
@@ -90,18 +96,19 @@ void termiq::canvas::Canvas<CC>::paint_row(size_t index) {
 }
 
 template<typename CC>
-void termiq::canvas::Canvas<CC>::resized() {
-	_canvas.resize(_height);
-	for(auto &c : _canvas) {
-		c.resize(_width);
-	}
-}
+void termiq::canvas::Canvas<CC>::resized() {}
 
 template<typename CC>
 void termiq::canvas::Canvas<CC>::moved() {}
 
 template<typename CC>
 void termiq::canvas::Canvas<CC>::drawn() {}
+
+template<typename CC>
+void termiq::canvas::Canvas<CC>::painted() {}
+
+template<typename CC>
+void termiq::canvas::Canvas<CC>::prepaint() {}
 
 // SECanvas
 

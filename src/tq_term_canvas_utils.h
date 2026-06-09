@@ -193,11 +193,16 @@ namespace termiq {
 		template<Char CT, State CS>
 		struct CharCell {
 			CharCell() {}
-			CharCell(CT symb, CS st) : symbol(symb), state(st), transparent(false) {}
+//			CharCell(CT symb, CS st) : symbol(symb), state(st), transparent(false) {}
+			CharCell(CT symb, CS st, bool transparent = false, bool continuation = false)
+				: symbol(symb), state(st), transparent(transparent), continuation(continuation) {}
+//			CharCell(const CharCell& cell) : symbol(cell.symbol), state(cell.state) {}
+//			CharCell(CharCell&& cell) : symbol(cell.symbol), state(cell.state) {}
 
 			CT symbol;
 			CS state;
 			bool transparent = true;
+			bool continuation = false;
 			using char_type = CT;
 			using char_state_type = CS;
 			bool operator==(const CharCell &other) const {
@@ -207,12 +212,16 @@ namespace termiq {
 				return !(*this == other);
 			}
 			bool is_transparent() const { return transparent; }
+			bool is_continuation() const { return continuation; }
 
 			static const CharCell<CT,CS> TRANSPARENT;
+			static const CharCell<CT,CS> CONTINUATION;
 		};
 
 		template<Char CT, State CS>
 		const CharCell<CT,CS> CharCell<CT,CS>::TRANSPARENT = CharCell<CT,CS>({},{},1);
+		template<Char CT, State CS>
+		const CharCell<CT,CS> CharCell<CT,CS>::CONTINUATION = CharCell<CT,CS>({},{},0,1);
 
 		// Piece of the canvas.
 		template<typename CC>

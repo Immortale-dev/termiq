@@ -58,9 +58,9 @@ void termiq::enable_raw_mode(size_t limit, size_t timeout, bool stop_sigs)
 	if (tcsetattr(fd, TCSAFLUSH, &raw) < 0) detail::fatal("tssetattr failed");
 }
 
-void termiq::disable_raw_mode()
+void termiq::disable_raw_mode(bool force)
 {
-	if (--detail::raw_mode_enabled_count) return;
+	if (!force && --detail::raw_mode_enabled_count) return;
 
 	tcsetattr(detail::get_input_file_descriptor(), TCSAFLUSH, &detail::orig_termios);
 }
@@ -333,7 +333,7 @@ std::string termiq::set_automatic_newline_str(bool value)
 std::string termiq::set_wraparound_str(bool value)
 {
 	char ch = value ? 'h' : 'l';
-	return std::format("{}{}7{}", ::termiq::code::ST, ::termiq::code::CSI, ch);
+	return std::format("{}{}?7{}", ::termiq::code::ST, ::termiq::code::CSI, ch);
 }
 
 std::string termiq::insert_chars_str(uint32_t cnt)
@@ -430,6 +430,16 @@ std::string termiq::disable_mouse_buttons_str()
 	return std::format("{}{}?1000l", ::termiq::code::ST, ::termiq::code::CSI);
 }
 
+std::string termiq::enable_resize_report_str()
+{
+	return std::format("{}{}?2048h", ::termiq::code::ST, ::termiq::code::CSI);
+}
+
+std::string termiq::disable_resize_report_str()
+{
+	return std::format("{}{}?2048l", ::termiq::code::ST, ::termiq::code::CSI);
+}
+
 std::string termiq::enable_mouse_cell_motions_str()
 {
 	return std::format("{}{}?1002h", ::termiq::code::ST, ::termiq::code::CSI);
@@ -448,6 +458,16 @@ std::string termiq::enable_mouse_all_motions_str()
 std::string termiq::disable_mouse_all_motions_str()
 {
 	return std::format("{}{}?1003l", ::termiq::code::ST, ::termiq::code::CSI);
+}
+
+std::string termiq::enable_unicode_graphemes()
+{
+	return std::format("{}{}?2027h", ::termiq::code::ST, ::termiq::code::CSI);
+}
+
+std::string termiq::disable_unicode_graphemes()
+{
+	return std::format("{}{}?2027l", ::termiq::code::ST, ::termiq::code::CSI);
 }
 
 std::string termiq::enable_paste_brackets_str()
