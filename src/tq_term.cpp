@@ -460,12 +460,12 @@ std::string termiq::disable_mouse_all_motions_str()
 	return std::format("{}{}?1003l", ::termiq::code::ST, ::termiq::code::CSI);
 }
 
-std::string termiq::enable_unicode_graphemes()
+std::string termiq::enable_unicode_graphemes_str()
 {
 	return std::format("{}{}?2027h", ::termiq::code::ST, ::termiq::code::CSI);
 }
 
-std::string termiq::disable_unicode_graphemes()
+std::string termiq::disable_unicode_graphemes_str()
 {
 	return std::format("{}{}?2027l", ::termiq::code::ST, ::termiq::code::CSI);
 }

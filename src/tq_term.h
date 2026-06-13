@@ -305,8 +305,8 @@ namespace termiq {
 	std::string enable_paste_brackets_str();
 	std::string disable_paste_brackets_str();
 
-	std::string enable_unicode_graphemes();
-	std::string disable_unicode_graphemes();
+	std::string enable_unicode_graphemes_str();
+	std::string disable_unicode_graphemes_str();
 
 	std::string sync_begin_str();
 	std::string sync_end_str();
