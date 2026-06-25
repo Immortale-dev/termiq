@@ -25,7 +25,7 @@ namespace termiq {
 			using char_type = typename CC::char_type;
 			using char_state_type = typename CC::char_state_type;
 			struct GridCellState {
-				termiq::color_t background = ::termiq::Color::NONE;
+				termiq::Color background = ::termiq::Color::NONE;
 				Content<CC>* content = nullptr;
 				unsigned int width = 0;
 				unsigned int height = 0;
@@ -48,10 +48,10 @@ namespace termiq {
 				Grid(unsigned int rows=1, unsigned int cols=1);
 				void select_cell(size_t c);
 				void select_cell(size_t r, size_t c);
-				void set_background_color(termiq::color_t color);
-				void set_border_foreground_color(termiq::color_t color);
-				void set_border_background_color(termiq::color_t color);
-				void set_cell_background_color(termiq::color_t color);
+				void set_background_color(termiq::Color color);
+				void set_border_foreground_color(termiq::Color color);
+				void set_border_background_color(termiq::Color color);
+				void set_cell_background_color(termiq::Color color);
 				void set_cell_content(Content<CC>* content);
 				void set_width(unsigned int width);
 				void set_height(unsigned int height);
@@ -87,8 +87,8 @@ namespace termiq {
 				std::vector<std::vector<GridCellState>> _grid;
 				size_t _current_cell_r = 0;
 				size_t _current_cell_c = 0;
-				termiq::color_t _border_foreground_color = termiq::Color::NONE;
-				termiq::color_t _border_background_color = termiq::Color::NONE;
+				termiq::Color _border_foreground_color = termiq::Color::NONE;
+				termiq::Color _border_background_color = termiq::Color::NONE;
 				BorderType _border_type = BorderType::SINGLE;
 
 			private:

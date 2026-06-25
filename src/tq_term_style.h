@@ -14,7 +14,7 @@ namespace termiq {
 		}
 
 		struct Underline {
-			color_t color = Color::NONE;
+			Color color = Color::NONE;
 			UnderlineStyle style = UnderlineStyle::NONE;
 
 			bool operator==(const Underline &other) const {
@@ -26,8 +26,8 @@ namespace termiq {
 		};
 
 		struct FontStyle {
-			std::variant<color_t, bool> foreground = false;
-			std::variant<color_t, bool> background = false;
+			std::variant<Color, bool> foreground = false;
+			std::variant<Color, bool> background = false;
 			std::optional<bool> bold = NONE;
 			std::optional<bool> dim = NONE;
 			std::optional<bool> italic = NONE;
@@ -41,20 +41,20 @@ namespace termiq {
 		};
 
 		struct TerminalStyle {
-			std::variant<color_t, bool> foreground = false;
-			std::variant<color_t, bool> background = false;
-			std::variant<color_t, bool> selection_foreground = false;
-			std::variant<color_t, bool> selection_background = false;
-			std::variant<color_t, bool> cursor_foreground = false;
-			std::variant<color_t, bool> cursor_background = false;
+			std::variant<Color, bool> foreground = false;
+			std::variant<Color, bool> background = false;
+			std::variant<Color, bool> selection_foreground = false;
+			std::variant<Color, bool> selection_background = false;
+			std::variant<Color, bool> cursor_foreground = false;
+			std::variant<Color, bool> cursor_background = false;
 		};
 
 		inline void init(SequenceExecutor* executor) { detail::executor = executor; }
 		inline bool inited() { return detail::executor != nullptr; }
 
 		void style(FontStyle style);
-		void foreground(color_t color);
-		void background(color_t color);
+		void foreground(Color color);
+		void background(Color color);
 		void bold(bool state);
 		void dim(bool state);
 		void italic(bool state);
@@ -69,15 +69,15 @@ namespace termiq {
 		void update();
 
 		void terminal_style(TerminalStyle style);
-		void terminal_foreground(termiq::color_t color);
-		void terminal_background(termiq::color_t color);
-		void selection_foreground(termiq::color_t color);
-		void selection_background(termiq::color_t color);
-		void cursor_foreground(termiq::color_t color);
-		void cursor_background(termiq::color_t color);
+		void terminal_foreground(termiq::Color color);
+		void terminal_background(termiq::Color color);
+		void selection_foreground(termiq::Color color);
+		void selection_background(termiq::Color color);
+		void cursor_foreground(termiq::Color color);
+		void cursor_background(termiq::Color color);
 		void terminal_style_reset();
 
-		inline bool is_color_defined(termiq::color_t color) { return color != termiq::Color::NONE; }
+		inline bool is_color_defined(termiq::Color color) { return color != termiq::Color::NONE; }
 	}
 }
 

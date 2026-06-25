@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <termios.h>
 
-const termiq::color_t termiq::Color::NONE = std::nullopt;
+const termiq::Color termiq::Color::NONE = termiq::Color();
 
 void termiq::init_term(int input_file_descriptor, int output_file_descriptor)
 {
@@ -272,16 +272,21 @@ std::string termiq::cursor_hidden_str()
 	return std::format("{}{}?25l", ::termiq::code::ST, ::termiq::code::CSI);
 }
 
-std::string termiq::set_foreground_color_str(color_t color)
+std::string termiq::set_foreground_color_str(Color color)
 {
+	// TODO: finish
 	if (color == Color::NONE) return std::format("{}{}39m", ::termiq::code::ST, ::termiq::code::CSI);
-	return std::format("{}{}38;2;{};{};{}m", ::termiq::code::ST, ::termiq::code::CSI, color->r, color->g, color->b);
+	if (color.is_true()) {
+		return std::format("{}{}38;2;{};{};{}m", ::termiq::code::ST, ::termiq::code::CSI, color.r(), color.g(), color.b());
+	}
+	// PlaceColor
+	return std::format("{}{}38;5;{}m", ::termiq::code::ST, ::termiq::code::CSI, color.place());
 }
 
-std::string termiq::set_background_color_str(color_t color)
+std::string termiq::set_background_color_str(Color color)
 {
 	if (color == Color::NONE) return std::format("{}{}49m", ::termiq::code::ST, ::termiq::code::CSI);
-	return std::format("{}{}48;2;{};{};{}m", ::termiq::code::ST, ::termiq::code::CSI, color->r, color->g, color->b);
+	return std::format("{}{}48;2;{};{};{}m", ::termiq::code::ST, ::termiq::code::CSI, color.r(), color.g(), color.b());
 }
 
 std::string termiq::enter_alternate_buffer_str()
@@ -392,10 +397,10 @@ std::string termiq::set_underline_style_str(UnderlineStyle style)
 	return std::format("{}{}4:{}m", ::termiq::code::ST, ::termiq::code::CSI, (int)style);
 }
 
-std::string termiq::set_underline_color_str(color_t color)
+std::string termiq::set_underline_color_str(Color color)
 {
 	if (color == Color::NONE) return std::format("{}{}59m", ::termiq::code::ST, ::termiq::code::CSI);
-	return std::format("{}{}58;2;{};{};{}m", ::termiq::code::ST, ::termiq::code::CSI, color->r, color->g, color->b);
+	return std::format("{}{}58;2;{};{};{}m", ::termiq::code::ST, ::termiq::code::CSI, color.r(), color.g(), color.b());
 }
 
 std::string termiq::set_cursor_str(CursorStyle style)
@@ -496,7 +501,7 @@ std::string termiq::query_color_str(ColorType type)
 	return std::format("{}{}21;{}=?{}", ::termiq::code::ST, ::termiq::code::OSC, q, ::termiq::code::BEL);
 }
 
-termiq::color_t termiq::query_color_parser(Reader* reader)
+termiq::Color termiq::query_color_parser(Reader* reader)
 {
 	std::vector<char> c(30);
 	while(true) {
@@ -525,10 +530,10 @@ termiq::color_t termiq::query_color_parser(Reader* reader)
 	return Color{static_cast<uint8_t>(rv), static_cast<uint8_t>(gv), static_cast<uint8_t>(bv)};
 }
 
-std::string termiq::set_color_str(ColorType type, color_t color)
+std::string termiq::set_color_str(ColorType type, Color color)
 {
 	std::string_view q = detail::query_color_types[(size_t)type];
 	std::string v;
-	if (color) v = std::format("=#{:x}{:x}{:x}", color->r, color->g, color->b);
+	if (color) v = std::format("=#{:x}{:x}{:x}", color.r(), color.g(), color.b());
 	return std::format("{}{}21;{}{}{}", ::termiq::code::ST, ::termiq::code::OSC, q, v, ::termiq::code::BEL);
 }

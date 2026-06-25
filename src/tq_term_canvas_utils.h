@@ -31,8 +31,8 @@ namespace termiq {
 		concept State = requires(T t, T g) {
 			std::is_default_constructible_v<T>;
 
-			{ t.foreground() } -> std::same_as<::termiq::color_t>;
-			{ t.background() } -> std::same_as<::termiq::color_t>;
+			{ t.foreground() } -> std::same_as<::termiq::Color>;
+			{ t.background() } -> std::same_as<::termiq::Color>;
 			{ t.bold() } -> std::same_as<bool>;
 			{ t.italic() } -> std::same_as<bool>;
 			{ t.dim() } -> std::same_as<bool>;
@@ -140,8 +140,8 @@ namespace termiq {
 		class CharState {
 			public:
 				struct Builder {
-					termiq::color_t foreground = termiq::Color::NONE;
-					termiq::color_t background = termiq::Color::NONE;
+					termiq::Color foreground = termiq::Color::NONE;
+					termiq::Color background = termiq::Color::NONE;
 					bool bold = false;
 					bool italic = false;
 					bool dim = false;
@@ -153,16 +153,16 @@ namespace termiq {
 				explicit CharState() = default;
 				CharState(Builder b) : foreground_(b.foreground), background_(b.background), bold_(b.bold), italic_(b.italic), dim_(b.dim), inverse_(b.inverse), underline_(b.underline) {}
 
-				termiq::color_t foreground() const { return foreground_; }
-				termiq::color_t background() const { return background_; }
+				termiq::Color foreground() const { return foreground_; }
+				termiq::Color background() const { return background_; }
 				bool bold() const { return bold_; }
 				bool italic() const { return italic_; }
 				bool dim() const { return dim_; }
 				bool inverse() const { return inverse_; }
 				bool underline() const { return underline_; }
 
-				void foreground(termiq::color_t color) { foreground_ = color; }
-				void background(termiq::color_t color) { background_ = color; }
+				void foreground(termiq::Color color) { foreground_ = color; }
+				void background(termiq::Color color) { background_ = color; }
 				void bold(bool state) { bold_ = state; }
 				void italic(bool state) { italic_ = state; }
 				void dim(bool state) { dim_ = state; }
@@ -179,8 +179,8 @@ namespace termiq {
 				}
 
 			private:
-				termiq::color_t foreground_ = termiq::Color::NONE;
-				termiq::color_t background_ = termiq::Color::NONE;
+				termiq::Color foreground_ = termiq::Color::NONE;
+				termiq::Color background_ = termiq::Color::NONE;
 				bool bold_ = false;
 				bool italic_ = false;
 				bool dim_ = false;
@@ -193,11 +193,8 @@ namespace termiq {
 		template<Char CT, State CS>
 		struct CharCell {
 			CharCell() {}
-//			CharCell(CT symb, CS st) : symbol(symb), state(st), transparent(false) {}
 			CharCell(CT symb, CS st, bool transparent = false, bool continuation = false)
 				: symbol(symb), state(st), transparent(transparent), continuation(continuation) {}
-//			CharCell(const CharCell& cell) : symbol(cell.symbol), state(cell.state) {}
-//			CharCell(CharCell&& cell) : symbol(cell.symbol), state(cell.state) {}
 
 			CT symbol;
 			CS state;

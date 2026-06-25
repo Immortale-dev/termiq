@@ -17,14 +17,14 @@ inline std::ostream& operator << (std::ostream& stream, termiq::canvas::CharStat
 		stream << "0;";
 	} else {
 		auto color = state.foreground();
-		stream << (int)color->r << "x" << (int)color->g << "x" << (int)color->b << ";";
+		stream << (int)color.r() << "x" << (int)color.g() << "x" << (int)color.b() << ";";
 	}
 	stream << "BG:";
 	if (!state.background()) {
 		stream << "0;";
 	} else {
 		auto color = state.background();
-		stream << (int)color->r << "x" << (int)color->g << "x" << (int)color->b << ";";
+		stream << (int)color.r() << "x" << (int)color.g() << "x" << (int)color.b() << ";";
 	}
 	stream << "A:" << (int)state.bold() << (int)state.dim() << (int)state.italic() << (int)state.inverse() << (int)state.underline() << ";";
 	return stream;

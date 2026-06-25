@@ -15,7 +15,7 @@ void termiq::canvas::Grid<CC>::select_cell(size_t r, size_t c) {
 }
 
 template<typename CC>
-void termiq::canvas::Grid<CC>::set_background_color(termiq::color_t color) {
+void termiq::canvas::Grid<CC>::set_background_color(termiq::Color color) {
 	for (size_t r=0;r<_rows;r++) {
 		for (size_t c=0;c<_cols;c++) {
 			_grid[r][c].background = color;
@@ -24,17 +24,17 @@ void termiq::canvas::Grid<CC>::set_background_color(termiq::color_t color) {
 }
 
 template<typename CC>
-void termiq::canvas::Grid<CC>::set_border_foreground_color(termiq::color_t color) {
+void termiq::canvas::Grid<CC>::set_border_foreground_color(termiq::Color color) {
 	_border_foreground_color = color;
 }
 
 template<typename CC>
-void termiq::canvas::Grid<CC>::set_border_background_color(termiq::color_t color) {
+void termiq::canvas::Grid<CC>::set_border_background_color(termiq::Color color) {
 	_border_background_color = color;
 }
 
 template<typename CC>
-void termiq::canvas::Grid<CC>::set_cell_background_color(termiq::color_t color) {
+void termiq::canvas::Grid<CC>::set_cell_background_color(termiq::Color color) {
 	get_current_cell().background = color;
 }
 

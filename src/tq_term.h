@@ -10,20 +10,54 @@
 #include <iostream>
 #include <vector>
 #include <span>
+#include <variant>
 
 #include <termios.h>
 #include <unistd.h>
 
 namespace termiq {
-	struct Color;
-	using color_t = std::optional<Color>;
-	struct Color {
+	struct TrueColor {
 		uint8_t r,g,b;
 
-		bool operator==(const Color &other) const { return r==other.r && g==other.g && b==other.b; }
-		bool operator!=(const Color &other) const { return !(*this == other); }
+		bool operator==(const TrueColor &other) const { return r==other.r && g==other.g && b==other.b; }
+		bool operator!=(const TrueColor &other) const { return !(*this == other); }
+	};
+	struct PlaceColor {
+		uint8_t place;
 
-		static const color_t NONE;
+		bool operator==(const PlaceColor &other) const { return place==other.place; }
+		bool operator!=(const PlaceColor &other) const { return !(*this == other); }
+	};
+	class Color {
+		public:
+			Color() : color_(std::monostate{}) {}
+			explicit Color(TrueColor color) : color_(color) {}
+			explicit Color(PlaceColor color) : color_(color) {}
+			Color(uint8_t r, uint8_t g, uint8_t b) : color_(TrueColor{r,g,b}) {}
+			explicit Color(uint8_t place) : color_(PlaceColor{place}) {}
+
+			bool operator==(const Color &other) const { return color_==other.color_; }
+			bool operator!=(const Color &other) const { return !(*this == other); }
+			explicit operator bool() const { return color_.index() != 0; }
+
+			bool exists() const { return !is_none(); }
+			bool is_none() const { return color_.index() == 0; }
+			bool is_true() const { return color_.index() == 1; }
+			bool is_place() const { return color_.index() == 2; }
+
+			TrueColor get_true() const { return std::get<TrueColor>(color_); }
+			PlaceColor get_place() const { return std::get<PlaceColor>(color_); }
+
+			uint8_t r() const { return std::get<TrueColor>(color_).r; }
+			uint8_t g() const { return std::get<TrueColor>(color_).g; }
+			uint8_t b() const { return std::get<TrueColor>(color_).b; }
+
+			uint8_t place() const { return std::get<PlaceColor>(color_).place; }
+
+			static const Color NONE;
+
+		private:
+			std::variant<std::monostate, TrueColor, PlaceColor> color_;
 	};
 
 	struct Pos {
@@ -257,8 +291,8 @@ namespace termiq {
 	std::string cursor_default_str();
 	std::string cursor_hidden_str();
 
-	std::string set_foreground_color_str(color_t color = Color::NONE);
-	std::string set_background_color_str(color_t color = Color::NONE);
+	std::string set_foreground_color_str(Color color = Color::NONE);
+	std::string set_background_color_str(Color color = Color::NONE);
 
 	std::string enter_alternate_buffer_str();
 	std::string exit_alternate_buffer_str();
@@ -285,7 +319,7 @@ namespace termiq {
 	std::string set_styles_str(std::vector<StyleProp> &&styles);
 	std::string reset_styles_str();
 	std::string set_underline_style_str(UnderlineStyle style=UnderlineStyle::STRAIGHT);
-	std::string set_underline_color_str(color_t color = Color::NONE);
+	std::string set_underline_color_str(Color color = Color::NONE);
 
 	std::string set_cursor_str(CursorStyle style);
 	std::string set_cursor_shape_str(CursorShape shape);
@@ -312,8 +346,8 @@ namespace termiq {
 	std::string sync_end_str();
 
 	std::string query_color_str(ColorType type);
-	color_t query_color_parser(Reader* reader);
-	std::string set_color_str(ColorType type, color_t color);
+	Color query_color_parser(Reader* reader);
+	std::string set_color_str(ColorType type, Color color);
 
 	namespace detail {
 		using namespace std::literals::string_view_literals;

@@ -7,8 +7,8 @@
 
 namespace termiq::style {
 	namespace {
-		termiq::color_t current_foreground = ::termiq::Color::NONE;
-		termiq::color_t current_background = ::termiq::Color::NONE;
+		termiq::Color current_foreground = ::termiq::Color::NONE;
+		termiq::Color current_background = ::termiq::Color::NONE;
 		bool is_bold = false;
 		bool is_dim = false;
 		bool is_italic = false;
@@ -18,12 +18,12 @@ namespace termiq::style {
 		bool is_hidden = false;
 		bool is_strike = false;
 
-		termiq::color_t current_terminal_foreground = ::termiq::Color::NONE;
-		termiq::color_t current_terminal_background = ::termiq::Color::NONE;
-		termiq::color_t current_terminal_selection_foreground = ::termiq::Color::NONE;
-		termiq::color_t current_terminal_selection_background = ::termiq::Color::NONE;
-		termiq::color_t current_terminal_cursor_foreground = ::termiq::Color::NONE;
-		termiq::color_t current_terminal_cursor_background = ::termiq::Color::NONE;
+		termiq::Color current_terminal_foreground = ::termiq::Color::NONE;
+		termiq::Color current_terminal_background = ::termiq::Color::NONE;
+		termiq::Color current_terminal_selection_foreground = ::termiq::Color::NONE;
+		termiq::Color current_terminal_selection_background = ::termiq::Color::NONE;
+		termiq::Color current_terminal_cursor_foreground = ::termiq::Color::NONE;
+		termiq::Color current_terminal_cursor_background = ::termiq::Color::NONE;
 
 		void reset_color_values() {
 			current_foreground = Color::NONE;
@@ -108,13 +108,13 @@ void termiq::style::style(style::FontStyle s) {
 	detail::executor->execute<se::set_styles>(std::move(list));
 }
 
-void termiq::style::foreground(const color_t color) {
+void termiq::style::foreground(const Color color) {
 	if (color == current_foreground) return;
 	current_foreground = color;
 	detail::executor->execute<se::set_foreground_color>(color);
 }
 
-void termiq::style::background(const color_t color) {
+void termiq::style::background(const Color color) {
 	if (color == current_background) return;
 	current_background = color;
 	detail::executor->execute<se::set_background_color>(color);
@@ -262,42 +262,42 @@ void termiq::style::terminal_style(TerminalStyle style)
 	if (style.cursor_background.index() == 0) cursor_background(std::get<0>(style.cursor_background));
 }
 
-void termiq::style::terminal_foreground(termiq::color_t color)
+void termiq::style::terminal_foreground(termiq::Color color)
 {
 	if (color == current_terminal_foreground) return;
 	current_terminal_foreground = color;
 	detail::executor->execute<se::set_color>(ColorType::FOREGROUND, color);
 }
 
-void termiq::style::terminal_background(termiq::color_t color)
+void termiq::style::terminal_background(termiq::Color color)
 {
 	if (color == current_terminal_background) return;
 	current_terminal_background = color;
 	detail::executor->execute<se::set_color>(ColorType::BACKGROUND, color);
 }
 
-void termiq::style::selection_foreground(termiq::color_t color)
+void termiq::style::selection_foreground(termiq::Color color)
 {
 	if (color == current_terminal_selection_foreground) return;
 	current_terminal_selection_foreground = color;
 	detail::executor->execute<se::set_color>(ColorType::SELECTION_FOREGROUND, color);
 }
 
-void termiq::style::selection_background(termiq::color_t color)
+void termiq::style::selection_background(termiq::Color color)
 {
 	if (color == current_terminal_selection_background) return;
 	current_terminal_selection_background = color;
 	detail::executor->execute<se::set_color>(ColorType::SELECTION_BACKGROUND, color);
 }
 
-void termiq::style::cursor_foreground(termiq::color_t color)
+void termiq::style::cursor_foreground(termiq::Color color)
 {
 	if (color == current_terminal_cursor_foreground) return;
 	current_terminal_cursor_foreground = color;
 	detail::executor->execute<se::set_color>(ColorType::CURSOR_FOREGROUND, color);
 }
 
-void termiq::style::cursor_background(termiq::color_t color)
+void termiq::style::cursor_background(termiq::Color color)
 {
 	if (color == current_terminal_cursor_background) return;
 	current_terminal_cursor_background = color;
