@@ -144,6 +144,8 @@ namespace termiq {
 		CURSOR_FOREGROUND     = 4,
 		CURSOR_BACKGROUND     = 5,
 	};
+	using ColorIndex = uint8_t;
+	using ColorVariant = std::variant<ColorType, ColorIndex>;
 
 	enum class KittyFlags {
 		DISAMBIGUATE       = 1,
@@ -345,9 +347,9 @@ namespace termiq {
 	std::string sync_begin_str();
 	std::string sync_end_str();
 
-	std::string query_color_str(ColorType type);
+	std::string query_color_str(std::vector<ColorVariant> colors);
+	std::string set_color_str(std::vector<std::pair<ColorVariant, Color>> colors);
 	Color query_color_parser(Reader* reader);
-	std::string set_color_str(ColorType type, Color color);
 
 	namespace detail {
 		using namespace std::literals::string_view_literals;

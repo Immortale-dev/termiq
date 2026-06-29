@@ -495,10 +495,44 @@ std::string termiq::sync_end_str()
 	return std::format("{}{}?2026l", ::termiq::code::ST, ::termiq::code::CSI);
 }
 
-std::string termiq::query_color_str(ColorType type)
+std::string termiq::query_color_str(std::vector<ColorVariant> colors)
 {
-	std::string_view q = detail::query_color_types[(size_t)type];
-	return std::format("{}{}21;{}=?{}", ::termiq::code::ST, ::termiq::code::OSC, q, ::termiq::code::BEL);
+	std::string query;
+	for (ColorVariant& color : colors) {
+		if (std::holds_alternative<ColorType>(color)) {
+			std::string_view q = detail::query_color_types[(size_t)std::get<ColorType>(color)];
+			query.insert(query.end(), q.begin(), q.end());
+		} else {
+			query.append(std::to_string(std::get<ColorIndex>(color)));
+		}
+		query.append("=?;");
+	}
+	query.pop_back(); // throw last ';'
+	return std::format("{}{}21;{}{}", ::termiq::code::ST, ::termiq::code::OSC, query, ::termiq::code::BEL);
+}
+
+std::string termiq::set_color_str(std::vector<std::pair<ColorVariant, Color>> colors)
+{
+	std::string s;
+	for (auto& [type, color] : colors) {
+		std::string set_color;
+		if (std::holds_alternative<ColorType>(type)) {
+			set_color = detail::query_color_types[(size_t)std::get<ColorType>(type)];
+		} else {
+			set_color = std::to_string(std::get<ColorIndex>(type));
+		}
+		s.append(set_color);
+		if (!color) {
+			s.push_back(';');
+			continue;
+		}
+		if (!color.is_true()) {
+			throw std::invalid_argument("place color is not supported");
+		}
+		s.append(std::format("=#{:x}{:x}{:x};", color.r(), color.g(), color.b()));
+	}
+	s.pop_back(); // throw last ';'
+	return std::format("{}{}21;{}{}", ::termiq::code::ST, ::termiq::code::OSC, s, ::termiq::code::BEL);
 }
 
 termiq::Color termiq::query_color_parser(Reader* reader)
@@ -528,12 +562,4 @@ termiq::Color termiq::query_color_parser(Reader* reader)
 	size_t bv = std::stoul(sb, nullptr, 16);
 	if (rv > 255 || gv > 255 || bv > 255) return Color::NONE;
 	return Color{static_cast<uint8_t>(rv), static_cast<uint8_t>(gv), static_cast<uint8_t>(bv)};
-}
-
-std::string termiq::set_color_str(ColorType type, Color color)
-{
-	std::string_view q = detail::query_color_types[(size_t)type];
-	std::string v;
-	if (color) v = std::format("=#{:x}{:x}{:x}", color.r(), color.g(), color.b());
-	return std::format("{}{}21;{}{}{}", ::termiq::code::ST, ::termiq::code::OSC, q, v, ::termiq::code::BEL);
 }

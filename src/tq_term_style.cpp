@@ -266,42 +266,42 @@ void termiq::style::terminal_foreground(termiq::Color color)
 {
 	if (color == current_terminal_foreground) return;
 	current_terminal_foreground = color;
-	detail::executor->execute<se::set_color>(ColorType::FOREGROUND, color);
+	detail::executor->execute<se::set_color>(std::vector{std::pair<ColorVariant, Color>{ColorType::FOREGROUND, color}});
 }
 
 void termiq::style::terminal_background(termiq::Color color)
 {
 	if (color == current_terminal_background) return;
 	current_terminal_background = color;
-	detail::executor->execute<se::set_color>(ColorType::BACKGROUND, color);
+	detail::executor->execute<se::set_color>(std::vector{std::pair<ColorVariant, Color>{ColorType::BACKGROUND, color}});
 }
 
 void termiq::style::selection_foreground(termiq::Color color)
 {
 	if (color == current_terminal_selection_foreground) return;
 	current_terminal_selection_foreground = color;
-	detail::executor->execute<se::set_color>(ColorType::SELECTION_FOREGROUND, color);
+	detail::executor->execute<se::set_color>(std::vector{std::pair<ColorVariant, Color>{ColorType::SELECTION_FOREGROUND, color}});
 }
 
 void termiq::style::selection_background(termiq::Color color)
 {
 	if (color == current_terminal_selection_background) return;
 	current_terminal_selection_background = color;
-	detail::executor->execute<se::set_color>(ColorType::SELECTION_BACKGROUND, color);
+	detail::executor->execute<se::set_color>(std::vector{std::pair<ColorVariant, Color>{ColorType::SELECTION_BACKGROUND, color}});
 }
 
 void termiq::style::cursor_foreground(termiq::Color color)
 {
 	if (color == current_terminal_cursor_foreground) return;
 	current_terminal_cursor_foreground = color;
-	detail::executor->execute<se::set_color>(ColorType::CURSOR_FOREGROUND, color);
+	detail::executor->execute<se::set_color>(std::vector{std::pair<ColorVariant, Color>{ColorType::CURSOR_FOREGROUND, color}});
 }
 
 void termiq::style::cursor_background(termiq::Color color)
 {
 	if (color == current_terminal_cursor_background) return;
 	current_terminal_cursor_background = color;
-	detail::executor->execute<se::set_color>(ColorType::CURSOR_BACKGROUND, color);
+	detail::executor->execute<se::set_color>(std::vector{std::pair<ColorVariant, Color>{ColorType::CURSOR_BACKGROUND, color}});
 }
 
 void termiq::style::terminal_style_reset()
