@@ -351,6 +351,8 @@ namespace termiq {
 	std::string set_color_str(std::vector<std::pair<ColorVariant, Color>> colors);
 	Color query_color_parser(Reader* reader);
 
+	// TODO: add set_color_legacy sequences that use OSC 4, OSC 10-12
+
 	namespace detail {
 		using namespace std::literals::string_view_literals;
 
@@ -375,8 +377,8 @@ namespace termiq {
 			"background"sv,
 			"selection_foreground"sv,
 			"selection_background"sv,
-			"cursor"sv,
 			"cursor_text"sv,
+			"cursor"sv,
 		};
 
 		inline constexpr std::array<std::string_view, 31> cursor_shapes{
