@@ -138,9 +138,9 @@ DESCRIBE("Term Style", {
 			});
 
 			IT("should turn on advanced underline", {
-				termiq::style::underline(termiq::style::Underline{
-					.color=termiq::Color{10,20,30},
-					.style=termiq::UnderlineStyle::CURLY,
+				termiq::style::underline(termiq::Underline{
+					termiq::UnderlineStyle::CURLY,
+					termiq::Color{10,20,30},
 				});
 
 				std::string str = output_sstream.str();
@@ -148,14 +148,14 @@ DESCRIBE("Term Style", {
 			});
 
 			IT("should turn off only underline color", {
-				termiq::style::underline(termiq::style::Underline{
-					.color=termiq::Color{10,20,30},
-					.style=termiq::UnderlineStyle::CURLY,
+				termiq::style::underline(termiq::Underline{
+					termiq::UnderlineStyle::CURLY,
+					termiq::Color{10,20,30},
 				});
 				size_t cur_str = output_sstream.str().size();
-				termiq::style::underline(termiq::style::Underline{
-					.color=termiq::Color::NONE,
-					.style=termiq::UnderlineStyle::CURLY,
+				termiq::style::underline(termiq::Underline{
+					termiq::UnderlineStyle::CURLY,
+					termiq::Color::NONE,
 				});
 
 				std::string str = output_sstream.str();
@@ -163,9 +163,9 @@ DESCRIBE("Term Style", {
 			});
 
 			IT("should turn off fancy underline", {
-				termiq::style::underline(termiq::style::Underline{
-					.color=termiq::Color{10,20,30},
-					.style=termiq::UnderlineStyle::CURLY,
+				termiq::style::underline(termiq::Underline{
+					termiq::UnderlineStyle::CURLY,
+					termiq::Color{10,20,30},
 				});
 				size_t cur_str = output_sstream.str().size();
 				termiq::style::underline(false);
@@ -196,6 +196,15 @@ DESCRIBE("Term Style", {
 
 				std::string str = output_sstream.str();
 				EXPECT(str).toBe("\033[1m");
+			});
+
+			IT("should set advanced underline", {
+				termiq::style::style({
+					.underline=termiq::Underline{termiq::UnderlineStyle::CURLY, termiq::Color{10,20,30}},
+				});
+
+				std::string str = output_sstream.str();
+				EXPECT(str).toBe("\033[58;2;10;20;30m\033[4:3m");
 			});
 
 			DESCRIBE("Style is set with colors and attributes", {

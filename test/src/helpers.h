@@ -26,7 +26,7 @@ inline std::ostream& operator << (std::ostream& stream, termiq::canvas::CharStat
 		auto color = state.background();
 		stream << (int)color.r() << "x" << (int)color.g() << "x" << (int)color.b() << ";";
 	}
-	stream << "A:" << (int)state.bold() << (int)state.dim() << (int)state.italic() << (int)state.inverse() << (int)state.underline() << ";";
+	stream << "A:" << (int)state.bold() << (int)state.dim() << (int)state.italic() << (int)state.inverse() << (int)state.underline().style << ";";
 	return stream;
 }
 

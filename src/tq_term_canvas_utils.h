@@ -36,16 +36,22 @@ namespace termiq {
 			{ t.bold() } -> std::same_as<bool>;
 			{ t.italic() } -> std::same_as<bool>;
 			{ t.dim() } -> std::same_as<bool>;
+			{ t.blinking() } -> std::same_as<bool>;
 			{ t.inverse() } -> std::same_as<bool>;
-			{ t.underline() } -> std::same_as<bool>;
+			{ t.hidden() } -> std::same_as<bool>;
+			{ t.strike() } -> std::same_as<bool>;
+			{ t.underline() } -> std::same_as<Underline>;
 
 			{ t.foreground(termiq::Color::NONE) };
 			{ t.background(termiq::Color::NONE) };
 			{ t.bold(true) };
 			{ t.italic(true) };
 			{ t.dim(true) };
+			{ t.blinking(true) };
 			{ t.inverse(true) };
-			{ t.underline(true) };
+			{ t.hidden(true) };
+			{ t.strike(true) };
+			{ t.underline(Underline()) };
 
 			{ t == g } -> std::same_as<bool>;
 			{ t != g } -> std::same_as<bool>;
@@ -145,8 +151,11 @@ namespace termiq {
 					bool bold = false;
 					bool italic = false;
 					bool dim = false;
+					bool blinking = false;
 					bool inverse = false;
-					bool underline = false;
+					bool hidden = false;
+					bool strike = false;
+					Underline underline = false;
 				};
 
 			public:
@@ -158,16 +167,22 @@ namespace termiq {
 				bool bold() const { return bold_; }
 				bool italic() const { return italic_; }
 				bool dim() const { return dim_; }
+				bool blinking() const { return blinking_; }
 				bool inverse() const { return inverse_; }
-				bool underline() const { return underline_; }
+				bool hidden() const { return hidden_; }
+				bool strike() const { return strike_; }
+				Underline underline() const { return underline_; }
 
 				void foreground(termiq::Color color) { foreground_ = color; }
 				void background(termiq::Color color) { background_ = color; }
 				void bold(bool state) { bold_ = state; }
 				void italic(bool state) { italic_ = state; }
 				void dim(bool state) { dim_ = state; }
+				void blinking(bool state) { blinking_ = state; }
+				void hidden(bool state) { hidden_ = state; }
+				void strike(bool state) { strike_ = state; }
 				void inverse(bool state) { inverse_ = state; }
-				void underline(bool state) { underline_ = state; }
+				void underline(Underline state) { underline_ = state; }
 
 				bool operator==(const CharState &other) const {
 					return foreground() == other.foreground() && background() == other.background()
@@ -184,8 +199,11 @@ namespace termiq {
 				bool bold_ = false;
 				bool italic_ = false;
 				bool dim_ = false;
+				bool blinking_ = false;
 				bool inverse_ = false;
-				bool underline_ = false;
+				bool hidden_ = false;
+				bool strike_ = false;
+				Underline underline_ = false;
 		};
 
 		// CT - char type, e.g. WCharType

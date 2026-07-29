@@ -73,6 +73,27 @@ namespace termiq {
 		DASHED    = 5,
 	};
 
+	struct Underline {
+		UnderlineStyle style = UnderlineStyle::NONE;
+		Color color = Color::NONE;
+
+		Underline() {};
+		Underline(bool state) {
+			if (state) {
+				style = UnderlineStyle::STRAIGHT;
+			}
+		}
+		Underline(UnderlineStyle style) : style(style) {}
+		Underline(UnderlineStyle style, Color color) : style(style), color(color) {}
+
+		bool operator==(const Underline &other) const {
+			return color == other.color && style == other.style;
+		}
+		bool operator!=(const Underline &other) const {
+			return !(*this == other);
+		}
+	};
+
 	enum class StyleProp : uint8_t {
 		RESET       = 0,
 		BOLD        = 1,

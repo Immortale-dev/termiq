@@ -13,18 +13,6 @@ namespace termiq {
 			inline ::termiq::SequenceExecutor* executor = nullptr;
 		}
 
-		struct Underline {
-			Color color = Color::NONE;
-			UnderlineStyle style = UnderlineStyle::NONE;
-
-			bool operator==(const Underline &other) const {
-				return color == other.color && style == other.style;
-			}
-			bool operator!=(const Underline &other) const {
-				return !(*this == other);
-			}
-		};
-
 		struct FontStyle {
 			std::variant<Color, bool> foreground = false;
 			std::variant<Color, bool> background = false;
