@@ -11,6 +11,7 @@
 #include <format>
 #include <vector>
 #include <csignal>
+#include <functional>
 
 #include <stdlib.h>
 #include <termios.h>
@@ -77,8 +78,8 @@ void termiq::set_utf_locale()
 
 void termiq::detail::fatal(std::string_view msg)
 {
-    std::cout << msg << std::endl;
-    exit(1);
+	std::cout << msg << std::endl;
+	exit(1);
 }
 
 void termiq::detail::exit_raw_mode()
@@ -104,6 +105,16 @@ size_t termiq::detail::read_until_ch(Reader* r, char* c, char ch, size_t limit)
 	return s;
 }
 
+size_t termiq::detail::read_until_true(Reader* r, char* c, std::function<bool(char)> fn, size_t limit)
+{
+	size_t s=0;
+	while(s < limit) {
+		while(!r->read(c + s, 1));
+		if (fn(c[s++])) return s;
+	}
+	return s;
+}
+
 std::optional<size_t> termiq::detail::read_unsigned_until_ch(Reader* reader, char ch, size_t limit)
 {
 	char n;
@@ -116,6 +127,106 @@ std::optional<size_t> termiq::detail::read_unsigned_until_ch(Reader* reader, cha
 		if (h > limit) return std::nullopt;
 	}
 	return h;
+}
+
+std::string termiq::detail::base64_encode(std::string&& src)
+{
+	return base64_encode(src);
+}
+
+std::string termiq::detail::base64_encode(std::string_view src)
+{
+	unsigned char *out, *pos;
+	const unsigned char *end, *in;
+
+	// 3 bytes blocks to 4 bytes
+	size_t len = 4 * ((src.size() + 2) / 3);
+
+	// int overflow
+	if (len < src.size()) return std::string{};
+
+	std::string result;
+	result.resize(len);
+	out = reinterpret_cast<unsigned char*>(result.data());
+
+	in = reinterpret_cast<const unsigned char*>(src.data());
+	end = in + src.size();
+	pos = out;
+	while (end - in >= 3) {
+		*pos++ = base64_table[in[0] >> 2];
+		*pos++ = base64_table[((in[0] & 0b00000011) << 4) | (in[1] >> 4)];
+		*pos++ = base64_table[((in[1] & 0b00001111) << 2) | (in[2] >> 6)];
+		*pos++ = base64_table[in[2] & 0b00111111];
+		in += 3;
+	}
+
+	if (end - in) {
+		*pos++ = base64_table[in[0] >> 2];
+		if (end - in == 1) {
+			*pos++ = base64_table[(in[0] & 0b00000011) << 4];
+			*pos++ = '=';
+		}
+		else {
+			*pos++ = base64_table[((in[0] & 0b00000011) << 4) | (in[1] >> 4)];
+			*pos++ = base64_table[(in[1] & 0b00001111) << 2];
+		}
+		*pos++ = '=';
+	}
+
+	return result;
+}
+
+std::string termiq::detail::base64_decode(std::string&& src)
+{
+	return base64_decode(src);
+}
+
+std::string termiq::detail::base64_decode(std::string_view src)
+{
+	const unsigned char* p = reinterpret_cast<const unsigned char*>(src.data());
+	size_t len = src.size();
+	int32_t pad = len > 0 && (len % 4 || p[len - 1] == '=');
+	const size_t temp_len = ((len + 3) / 4 - pad) * 4;
+	std::string str(temp_len / 4 * 3 + pad, '\0');
+
+	for (size_t i = 0, j = 0; i < temp_len; i += 4) {
+		int n = base64_index[p[i]] << 18 | base64_index[p[i + 1]] << 12 | base64_index[p[i + 2]] << 6 | base64_index[p[i + 3]];
+		str[j++] = n >> 16;
+		str[j++] = n >> 8 & 0xFF;
+		str[j++] = n & 0xFF;
+	}
+	if (pad) {
+		int n = base64_index[p[temp_len]] << 18 | base64_index[p[temp_len + 1]] << 12;
+		str[str.size() - 1] = n >> 16;
+
+		if (len > temp_len + 2 && p[temp_len + 2] != '=') {
+			n |= base64_index[p[temp_len + 2]] << 6;
+			str.push_back(n >> 8 & 0xFF);
+		}
+	}
+	return str;
+}
+
+termiq::OSC5522Status termiq::detail::osc5522_get_metadata_status(OSC5522Metadata& metadata)
+{
+	if (!metadata.valid) return OSC5522Status::UNKNOWN;
+
+	auto status_it = std::find_if(metadata.headers.begin(), metadata.headers.end(), [](std::pair<std::string, std::string>& header){
+		return header.first == "status";
+	});
+
+	if (status_it == metadata.headers.end()) return OSC5522Status::UNKNOWN;
+
+	std::string code = status_it->second;
+	if (code == "OK") return OSC5522Status::OK;
+	if (code == "DONE") return OSC5522Status::DONE;
+	if (code == "DATA") return OSC5522Status::DATA;
+	if (code == "EIO") return OSC5522Status::E_IO;
+	if (code == "EINVAL") return OSC5522Status::E_INVAL;
+	if (code == "ENOSYS") return OSC5522Status::E_NOSYS;
+	if (code == "EPERM") return OSC5522Status::E_PERM;
+	if (code == "EBUSY") return OSC5522Status::E_BUSY;
+	return OSC5522Status::UNKNOWN;
 }
 
 // ESC sequences
@@ -423,6 +534,297 @@ std::string termiq::push_cursor_shape_str(CursorShape shape)
 std::string termiq::pop_cursor_shape_str()
 {
 	return std::format("{}{}22;<{}{}", ::termiq::code::ST, ::termiq::code::OSC, ::termiq::code::ST, ::termiq::code::BSL);
+}
+
+std::string termiq::enable_osc5522_str()
+{
+	return std::format("{}{}?5522h", ::termiq::code::ST, ::termiq::code::CSI);
+}
+
+std::string termiq::disable_osc5522_str()
+{
+	return std::format("{}{}?5522l", ::termiq::code::ST, ::termiq::code::CSI);
+}
+
+std::string termiq::check_osc5522_str()
+{
+	return std::format("{}{}?5522$p", ::termiq::code::ST, ::termiq::code::CSI);
+}
+
+termiq::ProtocolSupport termiq::check_osc5522_parser(Reader* reader)
+{
+	std::string c;
+	c.resize(7);
+	while(true) {
+		// read ST
+		detail::read_exactly(reader, c.data(), 1);
+		if (c[0] != ::termiq::code::ST) continue;
+		detail::read_exactly(reader, c.data(), 1);
+		// read CSI
+		if (c[0] != ::termiq::code::CSI) continue;
+		// read '?'
+		detail::read_exactly(reader, c.data(), 1);
+		if (c[0] != '?') continue;
+		// read 5522
+		detail::read_exactly(reader, c.data(), 4);
+		if (std::string_view(c.data(), 4) != "5522") continue;
+		// skip ';'
+		detail::read_exactly(reader, c.data(), 1);
+		std::optional<size_t> res = detail::read_unsigned_until_ch(reader, '$', 7);
+		// skip 'y;
+		detail::read_exactly(reader, c.data(), 1);
+		if (!res || *res == 0) return ProtocolSupport::UNSUPPORTED;
+		if (*res == 1) return ProtocolSupport::ENABLED;
+		if (*res == 2) return ProtocolSupport::DISABLED;
+	}
+}
+
+std::string termiq::osc5522_write_begin_str(std::vector<std::pair<std::string, std::string>> headers)
+{
+	std::string hstr;
+	for (auto& [key, val] : headers) {
+		hstr.push_back(';');
+		hstr.insert(hstr.end(), key.begin(), key.end());
+		if (key == "name" || key == "pw") {
+			hstr += detail::base64_encode(val);
+		} else {
+			hstr += val;
+		}
+	}
+	return std::format(
+		"{}{}5522;type=write{}{}{}",
+		::termiq::code::ST, ::termiq::code::OSC,
+		hstr,
+		::termiq::code::ST, ::termiq::code::BSL
+	);
+}
+
+std::string termiq::osc5522_write_end_str()
+{
+	return std::format("{}{}5522;type=wdata{}{}", ::termiq::code::ST, ::termiq::code::OSC, ::termiq::code::ST, ::termiq::code::BSL);
+}
+
+std::string termiq::osc5522_write_chunk_str(std::pair<std::string, std::string_view> data)
+{
+	std::string mime_encoded = detail::base64_encode(data.first);
+	std::string data_encoded = detail::base64_encode(data.second);
+	return std::format(
+		"{}{}5522;type=wdata:mime={};{}{}{}",
+		::termiq::code::ST, ::termiq::code::OSC,
+		mime_encoded, data_encoded,
+		::termiq::code::ST, ::termiq::code::BSL
+	);
+}
+
+std::string termiq::osc5522_read_str(std::vector<std::string> mtypes, std::vector<std::pair<std::string, std::string>> headers)
+{
+	std::string hstr;
+	for (auto& [key, val] : headers) {
+		hstr.push_back(':');
+		hstr.insert(hstr.end(), key.begin(), key.end());
+		hstr.push_back('=');
+		if (key == "name" || key == "pw") {
+			hstr += detail::base64_encode(val);
+		} else {
+			hstr += val;
+		}
+	}
+	std::string data;
+	for (auto& m : mtypes) {
+		data.insert(data.end(), m.begin(), m.end());
+		data.push_back(' ');
+	}
+	if (!data.empty()) data.pop_back();
+	std::string data_encoded = detail::base64_encode(data);
+	return std::format(
+		"{}{}5522;type=read{};{}{}{}",
+		::termiq::code::ST, ::termiq::code::OSC,
+		hstr, data_encoded,
+		::termiq::code::ST, ::termiq::code::BSL);
+}
+
+termiq::OSC5522Metadata termiq::osc5522_metadata_parser(Reader* reader)
+{
+	const size_t BUFFER_SIZE = 1024;
+	std::vector<char> buffer(BUFFER_SIZE);
+
+	while(true) {
+		// read ST
+		detail::read_exactly(reader, buffer.data(), 1);
+		if (buffer[0] != ::termiq::code::ST) continue;
+		// read OSC
+		detail::read_exactly(reader, buffer.data(), 1);
+		if (buffer[0] != ::termiq::code::OSC) continue;
+		// read 5522
+		detail::read_exactly(reader, buffer.data(), 4);
+		if (std::string_view(buffer.data(), 4) != "5522") continue;
+		// skip ';'
+		detail::read_exactly(reader, buffer.data(), 1);
+
+		OSC5522Metadata metadata;
+		std::vector<std::pair<std::string, std::string>>& headers = metadata.headers;
+		while(true) {
+			size_t sz = detail::read_until_true(reader, buffer.data(), [](char c){
+				return c == ::termiq::code::ST || c == ::termiq::code::BEL || c == ':' || c == ';';
+			}, BUFFER_SIZE);
+
+			std::string_view header(buffer.data(), sz-1);
+			size_t eq_pos = header.find('=');
+			if (eq_pos == std::string::npos) {
+				// empty header?
+				headers.push_back({std::string(header.begin(), header.end()), ""});
+				continue;
+			}
+			headers.push_back({
+				std::string(header.begin(), header.begin() + eq_pos),
+				std::string(header.begin() + eq_pos + 1, header.end()),
+			});
+
+			char last = buffer[sz-1];
+			if (last == ::termiq::code::BEL) break;
+			if (last == ::termiq::code::ST) {
+				// skip BSL
+				detail::read_exactly(reader, buffer.data(), 1);
+				break;
+			}
+			if (last == ';') {
+				metadata.has_payload = true;
+				break;
+			}
+			if (last == ':') {
+				// more headers to come
+				continue;
+			}
+
+			// buffer overflow or invalid data
+			metadata.valid = false;
+			break;
+		}
+
+		return metadata;
+	}
+}
+
+termiq::OSC5522Status termiq::osc5522_status_parser(Reader* reader)
+{
+	OSC5522Metadata metadata = osc5522_metadata_parser(reader);
+	return detail::osc5522_get_metadata_status(metadata);
+}
+
+termiq::OSC5522Result termiq::osc5522_read_all_parser(Reader* reader)
+{
+	const size_t BUFFER_SIZE = 1024;
+	OSC5522Metadata metadata = osc5522_metadata_parser(reader);
+	OSC5522Status status = detail::osc5522_get_metadata_status(metadata);
+
+	// TODO: validate password (pw header)
+
+	std::vector<MimeData> data_vec;
+	if (status != OSC5522Status::OK) return {status, std::move(data_vec)};
+
+	std::vector<char> buffer(BUFFER_SIZE);
+	while(true) {
+		OSC5522Metadata md = osc5522_metadata_parser(reader);
+		OSC5522Status s = detail::osc5522_get_metadata_status(md);
+		if (s == OSC5522Status::DONE) return {s, std::move(data_vec)};
+		if (s != OSC5522Status::DATA) return {s, std::move(data_vec)};
+
+		if (!md.has_payload) {
+			// DATA event cannot be w/o payload
+			return {OSC5522Status::E_INVAL, std::move(data_vec)};
+		}
+		// find mime header
+		auto mime_it = std::find_if(md.headers.begin(), md.headers.end(), [](std::pair<std::string, std::string>& header){
+			return header.first == "mime";
+		});
+		if (mime_it == md.headers.end()) {
+			return {OSC5522Status::E_INVAL, std::move(data_vec)};
+		}
+
+		std::string mime = detail::base64_decode(mime_it->second);
+		std::string data;
+		while(true) {
+			size_t sz = detail::read_until_true(reader, buffer.data(), [](char c){
+				return c == ::termiq::code::ST || c == ::termiq::code::BEL;
+			}, BUFFER_SIZE);
+			if (buffer[sz-1] == ::termiq::code::ST || buffer[sz-1] == ::termiq::code::BEL) {
+				data.insert(data.end(), buffer.begin(), buffer.begin() + sz - 1);
+				data_vec.push_back({std::move(mime), std::move(detail::base64_decode(data))});
+				if (buffer[sz-1] == ::termiq::code::ST) {
+					// skip BSL
+					detail::read_exactly(reader, buffer.data(), 1);
+				}
+				break;
+			}
+			data.insert(data.end(), buffer.begin(), buffer.end());
+		}
+	}
+}
+
+std::string termiq::osc52_write_str(std::string_view data, char loc)
+{
+	return std::format(
+		"{}{}52;{};{}{}{}",
+		::termiq::code::ST,
+		::termiq::code::OSC,
+		loc, detail::base64_encode(data),
+		::termiq::code::ST, ::termiq::code::BSL
+	);
+}
+
+std::string termiq::osc52_read_str(char loc)
+{
+	return std::format(
+		"{}{}52;{};?{}{}",
+		::termiq::code::ST,
+		::termiq::code::OSC,
+		loc,
+		::termiq::code::ST, ::termiq::code::BSL
+	);
+}
+
+std::string termiq::osc52_read_parser(Reader* reader)
+{
+	const size_t BUFFER_SIZE = 1024;
+	std::vector<char> buffer(BUFFER_SIZE);
+
+	while(true) {
+		// read ST
+		detail::read_exactly(reader, buffer.data(), 1);
+		if (buffer[0] != ::termiq::code::ST) continue;
+		// read OSC
+		detail::read_exactly(reader, buffer.data(), 1);
+		if (buffer[0] != ::termiq::code::OSC) continue;
+		// read 52
+		detail::read_exactly(reader, buffer.data(), 2);
+		if (std::string_view(buffer.data(), 2) != "52") continue;
+		// skip ';'
+		detail::read_exactly(reader, buffer.data(), 1);
+		// read location
+		char loc;
+		detail::read_exactly(reader, &loc, 1);
+		// skip ';'
+		detail::read_exactly(reader, buffer.data(), 1);
+		// read data
+		std::string data;
+		while(true) {
+			size_t sz = detail::read_until_true(reader, buffer.data(), [](char c){
+				return c == ::termiq::code::ST || c == ::termiq::code::BEL;
+			}, BUFFER_SIZE);
+			char last = buffer[sz-1];
+			if (last != ::termiq::code::ST && last != ::termiq::code::BEL) {
+				data.insert(data.end(), buffer.begin(), buffer.end());
+				continue;
+			}
+			data.insert(data.end(), buffer.begin(), buffer.begin() + sz - 1);
+			if (last == ::termiq::code::ST) {
+				// skip BSL
+				detail::read_exactly(reader, buffer.data(), 1);
+			}
+			break;
+		}
+		return detail::base64_decode(data);
+	}
 }
 
 std::string termiq::enable_mouse_buttons_str()

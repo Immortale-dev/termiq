@@ -181,6 +181,17 @@ namespace termiq {
 		DECLARE_SEQUENCE_FUNCTION(push_cursor_shape, push_cursor_shape_str);
 		DECLARE_SEQUENCE_FUNCTION(pop_cursor_shape, pop_cursor_shape_str);
 
+		DECLARE_SEQUENCE_FUNCTION(check_osc5522, check_osc5522_str, check_osc5522_parser);
+		DECLARE_SEQUENCE_FUNCTION(enable_osc5522, enable_osc5522_str);
+		DECLARE_SEQUENCE_FUNCTION(disable_osc5522, disable_osc5522_str);
+		DECLARE_SEQUENCE_FUNCTION(osc5522_write_begin, osc5522_write_begin_str);
+		DECLARE_SEQUENCE_FUNCTION(osc5522_write_end, osc5522_write_end_str, osc5522_status_parser);
+		DECLARE_SEQUENCE_FUNCTION(osc5522_write_chunk, osc5522_write_chunk_str);
+		DECLARE_SEQUENCE_FUNCTION(osc5522_read, osc5522_read_str, osc5522_read_all_parser);
+
+		DECLARE_SEQUENCE_FUNCTION(osc52_write, osc52_write_str);
+		DECLARE_SEQUENCE_FUNCTION(osc52_read, osc52_read_str, osc52_read_parser);
+
 		DECLARE_SEQUENCE_FUNCTION(enable_mouse_buttons, enable_mouse_buttons_str);
 		DECLARE_SEQUENCE_FUNCTION(disable_mouse_buttons, disable_mouse_buttons_str);
 		DECLARE_SEQUENCE_FUNCTION(enable_mouse_cell_motions, enable_mouse_cell_motions_str);

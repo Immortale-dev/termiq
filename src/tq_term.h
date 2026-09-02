@@ -11,6 +11,7 @@
 #include <vector>
 #include <span>
 #include <variant>
+#include <functional>
 
 #include <termios.h>
 #include <unistd.h>
@@ -60,8 +61,42 @@ namespace termiq {
 			std::variant<std::monostate, TrueColor, PlaceColor> color_;
 	};
 
+	struct MimeData {
+		std::string mime;
+		std::string data;
+	};
+
+	struct OSC5522Metadata {
+		std::vector<std::pair<std::string, std::string>> headers;
+		bool has_payload = false;
+		bool valid = true;
+	};
+
+	enum class OSC5522Status : int8_t {
+		E_BUSY    = -5,
+		E_PERM    = -4,
+		E_NOSYS   = -3,
+		E_INVAL   = -2,
+		E_IO      = -1,
+		UNKNOWN   =  0,
+		OK        =  1,
+		DONE      =  2,
+		DATA      =  3,
+	};
+
+	struct OSC5522Result {
+		OSC5522Status status;
+		std::vector<MimeData> data = {};
+	};
+
 	struct Pos {
 		int32_t r,c;
+	};
+
+	enum class ProtocolSupport : uint8_t {
+		UNSUPPORTED  = 0,
+		ENABLED      = 1,
+		DISABLED     = 2,
 	};
 
 	enum class UnderlineStyle : uint8_t {
@@ -349,6 +384,23 @@ namespace termiq {
 	std::string push_cursor_shape_str(CursorShape shape);
 	std::string pop_cursor_shape_str();
 
+	std::string enable_osc5522_str();
+	std::string disable_osc5522_str();
+	std::string check_osc5522_str();
+	ProtocolSupport check_osc5522_parser(Reader* reader);
+
+	std::string osc5522_write_begin_str(std::vector<std::pair<std::string, std::string>> headers = {});
+	std::string osc5522_write_end_str();
+	std::string osc5522_write_chunk_str(std::pair<std::string, std::string_view> data);
+	std::string osc5522_read_str(std::vector<std::string> mtypes, std::vector<std::pair<std::string, std::string>> headers = {});
+	OSC5522Metadata osc5522_metadata_parser(Reader* reader);
+	OSC5522Status osc5522_status_parser(Reader* reader);
+	OSC5522Result osc5522_read_all_parser(Reader* reader);
+
+	std::string osc52_write_str(std::string_view data, char loc = 'c');
+	std::string osc52_read_str(char loc);
+	std::string osc52_read_parser(Reader* reader);
+
 	std::string enable_mouse_buttons_str();
 	std::string disable_mouse_buttons_str();
 	std::string enable_mouse_cell_motions_str();
@@ -385,13 +437,41 @@ namespace termiq {
 
 		size_t read_exactly(Reader* r, char* c, size_t sz);
 		size_t read_until_ch(Reader* r, char* c, char ch, size_t limit);
+		size_t read_until_true(Reader* r, char* c, std::function<bool(char)> fn, size_t limit);
 		std::optional<size_t> read_unsigned_until_ch(Reader*r, char ch, size_t limit);
+
+		std::string base64_encode(std::string_view src);
+		std::string base64_encode(std::string&& src);
+		std::string base64_decode(std::string_view src);
+		std::string base64_decode(std::string&& src);
+
+		OSC5522Status osc5522_get_metadata_status(OSC5522Metadata& metadata);
 
 		inline int input = STDIN_FILENO;
 		inline int output = STDOUT_FILENO;
 
 		inline int32_t raw_mode_enabled_count = 0;
 		inline termios orig_termios;
+
+		inline constexpr std::string_view base64_table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+		static constexpr std::array<int32_t, 256> base64_index = {
+			 0,  0,  0,  0,  0,  0,  0,  0,
+			 0,  0,  0,  0,  0,  0,  0,  0,
+			 0,  0,  0,  0,  0,  0,  0,  0,
+			 0,  0,  0,  0,  0,  0,  0,  0,
+			 0,  0,  0,  0,  0,  0,  0,  0,
+			 0,  0,  0, 62, 63, 62, 62, 63,
+			52, 53, 54, 55, 56, 57, 58, 59,
+			60, 61,  0,  0,  0,  0,  0,  0,
+			 0,  0,  1,  2,  3,  4,  5,  6,
+			 7,  8,  9, 10, 11, 12, 13, 14,
+			15, 16, 17, 18, 19, 20, 21, 22,
+			23, 24, 25,  0,  0,  0,  0, 63,
+			 0, 26, 27, 28, 29, 30, 31, 32,
+			33, 34, 35, 36, 37, 38, 39, 40,
+			41, 42, 43, 44, 45, 46, 47, 48,
+			49, 50, 51,  0,  0,  0,  0,  0
+		};
 
 		inline constexpr std::array<std::string_view, 6> query_color_types{
 			"foreground"sv,

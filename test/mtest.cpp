@@ -16,42 +16,42 @@ using BGrid = termiq::canvas::FlexGrid<CC>;
 
 int rows, cols;
 
-void paint_texts() {
+void paint_texts(termiq::SequenceExecutor* se) {
 	termiq::style::background(termiq::Color{0, 128, 128});
 	termiq::style::bold(true);
 	termiq::style::underline(true);
 
 	std::cout << "Some text";
 	termiq::style::colors_reset();
-	std::cout << std::endl;
+	std::cout << "\n";
 
 	termiq::style::foreground(termiq::Color{0, 128, 50});
 	termiq::style::underline(false);
 
-	std::cout << "Other text" << std::endl;
+	std::cout << "Other text\n";
 	for(int i=1;i<=10;i++) {
 		termiq::style::foreground(termiq::Color{(uint8_t)((i%2) == 0 ? 255 : 128), 0, 0});
-		std::cout << "This is red color" << std::endl;
+		std::cout << "This is red color\n";
 	}
 	termiq::style::colors_reset();
 
 	termiq::style::bold(false);
 
-	std::cout << "colors were reset" << std::endl;
+	std::cout << "colors were reset\n";
 
 	termiq::style::style(termiq::style::FontStyle{.dim=true, .inverse=true});
-	std::cout << "dim and reverse" << std::endl;
+	std::cout << "dim and reverse\n";
 
 	termiq::style::style(termiq::style::FontStyle{
 		.dim=false,
-		.underline=termiq::style::Underline{
-			.color=termiq::Color{250,10,10},
-			.style=termiq::UnderlineStyle::CURLY
-		},
+		.underline=termiq::Underline(
+			termiq::UnderlineStyle::CURLY,
+			termiq::Color{250,10,10}
+		),
 		.inverse=false,
 	});
 
-	std::cout << "with curly red underline" << std::endl;
+	std::cout << "with curly red underline\n";
 
 	termiq::style::style(termiq::style::FontStyle{
 		.bold=true,
@@ -59,7 +59,7 @@ void paint_texts() {
 		.strike=true
 	});
 
-	std::cout << "bold, striked text" << std::endl;
+	std::cout << "bold, striked text\n";
 
 	termiq::style::italic(true);
 	termiq::style::inverse(true);
@@ -69,15 +69,16 @@ void paint_texts() {
 		.background=termiq::Color{130,40,150},
 	});
 
-	std::cout << "bold, italic, inversed, colored" << std::endl;
+	std::cout << "bold, italic, inversed, colored\n";
 
 	termiq::style::props_reset();
 
-	std::cout << "with colored background" << std::endl;
+	std::cout << "with colored background\n";
 
 	termiq::style::colors_reset();
 
-	std::cout << "press enter...";
+	std::cout << "press enter...\n";
+	se->flush();
 	getchar();
 
 	termiq::style::terminal_background(termiq::Color{60,70,200});
@@ -85,9 +86,9 @@ void paint_texts() {
 		.foreground=termiq::Color{100,250,250},
 	});
 
-	std::fflush(stdout);
+	se->flush();
 
-	std::cout << "press enter...";
+	std::cout << "press enter...\n";
 	getchar();
 
 	termiq::style::terminal_style_reset();
@@ -170,7 +171,8 @@ void paint_canvas(termiq::SequenceExecutor* se) {
 	se->execute<termiq::se::sync_end>();
 	se->execute<termiq::se::cursor_default>();
 	auto t3 = std::chrono::system_clock::now();
-	fflush(stdout);
+
+	se->flush();
 
 	getchar();
 
@@ -178,9 +180,10 @@ void paint_canvas(termiq::SequenceExecutor* se) {
 	se->execute<termiq::se::exit_alternate_buffer>();
 
 	termiq::style::style_reset();
+	se->flush();
 
-	std::cout << "Time to draw: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count() << std::endl;
-	std::cout << "Time to paint: " << std::chrono::duration_cast<std::chrono::milliseconds>(t3-t2).count() << std::endl;
+	std::cout << "Time to draw: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count() << "\n";
+	std::cout << "Time to paint: " << std::chrono::duration_cast<std::chrono::milliseconds>(t3-t2).count() << "\n";
 }
 
 void paint_full_screen(termiq::SequenceExecutor* se) {
@@ -222,13 +225,76 @@ void paint_full_screen(termiq::SequenceExecutor* se) {
 	termiq::style::style_reset();
 	se->flush();
 
-	std::cout << "Time to draw: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count() << std::endl;
-	std::cout << "Time to paint: " << std::chrono::duration_cast<std::chrono::milliseconds>(t3-t2).count() << std::endl;
+	std::cout << "Time to draw: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count() << "\n";
+	std::cout << "Time to paint: " << std::chrono::duration_cast<std::chrono::milliseconds>(t3-t2).count() << "\n";
+}
+
+void test_osc5522(termiq::SequenceExecutor* se) {
+	std::cout << "OSC 5522 Start\n";
+	se->flush();
+	se->execute<termiq::se::enable_osc5522>();
+	termiq::ProtocolSupport osc5522support = se->execute<termiq::se::check_osc5522>();
+	if (osc5522support == termiq::ProtocolSupport::ENABLED) {
+		std::cout << "OSC 5522 enabled!" << std::endl;
+
+		se->execute<termiq::se::osc5522_write_begin>(std::vector<std::pair<std::string, std::string>>{
+			{"name", "test"},
+			{"pw", "some_fancy_id_123"}
+		});
+		se->execute<termiq::se::osc5522_write_chunk>(std::pair<std::string, std::string_view>{"text/plain", "Hello World! 5522"});
+		termiq::OSC5522Status status = se->execute<termiq::se::osc5522_write_end>();
+		se->flush();
+
+		std::cout << "OSC 5522 write status: " << (int)status << "\n";
+		se->flush();
+
+		getchar();
+
+		termiq::OSC5522Result result = se->execute<termiq::se::osc5522_read>(
+			std::vector<std::string>{"text/plain"},
+			std::vector<std::pair<std::string, std::string>>{
+				{"name", "test"},
+				{"pw", "some_fancy_id_123"}
+			}
+		);
+
+		// second read with the same name/password
+		se->execute<termiq::se::osc5522_read>(
+			std::vector<std::string>{"text/plain"},
+			std::vector<std::pair<std::string, std::string>>{
+				{"name", "test"},
+				{"pw", "some_fancy_id_123"}
+			}
+		);
+
+		std::cout << "OSC5522 read status: " << (int)result.status << std::endl;
+		for (auto& d : result.data) {
+			std::cout << "DATA: " << d.mime << " - " << d.data << std::endl;
+		}
+
+		getchar();
+	} else {
+		std::cout << "No OSC 5522 support\n";
+	}
+
+	std::cout << "OSC52 write" << std::endl;
+	se->execute<termiq::se::osc52_write>("Hello World! 52", 'c');
+
+	getchar();
+
+	std::string osc52read = se->execute<termiq::se::osc52_read>('c');
+	std::cout << "OSC52 read: " << osc52read << std::endl;
+
+	se->execute<termiq::se::disable_osc5522>();
+	se->flush();
+
+	getchar();
 }
 
 int main() {
-//	std::ios_base::sync_with_stdio(false);
-//	std::cin.tie(nullptr);
+	std::ios_base::sync_with_stdio(false);
+	std::cin.tie(nullptr);
+	std::cout.tie(nullptr);
 
 	termiq::init_term();
 	setlocale(LC_ALL, "C.UTF-8");
@@ -236,30 +302,13 @@ int main() {
 	auto runner = std::make_unique<termiq::StreamSequenceRunner<>>();
 	termiq::style::init(runner->get());
 
-//	auto p1 = std::chrono::system_clock::now();
-//	for (int r=0;r<38;r++) {
-//		for (int c=0;c<142;c++) {
-//			if (c%2) {
-//				std::cout << termiq::set_foreground_color_str(termiq::Color{255,0,0});
-////				termiq::style::foreground(termiq::Color{255,0,0});
-////				std::cout << "\x1b" << "\x5b" << "38;2;255;0;0m" << "A"; //<< "\x1b" << "\x5b" << "23;1m" << "A";
-//			} else {
-//				std::cout << termiq::set_foreground_color_str(termiq::Color{128,0,0});
-////				termiq::style::foreground(termiq::Color{128,0,0});
-////				std::cout << "\x1b" << "\x5b" << "38;2;100;0;0m" << "A"; //<< "\x1b" << "\x5b" << "22;3m" << "A";
-//			}
-//			std::cout << "A";
-//		}
-//	}
-//	auto p2 = std::chrono::system_clock::now();
-//	std::cout << "MS: " << std::chrono::duration_cast<std::chrono::milliseconds>(p2-p1).count() << std::endl;
-//
-//	return 0;
-
 	std::optional<termiq::Pos> term_size;
+	std::optional<termiq::ProtocolSupport> osc5522support;
 
-	runner->run([&term_size](termiq::SequenceExecutor* e){
+	runner->run([&term_size, &osc5522support](termiq::SequenceExecutor* e){
 		term_size = e->execute<termiq::se::get_size_ch>();
+		e->execute<termiq::se::enable_osc5522>();
+		osc5522support = e->execute<termiq::se::check_osc5522>();
 	});
 
 	auto se = runner->get();
@@ -267,30 +316,31 @@ int main() {
 	if (!term_size) return 1;
 	rows = term_size->r;
 	cols = term_size->c;
-	std::cout << "Lines: " << term_size->r << std::endl;
-	std::cout << "Columns: " << term_size->c << std::endl;
+	std::cout << "Lines: " << term_size->r << "\n";
+	std::cout << "Columns: " << term_size->c << "\n";
+	std::cout << "OSC5522: " << (int)(*osc5522support) << "\n";
 
 	termiq::style::italic(true);
 	termiq::style::foreground(termiq::Color{255, 50, 50});
 	se->flush();
-	std::cout << "ITALIC_ON" << std::endl;
+	std::cout << "ITALIC_ON" << "\n";
 
 	termiq::style::style({.bold=true});
 	se->flush();
-	std::cout << "TURN_ON_BOLD_ATTR" << std::endl;
+	std::cout << "TURN_ON_BOLD_ATTR" << "\n";
 
 	termiq::style::style_reset();
 	se->flush();
-	std::cout << "RESET_ATTRS" << std::endl;
+	std::cout << "RESET_ATTRS" << "\n";
 
 	// unicode char
 	std::vector<unsigned char> em = {0xf0, 0x9f, 0xa7, 0x99};
 	for (size_t i=0;i<em.size();i++) {
 		std::cout << em[i];
 	}
-	std::cout << std::endl;
+	std::cout << "\n";
 
-	std::cout << "Press enter..." << std::endl;
+	std::cout << "Press enter..." << "\n";
 
 	std::wstring charw = L"\u4ef6\u4ef6\u4ef6\u4ef6\u4ef6\u4ef6\u4ef6\u4ef6\u4ef6\u4ef6";
 	printf("%ls", charw.data());
@@ -302,7 +352,8 @@ int main() {
 
 	getchar();
 
-	paint_texts();
+	test_osc5522(runner->get());
+	paint_texts(runner->get());
 	paint_full_screen(runner->get());
 	paint_canvas(runner->get());
 }

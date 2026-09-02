@@ -221,6 +221,8 @@ namespace termiq {
 			using char_type = CT;
 			using char_state_type = CS;
 			bool operator==(const CharCell &other) const {
+				if (continuation && other.continuation) return true;
+				if (transparent && other.transparent) return true;
 				return symbol == other.symbol && state == other.state;
 			}
 			bool operator!=(const CharCell &other) const {
