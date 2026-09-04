@@ -398,7 +398,7 @@ namespace termiq {
 	OSC5522Result osc5522_read_all_parser(Reader* reader);
 
 	std::string osc52_write_str(std::string_view data, char loc = 'c');
-	std::string osc52_read_str(char loc);
+	std::string osc52_read_str(char loc = 'c');
 	std::string osc52_read_parser(Reader* reader);
 
 	std::string enable_mouse_buttons_str();
