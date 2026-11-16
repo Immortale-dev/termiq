@@ -97,6 +97,7 @@ DESCRIBE("Term Style", {
 				termiq::style::strike(true);
 
 				std::string str = output_sstream.str();
+
 				EXPECT(str).toBe("\033[1m\033[3m\033[4m\033[7m\033[9m");
 			});
 

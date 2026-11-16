@@ -6,140 +6,132 @@
 #include "tq_term_adv.h"
 #include "tq_term_canvas_utils.h"
 
-template<typename CC>
-termiq::canvas::Canvas<CC>::Canvas(unsigned int h, unsigned int w, unsigned int r, unsigned int c) : _height(h), _width(w), _row(r), _col(c), _canvas(h, container<CC>(w)) {}
+template<typename CC, typename Container>
+termiq::canvas::Canvas<CC,Container>::Canvas(uint32_t h, uint32_t w, int32_t r, int32_t c)
+	: height_(h), width_(w), row_(r), col_(c), canvas_(h, w) {}
 
-template<typename CC>
-void termiq::canvas::Canvas<CC>::resize(unsigned int height, unsigned int width) {
-	_width = width;
-	_height = height;
-	_canvas.resize(_height);
-	for(auto &c : _canvas) {
-		c.resize(_width);
-	}
+template<typename CC, typename Container>
+void termiq::canvas::Canvas<CC,Container>::resize(uint32_t height, uint32_t width) {
+	width_ = width;
+	height_ = height;
+	canvas_.resize(height_, width_);
 	resized();
 }
 
-template<typename CC>
-void termiq::canvas::Canvas<CC>::move(unsigned int row, unsigned int col) {
-	_row = row;
-	_col = col;
+template<typename CC, typename Container>
+void termiq::canvas::Canvas<CC,Container>::move(int32_t row, int32_t col) {
+	row_ = row;
+	col_ = col;
+	canvas_.move(row_, col_);
 	moved();
 }
 
-template<typename CC>
-void termiq::canvas::Canvas<CC>::draw(unsigned int row, unsigned int col, const CanvasPiece<CC> &piece) {
-	for(size_t pr=0;pr<piece.rows;pr++) {
-		for(size_t pc=0;pc<piece.cols;pc++) {
-			size_t r = pr + row + piece.offset_rows;
-			size_t c = pc + col + piece.offset_cols;
-			if (r >= _height || c >= _width || piece.canvas[pr][pc].transparent) continue;
-			_canvas[r][c] = piece.canvas[pr][pc];
+template<typename CC, typename Container>
+template<typename Layer>
+void termiq::canvas::Canvas<CC,Container>::draw_layer(uint32_t row, uint32_t col, const Layer& layer) {
+	for(size_t pr=0;pr<layer.rows();pr++) {
+		for(size_t pc=0;pc<layer.cols();pc++) {
+			size_t r = pr + row + layer.row();
+			size_t c = pc + col + layer.col();
+			if (r >= height_ || c >= width_ || layer.cell(pr,pc).transparent()) continue;
+			canvas_.set(r,c, layer.cell(pr,pc));
 		}
 	}
 }
 
 
-template<typename CC>
-void termiq::canvas::Canvas<CC>::draw(unsigned int row, unsigned int col, const CanvasPieces<CC> &pieces) {
-	for (auto& piece : pieces.pieces) {
-		draw(row, col, piece);
+template<typename CC, typename Container>
+template<typename Piece>
+void termiq::canvas::Canvas<CC,Container>::draw(uint32_t row, uint32_t col, Piece&& piece) {
+	for (auto& layer : piece.layers()) {
+		draw_layer(row, col, layer);
 	}
 	drawn();
 }
 
-template<typename CC>
-void termiq::canvas::Canvas<CC>::draw(unsigned int row, unsigned int col, const CanvasPieces<CC> &&pieces) {
-	draw(row, col, pieces);
-}
-
-template<typename CC>
-void termiq::canvas::Canvas<CC>::paint() {
+template<typename CC, typename Container>
+void termiq::canvas::Canvas<CC,Container>::paint() {
 	prepaint();
-	for(size_t cr=0;cr<_height;cr++) {
+	for(size_t cr=0;cr<height_;cr++) {
 		paint_row(cr);
 	}
 	painted();
 }
 
-template<typename CC>
-unsigned int termiq::canvas::Canvas<CC>::get_width() {
-	return _width;
+template<typename CC, typename Container>
+uint32_t termiq::canvas::Canvas<CC,Container>::get_width() {
+	return width_;
 }
 
-template<typename CC>
-unsigned int termiq::canvas::Canvas<CC>::get_height() {
-	return _height;
+template<typename CC, typename Container>
+uint32_t termiq::canvas::Canvas<CC,Container>::get_height() {
+	return height_;
 }
 
-template<typename CC>
-unsigned int termiq::canvas::Canvas<CC>::get_col() {
-	return _col;
+template<typename CC, typename Container>
+int32_t termiq::canvas::Canvas<CC,Container>::get_col() {
+	return col_;
 }
 
-template<typename CC>
-unsigned int termiq::canvas::Canvas<CC>::get_row() {
-	return _row;
+template<typename CC, typename Container>
+int32_t termiq::canvas::Canvas<CC,Container>::get_row() {
+	return row_;
 }
 
-template<typename CC>
-const typename termiq::canvas::Canvas<CC>::container<typename termiq::canvas::Canvas<CC>::container<CC>>& termiq::canvas::Canvas<CC>::get_canvas() {
-	return _canvas;
+template<typename CC, typename Container>
+const Container& termiq::canvas::Canvas<CC,Container>::get_canvas() {
+	return canvas_;
 }
 
-template<typename CC>
-void termiq::canvas::Canvas<CC>::paint_row(size_t index) {
-	move_cursor(_row + index, _col);
-	for (size_t i=0;i<_width;i++) {
-		paint_cell(_canvas[index][i]);
+template<typename CC, typename Container>
+void termiq::canvas::Canvas<CC,Container>::paint_row(uint32_t index) {
+	move_cursor(row_ + index, col_);
+	for (size_t i=0;i<width_;i++) {
+		paint_cell(canvas_.get(index, i));
 	}
 }
 
-template<typename CC>
-void termiq::canvas::Canvas<CC>::resized() {}
+template<typename CC, typename Container>
+void termiq::canvas::Canvas<CC,Container>::resized() {}
 
-template<typename CC>
-void termiq::canvas::Canvas<CC>::moved() {}
+template<typename CC, typename Container>
+void termiq::canvas::Canvas<CC,Container>::moved() {}
 
-template<typename CC>
-void termiq::canvas::Canvas<CC>::drawn() {}
+template<typename CC, typename Container>
+void termiq::canvas::Canvas<CC,Container>::drawn() {}
 
-template<typename CC>
-void termiq::canvas::Canvas<CC>::painted() {}
+template<typename CC, typename Container>
+void termiq::canvas::Canvas<CC,Container>::painted() {}
 
-template<typename CC>
-void termiq::canvas::Canvas<CC>::prepaint() {}
+template<typename CC, typename Container>
+void termiq::canvas::Canvas<CC,Container>::prepaint() {}
 
 // SECanvas
 
-template<typename CC>
-termiq::canvas::SECanvas<CC>::SECanvas(SequenceExecutor* se, unsigned int h, unsigned int w, unsigned int r, unsigned int c)
-	: Canvas<CC>(h,w,r,c), se_(se) {}
+template<typename CC, typename Container>
+termiq::canvas::SECanvas<CC,Container>::SECanvas(SequenceExecutor* se, uint32_t h, uint32_t w, int32_t r, int32_t c)
+	: Canvas<CC,Container>(h,w,r,c), se_(se) {}
 
-template<typename CC>
-void termiq::canvas::SECanvas<CC>::move_cursor(unsigned int row, unsigned int col) {
+template<typename CC, typename Container>
+void termiq::canvas::SECanvas<CC,Container>::move_cursor(uint32_t row, uint32_t col) {
 	se_->execute<termiq::se::move>(row, col);
 }
 
-template<typename CC>
-void termiq::canvas::SECanvas<CC>::set_paint_state(const char_state_type* state) {
-	if (!state) {
-		termiq::style::style_reset();
-		return;
-	}
+template<typename CC, typename Container>
+void termiq::canvas::SECanvas<CC,Container>::set_paint_state(const Style& state) {
 	termiq::style::style({
-		.foreground = state->foreground(),
-		.background = state->background(),
-		.bold = state->bold(),
-		.dim = state->dim(),
-		.italic = state->italic(),
-		.underline = state->underline(),
-		.inverse = state->inverse(),
+		.foreground = state.foreground(),
+		.background = state.background(),
+		.bold = state.bold(),
+		.dim = state.dim(),
+		.italic = state.italic(),
+		.underline = state.underline(),
+		.inverse = state.inverse(),
 	});
 }
 
-template<typename CC>
-void termiq::canvas::SECanvas<CC>::paint_cell(const CC &cell) {
-	set_paint_state(&cell.state);
-	se_->writer()->write(cell.symbol.begin(), cell.symbol.size());
+template<typename CC, typename Container>
+void termiq::canvas::SECanvas<CC,Container>::paint_cell(const Cell& cell) {
+	set_paint_state(cell.style());
+	se_->writer()->write(cell.symbol().begin(), cell.symbol().size());
 }

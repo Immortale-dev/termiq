@@ -12,7 +12,7 @@ namespace termiq::style {
 		bool is_bold = false;
 		bool is_dim = false;
 		bool is_italic = false;
-		std::variant<bool, Underline> is_underline = false;
+		Underline is_underline = false;
 		bool is_blinking = false;
 		bool is_inverse = false;
 		bool is_hidden = false;
@@ -45,11 +45,11 @@ namespace termiq::style {
 
 void termiq::style::style(style::FontStyle s) {
 	std::vector<StyleProp> list{};
-	if (s.foreground.index() == 0) {
-		::termiq::style::foreground(std::get<0>(s.foreground));
+	if (s.foreground) {
+		::termiq::style::foreground(*s.foreground);
 	}
-	if (s.background.index() == 0) {
-		::termiq::style::background(std::get<0>(s.background));
+	if (s.background) {
+		::termiq::style::background(*s.background);
 	}
 
 	bool bold_changed = false;
@@ -73,13 +73,13 @@ void termiq::style::style(style::FontStyle s) {
 
 	if (s.underline && *s.underline != is_underline) {
 		is_underline = *s.underline;
-		if (is_underline.index() == 0) {
-			bool st = std::get<0>(is_underline);
-			list.push_back(st ? StyleProp::UNDERLINE : StyleProp::NONDERLINE);
+		if (is_underline.style == UnderlineStyle::NONE) {
+			list.push_back(StyleProp::NONDERLINE);
+		} else if (is_underline.style == UnderlineStyle::STRAIGHT && is_underline.color == Color::NONE) {
+			list.push_back(StyleProp::UNDERLINE);
 		} else {
-			Underline &u = std::get<1>(is_underline);
-			detail::executor->execute<se::set_underline_color>(u.color);
-			detail::executor->execute<se::set_underline_style>(u.style);
+			detail::executor->execute<se::set_underline_color>(is_underline.color);
+			detail::executor->execute<se::set_underline_style>(is_underline.style);
 		}
 	}
 
@@ -154,20 +154,16 @@ void termiq::style::italic(bool state) {
 	}
 }
 
-void termiq::style::underline(std::variant<bool, Underline> state) {
+void termiq::style::underline(Underline state) {
 	if (is_underline == state) return;
 	is_underline = state;
-	if (state.index() == 0) {
-		bool s = std::get<0>(state);
-		if (s) {
-			detail::executor->execute<se::set_styles>(std::vector{StyleProp::UNDERLINE});
-		} else {
-			detail::executor->execute<se::set_styles>(std::vector{StyleProp::NONDERLINE});
-		}
+	if (is_underline.style == UnderlineStyle::NONE) {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::NONDERLINE});
+	} else if (is_underline.style == UnderlineStyle::STRAIGHT && state.color == Color::NONE) {
+		detail::executor->execute<se::set_styles>(std::vector{StyleProp::UNDERLINE});
 	} else {
-		Underline &u = std::get<1>(state);
-		detail::executor->execute<se::set_underline_color>(u.color);
-		detail::executor->execute<se::set_underline_style>(u.style);
+		detail::executor->execute<se::set_underline_color>(is_underline.color);
+		detail::executor->execute<se::set_underline_style>(is_underline.style);
 	}
 }
 
@@ -222,7 +218,7 @@ void termiq::style::props_reset()
 	std::vector<StyleProp> list;
 	if (is_bold || is_dim) list.push_back(StyleProp::NORMAL);
 	if (is_italic) list.push_back(StyleProp::STRAIGHT);
-	if (is_underline.index() == 1 || (is_underline.index() == 0 && std::get<0>(is_underline))) list.push_back(StyleProp::NONDERLINE);
+	if (is_underline.style != UnderlineStyle::NONE) list.push_back(StyleProp::NONDERLINE);
 	if (is_blinking) list.push_back(StyleProp::STARING);
 	if (is_inverse) list.push_back(StyleProp::OUTVERSE);
 	if (is_hidden) list.push_back(StyleProp::VISIBLE);
@@ -254,12 +250,12 @@ void termiq::style::update() {
 
 void termiq::style::terminal_style(TerminalStyle style)
 {
-	if (style.foreground.index() == 0) terminal_foreground(std::get<0>(style.foreground));
-	if (style.background.index() == 0) terminal_background(std::get<0>(style.background));
-	if (style.selection_foreground.index() == 0) selection_foreground(std::get<0>(style.selection_foreground));
-	if (style.selection_background.index() == 0) selection_background(std::get<0>(style.selection_background));
-	if (style.cursor_foreground.index() == 0) cursor_foreground(std::get<0>(style.cursor_foreground));
-	if (style.cursor_background.index() == 0) cursor_background(std::get<0>(style.cursor_background));
+	if (style.foreground) terminal_foreground(*style.foreground);
+	if (style.background) terminal_background(*style.background);
+	if (style.selection_foreground) selection_foreground(*style.selection_foreground);
+	if (style.selection_background) selection_background(*style.selection_background);
+	if (style.cursor_foreground) cursor_foreground(*style.cursor_foreground);
+	if (style.cursor_background) cursor_background(*style.cursor_background);
 }
 
 void termiq::style::terminal_foreground(termiq::Color color)

@@ -10,7 +10,7 @@
 #include "tq_term_canvas_flextext.h"
 #include "tq_term_canvas_flexgrid.h"
 
-using CC = termiq::canvas::CharCell<termiq::canvas::WCharType, termiq::canvas::CharState>;
+using CC = termiq::canvas::CharCell<termiq::canvas::WideChar, termiq::canvas::CharStyle>;
 using BText = termiq::canvas::FlexText<CC>;
 using BGrid = termiq::canvas::FlexGrid<CC>;
 

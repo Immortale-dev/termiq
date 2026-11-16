@@ -12,14 +12,14 @@ namespace termiq {
 				using Text<CC>::Text;
 
 			protected:
-				unsigned int get_calc_width() override;
-				unsigned int get_calc_height() override;
-				void suggest_width(unsigned int w) override;
-				void suggest_height(unsigned int h) override;
+				uint32_t get_calc_width() const override;
+				uint32_t get_calc_height() const override;
+				void suggest_width(uint32_t w) override;
+				void suggest_height(uint32_t h) override;
 
 			private:
-				unsigned int _suggested_width = 0;
-				unsigned int _suggested_height = 0;
+				uint32_t _suggested_width = 0;
+				uint32_t _suggested_height = 0;
 		};
 	}
 }

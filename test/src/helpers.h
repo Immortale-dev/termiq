@@ -10,7 +10,7 @@
 
 #include "tq_term_canvas_utils.h"
 
-inline std::ostream& operator << (std::ostream& stream, termiq::canvas::CharState state) {
+inline std::ostream& operator << (std::ostream& stream, termiq::canvas::CharStyle state) {
 //	stream << "E:" << state.empty() << ";";
 	stream << "FG:";
 	if (!state.foreground()) {
@@ -31,8 +31,8 @@ inline std::ostream& operator << (std::ostream& stream, termiq::canvas::CharStat
 }
 
 template<typename CC, typename C>
-std::vector<std::vector<typename CC::char_type>> build_text(std::basic_string<C> str){
-	using char_type = typename CC::char_type;
+std::vector<std::vector<typename CC::Char>> build_text(std::basic_string<C> str){
+	using char_type = typename CC::Char;
 	std::vector<std::vector<char_type>> res;
 	std::vector<char_type> line;
 	std::mbstate_t state{};
@@ -61,35 +61,43 @@ std::vector<std::vector<typename CC::char_type>> build_text(std::basic_string<C>
 }
 
 template<typename CC>
-std::vector<std::vector<CC>> pieces_to_grid(termiq::canvas::CanvasPieces<CC> p) {
+std::vector<std::vector<CC>> pieces_to_grid(termiq::canvas::CanvasPiece<CC> p) {
 	unsigned int max_w = 0;
 	unsigned int max_h = 0;
-	for (auto &piece : p.pieces) {
-		max_w = std::max(max_w, piece.offset_cols + piece.cols);
-		max_h = std::max(max_h, piece.offset_rows + piece.rows);
+	for (auto &layer : p.layers()) {
+		max_w = std::max(max_w, layer.col() + layer.cols());
+		max_h = std::max(max_h, layer.row() + layer.rows());
 	}
 
 	std::vector<std::vector<CC>> result(max_h, std::vector<CC>(max_w));
 
-	for(auto &piece : p.pieces) {
-		int r = piece.offset_rows;
-		for(auto &row : piece.canvas) {
-			int c = piece.offset_cols;
-			for (auto &cell : row) {
-				result[r][c] = cell;
-				++c;
+	for(auto &layer : p.layers()) {
+		int o_r = layer.row();
+		int o_c = layer.col();
+		for (uint32_t r=0;r<layer.rows();++r) {
+			for (uint32_t c=0;c<layer.cols();++c) {
+				result[o_r+r][o_c+c] = layer.cell(r,c);
 			}
-			++r;
 		}
 	}
 
 	return result;
 }
 
+template<typename CC>
+std::vector<std::vector<CC>> canvas_to_grid(const termiq::canvas::CanvasContainer<CC>& can) {
+	std::vector<std::vector<CC>> result(can.rows(), std::vector<CC>(can.cols()));
+	for (uint32_t r=0;r<can.rows();++r) {
+		for (uint32_t c=0;c<can.cols();++c) {
+			result[r][c] = can.get(r,c);
+		}
+	}
+	return result;
+}
 
 template<typename CC, typename C = char>
 std::vector<std::basic_string<C>> grid_to_text(std::vector<std::vector<CC>> grid) {
-	using CT = typename CC::char_type;
+	using CT = typename CC::Char;
 	using symbol_type = C;
 	int max_h = grid.size();
 	int max_w = grid.size()>0 ? grid[0].size() : 0;
@@ -99,7 +107,7 @@ std::vector<std::basic_string<C>> grid_to_text(std::vector<std::vector<CC>> grid
 
 	for(int r=0;r<max_h;r++) {
 		for(int c=0;c<max_w;c++) {
-			CT &symbol = grid[r][c].symbol;
+			CT &symbol = grid[r][c].symbol();
 			if constexpr (std::is_same_v<C,char16_t>) {
 				std::mbrtoc16(&c16, symbol.begin(), symbol.end() - symbol.begin(), &state);
 				result[r][c] = c16;
@@ -113,7 +121,7 @@ std::vector<std::basic_string<C>> grid_to_text(std::vector<std::vector<CC>> grid
 }
 
 template<typename CC, typename C>
-std::vector<std::basic_string<C>> pieces_to_text(termiq::canvas::CanvasPieces<CC> p) {
+std::vector<std::basic_string<C>> pieces_to_text(termiq::canvas::CanvasPiece<CC> p) {
 	auto grid = pieces_to_grid<CC>(p);
 	return grid_to_text<CC, C>(grid);
 }

@@ -1,32 +1,32 @@
 template<typename CC>
-void termiq::canvas::FlexGrid<CC>::suggest_width(unsigned int w) {
+void termiq::canvas::FlexGrid<CC>::suggest_width(uint32_t w) {
 	_suggested_width = w;
 	this->invalidate_calc();
 }
 
 template<typename CC>
-void termiq::canvas::FlexGrid<CC>::suggest_height(unsigned int h) {
+void termiq::canvas::FlexGrid<CC>::suggest_height(uint32_t h) {
 	_suggested_height = h;
 	this->invalidate_calc();
 }
 
 
 template<typename CC>
-std::vector<unsigned int> termiq::canvas::FlexGrid<CC>::get_optimal_cell_sizes(
-	std::vector<unsigned int> &defined_sizes,
-	std::vector<unsigned int> &text_sizes,
-	std::vector<unsigned int> &min_content_sizes,
-	unsigned int size
-) {
+std::vector<uint32_t> termiq::canvas::FlexGrid<CC>::get_optimal_cell_sizes(
+	std::vector<uint32_t> &defined_sizes,
+	std::vector<uint32_t> &text_sizes,
+	std::vector<uint32_t> &min_content_sizes,
+	uint32_t size
+) const {
 	size_t vals_count = defined_sizes.size();
-	std::vector<unsigned int> cols_widths(vals_count);
+	std::vector<uint32_t> cols_widths(vals_count);
 	for (size_t c=0;c<vals_count;++c) {
 		cols_widths[c] = defined_sizes[c] ? defined_sizes[c] : text_sizes[c];
 	}
 	if (!size) return cols_widths;
 
-	std::vector<unsigned int*> fit_values;
-	std::vector<unsigned int> fit_rates;
+	std::vector<uint32_t*> fit_values;
+	std::vector<uint32_t> fit_rates;
 
 	int rest = size - summary(cols_widths);
 
@@ -45,7 +45,7 @@ std::vector<unsigned int> termiq::canvas::FlexGrid<CC>::get_optimal_cell_sizes(
 				fit_rates.push_back(text_sizes[c]+1);
 			}
 		}
-		distribute_rated<unsigned int>(fit_values, fit_rates, rest);
+		distribute_rated<uint32_t>(fit_values, fit_rates, rest);
 		return cols_widths;
 	}
 
@@ -64,7 +64,7 @@ std::vector<unsigned int> termiq::canvas::FlexGrid<CC>::get_optimal_cell_sizes(
 				fit_rates.push_back(text_sizes[c]+1);
 			}
 		}
-		distribute_rated<unsigned int>(fit_values, fit_rates, rest);
+		distribute_rated<uint32_t>(fit_values, fit_rates, rest);
 		return cols_widths;
 	}
 
@@ -88,23 +88,23 @@ std::vector<unsigned int> termiq::canvas::FlexGrid<CC>::get_optimal_cell_sizes(
 				fit_rates.push_back(defined_sizes[c] + text_sizes[c] + 1);
 			}
 		}
-		distribute_rated<unsigned int>(fit_values, fit_rates, rest);
+		distribute_rated<uint32_t>(fit_values, fit_rates, rest);
 	}
 	return cols_widths;
 }
 
 template<typename CC>
-std::vector<unsigned int> termiq::canvas::FlexGrid<CC>::calculate_column_sizes() {
-	unsigned int max_width = _suggested_width;
+std::vector<uint32_t> termiq::canvas::FlexGrid<CC>::calculate_column_sizes() const {
+	uint32_t max_width = _suggested_width;
 	if (!max_width || (this->_width && this->_width < max_width)) {
 		max_width = this->_width;
 	}
 	if (max_width > 0 && this->_border_type != BorderType::NONE) {
 		max_width -= this->_cols + 1;
 	}
-	std::vector<unsigned int> cols_defined_widths(this->_cols, 0);
-	std::vector<unsigned int> cols_text_widths(this->_cols, 0);
-	std::vector<unsigned int> cols_content_min_widths(this->_cols, 0);
+	std::vector<uint32_t> cols_defined_widths(this->_cols, 0);
+	std::vector<uint32_t> cols_text_widths(this->_cols, 0);
+	std::vector<uint32_t> cols_content_min_widths(this->_cols, 0);
 
 	for (size_t c=0;c<this->_cols;++c) {
 		cols_defined_widths[c] = this->get_column_defined_width(c);
@@ -116,17 +116,17 @@ std::vector<unsigned int> termiq::canvas::FlexGrid<CC>::calculate_column_sizes()
 }
 
 template<typename CC>
-std::vector<unsigned int> termiq::canvas::FlexGrid<CC>::calculate_row_sizes() {
-	unsigned int max_height = _suggested_height;
+std::vector<uint32_t> termiq::canvas::FlexGrid<CC>::calculate_row_sizes() const {
+	uint32_t max_height = _suggested_height;
 	if (!max_height || (this->_height && this->_height < max_height)) {
 		max_height = this->_height;
 	}
 	if (max_height > 0 && this->_border_type != BorderType::NONE) {
 		max_height -= this->_rows + 1;
 	}
-	std::vector<unsigned int> rows_defined_heights(this->_rows, 0);
-	std::vector<unsigned int> rows_text_heights(this->_rows, 0);
-	std::vector<unsigned int> rows_content_min_heights(this->_rows, 0);
+	std::vector<uint32_t> rows_defined_heights(this->_rows, 0);
+	std::vector<uint32_t> rows_text_heights(this->_rows, 0);
+	std::vector<uint32_t> rows_content_min_heights(this->_rows, 0);
 
 	for (size_t r=0;r<this->_rows;++r) {
 		rows_defined_heights[r] = this->get_row_defined_height(r);
@@ -138,8 +138,8 @@ std::vector<unsigned int> termiq::canvas::FlexGrid<CC>::calculate_row_sizes() {
 }
 
 template<typename CC>
-unsigned int termiq::canvas::FlexGrid<CC>::get_column_content_min_width(size_t index) {
-	unsigned int width = 0;
+uint32_t termiq::canvas::FlexGrid<CC>::get_column_content_min_width(size_t index) const {
+	uint32_t width = 0;
 	this->iterate_column(index, [&width](auto &cell){
 		if (!cell.content) return;
 		width = std::max(width, cell.content->min_width());
@@ -148,8 +148,8 @@ unsigned int termiq::canvas::FlexGrid<CC>::get_column_content_min_width(size_t i
 }
 
 template<typename CC>
-unsigned int termiq::canvas::FlexGrid<CC>::get_row_content_min_height(size_t index) {
-	unsigned int height = 0;
+uint32_t termiq::canvas::FlexGrid<CC>::get_row_content_min_height(size_t index) const {
+	uint32_t height = 0;
 	this->iterate_row(index, [&height](auto &cell){
 		if (!cell.content) return;
 		height = std::max(height, cell.content->min_height());
@@ -158,8 +158,8 @@ unsigned int termiq::canvas::FlexGrid<CC>::get_row_content_min_height(size_t ind
 }
 
 template<typename CC>
-unsigned int termiq::canvas::FlexGrid<CC>::get_column_content_width(size_t index) {
-	unsigned int width = 0;
+uint32_t termiq::canvas::FlexGrid<CC>::get_column_content_width(size_t index) const {
+	uint32_t width = 0;
 	this->iterate_column(index, [&width](auto &cell){
 		if (!cell.content) return;
 		width = std::max(width, cell.content->get_width());
@@ -168,8 +168,8 @@ unsigned int termiq::canvas::FlexGrid<CC>::get_column_content_width(size_t index
 }
 
 template<typename CC>
-unsigned int termiq::canvas::FlexGrid<CC>::get_row_content_height(size_t index) {
-	unsigned int height = 0;
+uint32_t termiq::canvas::FlexGrid<CC>::get_row_content_height(size_t index) const {
+	uint32_t height = 0;
 	this->iterate_row(index, [&height](auto &cell){
 		if (!cell.content) return;
 		height = std::max(height, cell.content->get_height());
@@ -179,7 +179,7 @@ unsigned int termiq::canvas::FlexGrid<CC>::get_row_content_height(size_t index) 
 
 template<typename CC>
 template<typename IT>
-void termiq::canvas::FlexGrid<CC>::distribute(std::vector<IT*> &values, IT size) {
+void termiq::canvas::FlexGrid<CC>::distribute(std::vector<IT*> &values, IT size) const {
 	std::vector<IT> rates;
 	for (size_t i=0;i<values.size();++i) {
 		rates.push_back(1);
@@ -189,7 +189,7 @@ void termiq::canvas::FlexGrid<CC>::distribute(std::vector<IT*> &values, IT size)
 
 template<typename CC>
 template<typename IT>
-void termiq::canvas::FlexGrid<CC>::distribute_rated(std::vector<IT*> &values, std::vector<IT> &rates, IT size) {
+void termiq::canvas::FlexGrid<CC>::distribute_rated(std::vector<IT*> &values, std::vector<IT> &rates, IT size) const {
 	if (!size) return;
 
 	IT rates_size = 0;
@@ -218,7 +218,7 @@ void termiq::canvas::FlexGrid<CC>::distribute_rated(std::vector<IT*> &values, st
 
 template<typename CC>
 template<typename IT>
-IT termiq::canvas::FlexGrid<CC>::summary(std::vector<IT> &values) {
+IT termiq::canvas::FlexGrid<CC>::summary(std::vector<IT> &values) const {
 	IT res = 0;
 	for (size_t i=0;i<values.size();i++) {
 		res += values[i];
@@ -227,7 +227,7 @@ IT termiq::canvas::FlexGrid<CC>::summary(std::vector<IT> &values) {
 }
 
 template<typename CC>
-void termiq::canvas::FlexGrid<CC>::calc() {
+void termiq::canvas::FlexGrid<CC>::calc() const {
 	// Reset cells text sizes.
 	for (size_t r=0;r<this->_rows;++r) {
 		for (size_t c=0;c<this->_cols;++c) {
@@ -240,7 +240,7 @@ void termiq::canvas::FlexGrid<CC>::calc() {
 		}
 	}
 
-	std::vector<unsigned int> cols_widths = calculate_column_sizes();
+	std::vector<uint32_t> cols_widths = calculate_column_sizes();
 	// Define cells text widths.
 	for (size_t r=0;r<this->_rows;++r) {
 		for (size_t c=0;c<this->_cols;++c) {
@@ -252,7 +252,7 @@ void termiq::canvas::FlexGrid<CC>::calc() {
 		}
 	}
 
-	std::vector<unsigned int> rows_heights = calculate_row_sizes();
+	std::vector<uint32_t> rows_heights = calculate_row_sizes();
 	// Define cells text heights.
 	for (size_t r=0;r<this->_rows;++r) {
 		for (size_t c=0;c<this->_cols;++c) {

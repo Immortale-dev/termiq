@@ -22,30 +22,30 @@ namespace termiq {
 
 		template <typename CC>
 		class Grid : public Content<CC> {
-			using char_type = typename CC::char_type;
-			using char_state_type = typename CC::char_state_type;
+			using Char = typename CC::Char;
+			using Style = typename CC::Style;
 			struct GridCellState {
 				termiq::Color background = ::termiq::Color::NONE;
 				Content<CC>* content = nullptr;
-				unsigned int width = 0;
-				unsigned int height = 0;
+				uint32_t width = 0;
+				uint32_t height = 0;
 			};
 			struct GridBorders {
-				char_type C_H;  // Horizontal line.
-				char_type C_V;  // Vertical line.
-				char_type C_X;  // Vertical/Horiaonal cross.
-				char_type C_HT; // Horizontal line with connection on the top.
-				char_type C_HB; // Horizontal line with connection on the bottom.
-				char_type C_VL; // Vertical line with connection on the left.
-				char_type C_VR; // Vertical line with connection on the right.
-				char_type C_TL; // Top left corner.
-				char_type C_TR; // Top right corner.
-				char_type C_BL; // Bottom left corner.
-				char_type C_BR; // Bottom right corner.
+				Char C_H;  // Horizontal line.
+				Char C_V;  // Vertical line.
+				Char C_X;  // Vertical/Horiaonal cross.
+				Char C_HT; // Horizontal line with connection on the top.
+				Char C_HB; // Horizontal line with connection on the bottom.
+				Char C_VL; // Vertical line with connection on the left.
+				Char C_VR; // Vertical line with connection on the right.
+				Char C_TL; // Top left corner.
+				Char C_TR; // Top right corner.
+				Char C_BL; // Bottom left corner.
+				Char C_BR; // Bottom right corner.
 			};
 
 			public:
-				Grid(unsigned int rows=1, unsigned int cols=1);
+				Grid(uint32_t rows=1, uint32_t cols=1);
 				void select_cell(size_t c);
 				void select_cell(size_t r, size_t c);
 				void set_background_color(termiq::Color color);
@@ -53,37 +53,37 @@ namespace termiq {
 				void set_border_background_color(termiq::Color color);
 				void set_cell_background_color(termiq::Color color);
 				void set_cell_content(Content<CC>* content);
-				void set_width(unsigned int width);
-				void set_height(unsigned int height);
-				void set_cell_width(unsigned int width);
-				void set_cell_height(unsigned int height);
+				void set_width(uint32_t width);
+				void set_height(uint32_t height);
+				void set_cell_width(uint32_t width);
+				void set_cell_height(uint32_t height);
 				void set_border_type(BorderType type);
-				CanvasPieces<CC> build() override;
 
-				unsigned int get_width() override;
-				unsigned int get_height() override;
-				unsigned int min_width() override;
-				unsigned int min_height() override;
+				CanvasPiece<CC> build() const override;
+				uint32_t get_width() const override;
+				uint32_t get_height() const override;
+				uint32_t min_width() const override;
+				uint32_t min_height() const override;
 
 			protected:
-				virtual std::vector<unsigned int> calculate_column_sizes();
-				virtual std::vector<unsigned int> calculate_row_sizes();
-				virtual void calc();
-				void lazy_calc();
+				virtual std::vector<uint32_t> calculate_column_sizes() const;
+				virtual std::vector<uint32_t> calculate_row_sizes() const;
+				virtual void calc() const;
+				void lazy_calc() const;
 				void invalidate_calc();
 				bool is_valid_calc();
-				void iterate_column(size_t index, std::function<void(GridCellState&)> callback);
-				void iterate_row(size_t index, std::function<void(GridCellState&)> callback);
-				unsigned int get_column_defined_width(size_t index);
-				unsigned int get_row_defined_height(size_t index);
+				void iterate_column(size_t index, std::function<void(const GridCellState&)> callback) const;
+				void iterate_row(size_t index, std::function<void(const GridCellState&)> callback) const;
+				uint32_t get_column_defined_width(size_t index) const;
+				uint32_t get_row_defined_height(size_t index) const;
 				GridCellState& get_current_cell();
 
-				std::vector<unsigned int> _cols_widths;
-				std::vector<unsigned int> _rows_heights;
-				unsigned int _rows;
-				unsigned int _cols;
-				unsigned int _width = 0;
-				unsigned int _height = 0;
+				mutable std::vector<uint32_t> _cols_widths;
+				mutable std::vector<uint32_t> _rows_heights;
+				uint32_t _rows;
+				uint32_t _cols;
+				uint32_t _width = 0;
+				uint32_t _height = 0;
 				std::vector<std::vector<GridCellState>> _grid;
 				size_t _current_cell_r = 0;
 				size_t _current_cell_c = 0;
@@ -92,15 +92,15 @@ namespace termiq {
 				BorderType _border_type = BorderType::SINGLE;
 
 			private:
-				GridBorders get_border(BorderType type);
+				GridBorders get_border(BorderType type) const;
 				template<typename IT>
 				void distribute(std::vector<IT*> &values, IT size);
 				template<typename IT>
 				void distribute_rated(std::vector<IT*> &values, std::vector<IT> &rates, IT size);
 
-				bool _valid_calc = false;
+				mutable bool _valid_calc = false;
 
-				static inline char_type EMPTY_SPACE = {' '};
+				static inline Char EMPTY_SPACE = {' '};
 		};
 	}
 }

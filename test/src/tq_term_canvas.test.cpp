@@ -9,7 +9,7 @@
 #include "test/src/helpers.h"
 
 namespace {
-	using CC = termiq::canvas::CharCell<termiq::canvas::WCharType, termiq::canvas::CharState>;
+	using CC = termiq::canvas::CharCell<termiq::canvas::WideChar, termiq::canvas::CharStyle>;
 
 	std::vector<std::pair<unsigned int, unsigned int>> size_on_resized;
 	std::vector<std::pair<unsigned int, unsigned int>> position_on_moved;
@@ -38,12 +38,12 @@ namespace {
 			void drawn() override {
 				++drawn_called_times;
 			}
-			void paint_row(size_t index) override {
+			void paint_row(uint32_t index) override {
 				paint_row_called.push_back(index);
 			}
 			void paint_cell([[maybe_unused]] const CC &cell) override {}
 			void move_cursor([[maybe_unused]] unsigned int row, [[maybe_unused]] unsigned int col) override {}
-			void set_paint_state([[maybe_unused]] const char_state_type* state) override {}
+			void set_paint_state([[maybe_unused]] const Style& state) override {}
 	};
 }
 
@@ -64,8 +64,8 @@ DESCRIBE("canvas", {
 		IT("should create correct canvas", {
 			EXPECT(canvas.get_width()).toBe(25ull);
 			EXPECT(canvas.get_height()).toBe(20ull);
-			EXPECT(canvas.get_col()).toBe(5u);
-			EXPECT(canvas.get_row()).toBe(3u);
+			EXPECT(canvas.get_col()).toBe(5);
+			EXPECT(canvas.get_row()).toBe(3);
 			EXPECT(size_on_resized.size()).toBe(0ull);
 			EXPECT(position_on_moved.size()).toBe(0ull);
 			EXPECT(drawn_called_times).toBe(0);
@@ -86,8 +86,8 @@ DESCRIBE("canvas", {
 
 			EXPECT(position_on_moved.size()).toBe(1ull);
 			EXPECT(position_on_moved[0]).toBe({10, 15});
-			EXPECT(canvas.get_col()).toBe(15u);
-			EXPECT(canvas.get_row()).toBe(10u);
+			EXPECT(canvas.get_col()).toBe(15);
+			EXPECT(canvas.get_row()).toBe(10);
 		});
 
 		IT("should call drawn protected function once when draw is called with rvalue", {
@@ -109,15 +109,18 @@ DESCRIBE("canvas", {
 			canvas.draw(3, 4, pieces.build());
 
 			int filled_cells = 0;
-			auto matrix = canvas.get_canvas();
-			for (auto &l : matrix) {
-				for (auto &c : l) {
-					if (!c.is_transparent()) {
+			auto& can = canvas.get_canvas();
+			for (uint32_t r=0;r<can.rows();++r) {
+				for (uint32_t c=0;c<can.cols();++c) {
+					const auto& cell = can.get(r,c);
+					if (!cell.transparent()) {
 						++filled_cells;
 					}
 				}
 			}
-			auto text_lines = grid_to_text<CC,char16_t>(matrix);
+
+			auto grid = canvas_to_grid<CC>(can);
+			auto text_lines = grid_to_text<CC,char16_t>(grid);
 			int text_cells = 0;
 			for (auto &l : text_lines) {
 				for (auto c : l) {
@@ -161,10 +164,10 @@ DESCRIBE("canvas", {
 			});
 
 			IT("should correctly draw pieces with complex offsets", {
-				auto piece_state = termiq::canvas::CharState({});
-				const termiq::canvas::CanvasPieces<CC> built_pieces{
+				auto piece_state = termiq::canvas::CharStyle({});
+				const termiq::canvas::CanvasPiece<CC> built_pieces{
 					{
-						termiq::canvas::CanvasPiece<CC>{
+						termiq::canvas::CanvasLayer<CC>{
 							{
 								{
 									{'T', piece_state},
@@ -174,7 +177,7 @@ DESCRIBE("canvas", {
 							},
 							1, 3, -2, 0
 						},
-						termiq::canvas::CanvasPiece<CC>{
+						termiq::canvas::CanvasLayer<CC>{
 							{
 								{
 									{'B', piece_state},
@@ -184,13 +187,13 @@ DESCRIBE("canvas", {
 							},
 							1, 3, 0, 0
 						},
-						termiq::canvas::CanvasPiece<CC>{
+						termiq::canvas::CanvasLayer<CC>{
 							{
 								{{'L', piece_state}},
 							},
 							1, 1, -1, 0
 						},
-						termiq::canvas::CanvasPiece<CC>{
+						termiq::canvas::CanvasLayer<CC>{
 							{
 								{{'R', piece_state}},
 							},
@@ -202,15 +205,16 @@ DESCRIBE("canvas", {
 				canvas.draw(5, 6, built_pieces);
 
 				int filled_cells = 0;
-				auto matrix = canvas.get_canvas();
-				for (auto &l : matrix) {
-					for (auto &c : l) {
-						if (!c.is_transparent()) {
-							++filled_cells;
-						}
+				auto can = canvas.get_canvas();
+				for (uint32_t r=0;r<can.rows();++r) {
+					for (uint32_t c=0;c<can.cols();++c) {
+						const auto &cell = can.get(r,c);
+						if (!cell.transparent()) ++filled_cells;
 					}
 				}
-				auto text_lines = grid_to_text<CC,char16_t>(matrix);
+
+				auto grid = canvas_to_grid(can);
+				auto text_lines = grid_to_text<CC,char16_t>(grid);
 				int text_cells = 0;
 				for (auto &l : text_lines) {
 					for (auto c : l) {

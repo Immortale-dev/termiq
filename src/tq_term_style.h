@@ -13,28 +13,28 @@ namespace termiq {
 			inline ::termiq::SequenceExecutor* executor = nullptr;
 		}
 
-		struct FontStyle {
-			std::variant<Color, bool> foreground = false;
-			std::variant<Color, bool> background = false;
-			std::optional<bool> bold = NONE;
-			std::optional<bool> dim = NONE;
-			std::optional<bool> italic = NONE;
-			std::optional<std::variant<bool, Underline>> underline = NONE;
-			std::optional<bool> blinking = NONE;
-			std::optional<bool> inverse = NONE;
-			std::optional<bool> hidden = NONE;
-			std::optional<bool> strike = NONE;
+		inline constexpr decltype(std::nullopt) UNDEFINED = std::nullopt;
 
-			inline static const decltype(std::nullopt) NONE = std::nullopt;
+		struct FontStyle {
+			std::optional<Color> foreground = UNDEFINED;
+			std::optional<Color> background = UNDEFINED;
+			std::optional<bool> bold = UNDEFINED;
+			std::optional<bool> dim = UNDEFINED;
+			std::optional<bool> italic = UNDEFINED;
+			std::optional<Underline> underline = UNDEFINED;
+			std::optional<bool> blinking = UNDEFINED;
+			std::optional<bool> inverse = UNDEFINED;
+			std::optional<bool> hidden = UNDEFINED;
+			std::optional<bool> strike = UNDEFINED;
 		};
 
 		struct TerminalStyle {
-			std::variant<Color, bool> foreground = false;
-			std::variant<Color, bool> background = false;
-			std::variant<Color, bool> selection_foreground = false;
-			std::variant<Color, bool> selection_background = false;
-			std::variant<Color, bool> cursor_foreground = false;
-			std::variant<Color, bool> cursor_background = false;
+			std::optional<Color> foreground = UNDEFINED;
+			std::optional<Color> background = UNDEFINED;
+			std::optional<Color> selection_foreground = UNDEFINED;
+			std::optional<Color> selection_background = UNDEFINED;
+			std::optional<Color> cursor_foreground = UNDEFINED;
+			std::optional<Color> cursor_background = UNDEFINED;
 		};
 
 		inline void init(SequenceExecutor* executor) { detail::executor = executor; }
@@ -46,7 +46,7 @@ namespace termiq {
 		void bold(bool state);
 		void dim(bool state);
 		void italic(bool state);
-		void underline(std::variant<bool, Underline>);
+		void underline(Underline state);
 		void blinking(bool state);
 		void inverse(bool state);
 		void hidden(bool state);

@@ -15,7 +15,7 @@ SCENARIO_START
 
 DESCRIBE("Canvas", {
 	DESCRIBE("FlexGrid", {
-		using CC = termiq::canvas::CharCell<termiq::canvas::WCharType, termiq::canvas::CharState>;
+		using CC = termiq::canvas::CharCell<termiq::canvas::WideChar, termiq::canvas::CharStyle>;
 		termiq::canvas::FlexGrid<CC>* grid;
 
 		DESCRIBE("w_char 2x3 instance is created", {

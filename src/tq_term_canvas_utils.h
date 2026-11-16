@@ -17,7 +17,7 @@ namespace termiq {
 		using symbol_char_type = char;
 
 		template<typename T>
-		concept Char = requires(T t) {
+		concept CharConcept = requires(T t) {
 			std::is_default_constructible_v<T>;
 			std::is_constructible_v<T, symbol_char_type*, symbol_char_type*>;
 			std::is_constructible_v<T, std::vector<symbol_char_type>::iterator, std::vector<symbol_char_type>::iterator>;
@@ -28,7 +28,7 @@ namespace termiq {
 		};
 
 		template<typename T>
-		concept State = requires(T t, T g) {
+		concept StyleConcept = requires(T t, T g) {
 			std::is_default_constructible_v<T>;
 
 			{ t.foreground() } -> std::same_as<::termiq::Color>;
@@ -57,14 +57,14 @@ namespace termiq {
 			{ t != g } -> std::same_as<bool>;
 		};
 
-		class CharType {
+		class NarrowChar {
 			public:
-				CharType() : symbol(' ') {}
-				CharType(symbol_char_type s) : symbol(s) {}
+				NarrowChar() : symbol(' ') {}
+				NarrowChar(symbol_char_type s) : symbol(s) {}
 
-				CharType(symbol_char_type* b, symbol_char_type* e) { std::memcpy(const_cast<symbol_char_type*>(begin()), b, std::min(size_t(e-b), sizeof(symbol_char_type))); }
+				NarrowChar(symbol_char_type* b, symbol_char_type* e) { std::memcpy(const_cast<symbol_char_type*>(begin()), b, std::min(size_t(e-b), sizeof(symbol_char_type))); }
 				template<typename IT>
-				CharType(IT b, IT e) { std::memcpy(const_cast<symbol_char_type*>(begin()), &*b, std::min(size_t(std::distance(b,e)), sizeof(symbol_char_type))); }
+				NarrowChar(IT b, IT e) { std::memcpy(const_cast<symbol_char_type*>(begin()), &*b, std::min(size_t(std::distance(b,e)), sizeof(symbol_char_type))); }
 
 				const symbol_char_type* begin() const { return reinterpret_cast<const symbol_char_type*>(&symbol); }
 				const symbol_char_type* end() const { return begin() + sizeof(symbol_char_type); }
@@ -74,17 +74,17 @@ namespace termiq {
 				symbol_char_type symbol;
 		};
 
-		class WCharType {
+		class WideChar {
 			public:
-				WCharType() : symbol({' '}) {}
-				WCharType(symbol_char_type s) : symbol({s}) {}
+				WideChar() : symbol({' '}) {}
+				WideChar(symbol_char_type s) : symbol({s}) {}
 
-				WCharType(const symbol_char_type* b, const symbol_char_type* e) {
+				WideChar(const symbol_char_type* b, const symbol_char_type* e) {
 					symbol.resize(e-b);
 					std::memcpy(const_cast<symbol_char_type*>(begin()), b, e-b);
 				}
 				template<typename IT> requires (std::contiguous_iterator<IT>)
-				WCharType(IT b, IT e) {
+				WideChar(IT b, IT e) {
 					symbol.resize(std::distance(b,e));
 					std::memcpy(const_cast<symbol_char_type*>(begin()), &*b, symbol.size());
 				}
@@ -98,8 +98,8 @@ namespace termiq {
 		};
 
 		template<typename T=char>
-		inline std::vector<std::vector<CharType>> build_char_lines(std::basic_string_view<T> str) {
-			using char_type = CharType;
+		inline std::vector<std::vector<NarrowChar>> build_char_lines(std::basic_string_view<T> str) {
+			using char_type = NarrowChar;
 			std::vector<std::vector<char_type>> res;
 			std::vector<char_type> line;
 			for (auto c : str) {
@@ -118,8 +118,8 @@ namespace termiq {
 		}
 
 		template<typename T=char16_t>
-		inline std::vector<std::vector<WCharType>> build_wchar_lines(std::basic_string_view<T> str) {
-			using char_type = WCharType;
+		inline std::vector<std::vector<WideChar>> build_wchar_lines(std::basic_string_view<T> str) {
+			using char_type = WideChar;
 			std::vector<std::vector<char_type>> res;
 			std::vector<char_type> line;
 			std::mbstate_t state{};
@@ -143,7 +143,7 @@ namespace termiq {
 			return res;
 		}
 
-		class CharState {
+		class CharStyle {
 			public:
 				struct Builder {
 					termiq::Color foreground = termiq::Color::NONE;
@@ -159,8 +159,8 @@ namespace termiq {
 				};
 
 			public:
-				explicit CharState() = default;
-				CharState(Builder b) : foreground_(b.foreground), background_(b.background), bold_(b.bold), italic_(b.italic), dim_(b.dim), inverse_(b.inverse), underline_(b.underline) {}
+				explicit CharStyle() = default;
+				CharStyle(Builder b) : foreground_(b.foreground), background_(b.background), bold_(b.bold), italic_(b.italic), dim_(b.dim), inverse_(b.inverse), underline_(b.underline) {}
 
 				termiq::Color foreground() const { return foreground_; }
 				termiq::Color background() const { return background_; }
@@ -184,13 +184,10 @@ namespace termiq {
 				void inverse(bool state) { inverse_ = state; }
 				void underline(Underline state) { underline_ = state; }
 
-				bool operator==(const CharState &other) const {
+				bool operator==(const CharStyle &other) const {
 					return foreground() == other.foreground() && background() == other.background()
 						&& bold() == other.bold() && italic() == other.italic() && dim() == other.dim() && inverse() == other.inverse()
 						&& underline() == other.underline();
-				}
-				bool operator!=(const CharState &other) const {
-					return !(*this == other);
 				}
 
 			private:
@@ -206,54 +203,110 @@ namespace termiq {
 				Underline underline_ = false;
 		};
 
-		// CT - char type, e.g. WCharType
-		// CS - char state, e.g. CharState
-		template<Char CT, State CS>
-		struct CharCell {
-			CharCell() {}
-			CharCell(CT symb, CS st, bool transparent = false, bool continuation = false)
-				: symbol(symb), state(st), transparent(transparent), continuation(continuation) {}
+		// CT - char type, e.g. WideChar
+		// CS - char styles, e.g. CharStyle
+		template<CharConcept CT, StyleConcept CS>
+		class CharCell {
+			public:
+				using Char = CT;
+				using Style = CS;
 
-			CT symbol;
-			CS state;
-			bool transparent = true;
-			bool continuation = false;
-			using char_type = CT;
-			using char_state_type = CS;
-			bool operator==(const CharCell &other) const {
-				if (continuation && other.continuation) return true;
-				if (transparent && other.transparent) return true;
-				return symbol == other.symbol && state == other.state;
-			}
-			bool operator!=(const CharCell &other) const {
-				return !(*this == other);
-			}
-			bool is_transparent() const { return transparent; }
-			bool is_continuation() const { return continuation; }
+			public:
+				CharCell() {}
+				CharCell(Char symb, Style st, bool transparent = false, bool continuation = false)
+					: symbol_(symb), state_(st), transparent_(transparent), continuation_(continuation) {}
 
-			static const CharCell<CT,CS> TRANSPARENT;
-			static const CharCell<CT,CS> CONTINUATION;
+				bool operator==(const CharCell &other) const {
+					if (continuation() && other.continuation()) return true;
+					if (transparent() && other.transparent()) return true;
+					return symbol() == other.symbol() && style() == other.style();
+				}
+				bool transparent() const { return transparent_; }
+				bool continuation() const { return continuation_; }
+
+				const Char& symbol() const { return symbol_; }
+				const Style& style() const { return state_; }
+				Char& symbol() { return symbol_; }
+				Style& style() { return state_; }
+
+				static const CharCell<Char,Style> TRANSPARENT;
+				static const CharCell<Char,Style> CONTINUATION;
+
+			private:
+				Char symbol_;
+				Style state_;
+				bool transparent_ = true;
+				bool continuation_ = false;
 		};
 
-		template<Char CT, State CS>
+		template<CharConcept CT, StyleConcept CS>
 		const CharCell<CT,CS> CharCell<CT,CS>::TRANSPARENT = CharCell<CT,CS>({},{},1);
-		template<Char CT, State CS>
+		template<CharConcept CT, StyleConcept CS>
 		const CharCell<CT,CS> CharCell<CT,CS>::CONTINUATION = CharCell<CT,CS>({},{},0,1);
 
-		// Piece of the canvas.
 		template<typename CC>
-		struct CanvasPiece {
-			std::vector<std::vector<CC>> canvas;
-			const unsigned int rows;
-			const unsigned int cols;
-			const int offset_rows = 0;
-			const int offset_cols = 0;
+		class CanvasLayer {
+			public:
+				CanvasLayer(std::vector<std::vector<CC>>&& canvas, uint32_t h, uint32_t w, int32_t r=0, int32_t c=0)
+					: rows_(h), cols_(w), offset_rows_(r), offset_cols_(c), canvas_(std::move(canvas)) {}
+
+				uint32_t rows() const { return rows_; }
+				uint32_t cols() const { return cols_; }
+				int32_t row() const { return offset_rows_; }
+				int32_t col() const { return offset_cols_; }
+				const CC& cell(uint32_t r, uint32_t c) const { return canvas_[r][c]; }
+
+			private:
+				const unsigned int rows_;
+				const unsigned int cols_;
+				const int offset_rows_ = 0;
+				const int offset_cols_ = 0;
+				std::vector<std::vector<CC>> canvas_;
 		};
 
-		// Collection of pieces.
 		template<typename CC>
-		struct CanvasPieces {
-			std::vector<CanvasPiece<CC>> pieces;
+		class CanvasPiece {
+			public:
+				CanvasPiece() = default;
+				CanvasPiece(std::vector<CanvasLayer<CC>>&& layers) : layers_(std::move(layers)) {}
+
+				std::span<const CanvasLayer<CC>> layers() const { return std::span(layers_.begin(), layers_.end()); }
+
+			private:
+				std::vector<CanvasLayer<CC>> layers_;
+		};
+
+		template<typename CC>
+		class CanvasContainer {
+			public:
+				CanvasContainer() = default;
+				CanvasContainer(uint32_t height, uint32_t width)
+					: height_(height), width_(width), grid_(height_, std::vector<CC>(width_)) {}
+
+				void resize(uint32_t height, uint32_t width) {
+					height_ = height;
+					width_ = width;
+					grid_.resize(height);
+					for (auto& l : grid_) l.resize(width_);
+				}
+
+				uint32_t rows() const { return height_; }
+				uint32_t cols() const { return width_; }
+
+				void move([[maybe_unused]] int32_t r, [[maybe_unused]] int32_t c) {} // Nothing to move
+
+				void set(uint32_t r, uint32_t c, CC cell) {
+					grid_[r][c] = cell;
+				}
+
+				CC get(uint32_t r, uint32_t c) const {
+					return grid_[r][c];
+				}
+
+			private:
+				uint32_t height_ = 0;
+				uint32_t width_ = 0;
+				std::vector<std::vector<CC>> grid_;
 		};
 
 		// Buildable content interface
@@ -263,23 +316,23 @@ namespace termiq {
 				Content() = default;
 				virtual ~Content() = default;
 
-				virtual CanvasPieces<CC> build() = 0;
-				virtual unsigned int get_width() = 0;
-				virtual unsigned int get_height() = 0;
-				virtual unsigned int min_width() = 0;
-				virtual unsigned int min_height() = 0;
+				virtual uint32_t get_width() const = 0;
+				virtual uint32_t get_height() const = 0;
+				virtual uint32_t min_width() const = 0;
+				virtual uint32_t min_height() const = 0;
+				virtual CanvasPiece<CC> build() const = 0;
 
-				virtual void built(CanvasPieces<CC> &pieces) { (void)pieces; }
+				virtual void built(CanvasPiece<CC>&) const {}
 		};
 
 		template<typename CC>
 		class Nothing : public Content<CC> {
 			public:
-				CanvasPieces<CC> build() { return {{}}; }
-				unsigned int get_width() { return 0; }
-				unsigned int get_height() { return 0; }
-				unsigned int min_width() { return 0; }
-				unsigned int min_height() { return 0; }
+				CanvasPiece<CC> build() { return {}; }
+				uint32_t get_width() override { return 0; }
+				unsigned int get_height() override { return 0; }
+				unsigned int min_width() override { return 0; }
+				unsigned int min_height() override { return 0; }
 		};
 	}
 }

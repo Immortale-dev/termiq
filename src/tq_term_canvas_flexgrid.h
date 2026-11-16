@@ -12,28 +12,31 @@ namespace termiq {
 				using Grid<CC>::Grid;
 
 			protected:
-				void suggest_width(unsigned int w) override;
-				void suggest_height(unsigned int h) override;
-				std::vector<unsigned int> calculate_column_sizes() override;
-				std::vector<unsigned int> calculate_row_sizes() override;
-				void calc() override;
+				void suggest_width(uint32_t w) override;
+				void suggest_height(uint32_t h) override;
+				std::vector<uint32_t> calculate_column_sizes() const override;
+				std::vector<uint32_t> calculate_row_sizes() const override;
+				void calc() const override;
 
 			private:
-				unsigned int get_column_content_min_width(size_t index);
-				unsigned int get_row_content_min_height(size_t index);
-				unsigned int get_column_content_width(size_t index);
-				unsigned int get_row_content_height(size_t index);
-				std::vector<unsigned int> get_optimal_cell_sizes(std::vector<unsigned int> &defined_sizes, std::vector<unsigned int> &text_sizes,
-					std::vector<unsigned int> &min_content_sizes, unsigned int size);
+				uint32_t get_column_content_min_width(size_t index) const;
+				uint32_t get_row_content_min_height(size_t index) const;
+				uint32_t get_column_content_width(size_t index) const;
+				uint32_t get_row_content_height(size_t index) const;
+				std::vector<uint32_t> get_optimal_cell_sizes(
+					std::vector<uint32_t> &defined_sizes,
+					std::vector<uint32_t> &text_sizes,
+					std::vector<uint32_t> &min_content_sizes,
+					uint32_t size) const;
 				template<typename IT>
-				void distribute(std::vector<IT*> &values, IT size);
+				void distribute(std::vector<IT*> &values, IT size) const;
 				template<typename IT>
-				void distribute_rated(std::vector<IT*> &values, std::vector<IT> &rates, IT size);
+				void distribute_rated(std::vector<IT*> &values, std::vector<IT> &rates, IT size) const;
 				template<typename IT>
-				IT summary(std::vector<IT> &values);
+				IT summary(std::vector<IT> &values) const;
 
-				unsigned int _suggested_width = 0;
-				unsigned int _suggested_height = 0;
+				uint32_t _suggested_width = 0;
+				uint32_t _suggested_height = 0;
 		};
 	}
 }
